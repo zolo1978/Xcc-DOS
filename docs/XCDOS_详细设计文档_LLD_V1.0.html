@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 详细设计文档 LLD V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225;--navy-900:#071A33;--navy-800:#0B2B52;--navy-700:#103B70;--navy-600:#15508F;
+  --bluegray-50:#F6F8FB;--bluegray-100:#EEF2F7;--bluegray-200:#DDE5EF;--bluegray-300:#C7D2E1;--bluegray-500:#66788A;--bluegray-700:#334155;
+  --cyan-500:#1BA6D9;--cyan-100:#E8F7FC;
+  --white:#FFFFFF;--text-main:#0F172A;--text-secondary:#475569;--text-tertiary:#8492A6;--border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06);--shadow-md:0 10px 28px rgba(7,26,51,.08);--shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:42px;line-height:1.16;letter-spacing:-.6px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:26px;color:var(--navy-900)}h3{margin:24px 0 12px;font-size:19px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:15px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0}th,td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-size:12px}
+pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;padding:20px;overflow:auto;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;line-height:1.65;border:1px solid rgba(255,255,255,.08)}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.grid-2,.grid-3{grid-template-columns:1fr}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">LLD</div><div><b>XCDOS LLD</b><span>Detailed Design V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#overview">概述</a>
+    <a href="#fe-components">前端组件设计</a>
+    <a href="#fe-state">前端状态管理</a>
+    <a href="#be-modules">后端模块详细设计</a>
+    <a href="#be-usecases">UseCase 编排</a>
+    <a href="#be-jobs">定时任务设计</a>
+    <a href="#cache-keys">缓存键设计</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Low-Level Design · V1.0</span>
+  <h1>XCDOS 详细设计文档<br/>LLD V1.0</h1>
+  <p>基于 TDD V1.0（高阶设计）展开的前端组件级 + 后端函数级的详细设计。覆盖组件树、状态管理、UseCase 编排、定时任务与缓存键设计，面向单模块编码。</p>
+  <div class="meta">
+    <span>前端：React + Next.js + TypeScript</span>
+    <span>状态：Zustand + React Query</span>
+    <span>后端：NestJS + DDD 分层</span>
+    <span>缓存：Redis 多级策略</span>
+  </div>
+</header>
+
+<section id="overview">
+  <h2>一、设计范围</h2>
+  <p class="desc">本文档为 TDD V1.0 的下沉补充——TDD 定义了模块边界和职责（What），LLD 定义组件/函数级实现（How）。</p>
+  <div class="grid grid-3">
+    <div class="card"><b>前端</b><p class="muted">组件树、Props 接口、状态流向、页面级交互细节、表单校验规则</p></div>
+    <div class="card"><b>后端</b><p class="muted">Service 函数签名、UseCase 编排步骤、Repository 方法定义、异常处理</p></div>
+    <div class="card"><b>基础设施</b><p class="muted">定时任务参数、缓存键命名与过期策略、领域事件订阅</p></div>
+  </div>
+</section>
+
+<section id="fe-components">
+  <h2>二、前端组件设计</h2>
+
+  <h3>2.1 组件树总览</h3>
+  <pre class="code">AppLayout
+├── Sidebar (导航菜单 + 用户信息)
+├── Header (面包屑 + 通知图标 + 用户下拉)
+└── MainContent
+    ├── BossDashboardPage
+    │   ├── KpiCardGrid (4 个 KpiCard + useDashboardQuery)
+    │   ├── ExceptionAlertPanel (ExceptionTable + 严重度标签)
+    │   └── GoalProgressChart (按组织维度柱状图)
+    ├── GoalListPage
+    │   ├── GoalFilterBar (状态/负责人/期限)
+    │   ├── GoalTable (分页列表)
+    │   └── GoalCreateDrawer (RHF + Zod 校验)
+    ├── GoalDetailPage
+    │   ├── GoalInfoCard (目标字段展示)
+    │   ├── GoalProgressBar (current/target 进度)
+    │   ├── ChildrenGoalTree (子目标树)
+    │   └── RelatedTasksPanel
+    ├── DecisionCasePage
+    │   ├── CaseStageStepper (5 步骤条)
+    │   ├── HypothesisForm (假设列表 + 证据评分输入)
+    │   ├── EvaluationRadar (4 维雷达图)
+    │   ├── RoiSimulator (成本/收入输入 + ROI 展示)
+    │   └── ReportViewer (报告汇总视图)
+    ├── TaskListPage
+    │   ├── TaskFilterBar
+    │   └── TaskTable (状态标签 + 延期高亮)
+    ├── FeedbackPage
+    │   ├── FeedbackForm (4 字段: 目标/结果/卡点/下一步)
+    │   └── FeedbackHistoryList
+    └── AgentRunPage (admin)
+        ├── AgentRunTable
+        └── AgentRunTraceDetail (阶段时间线 + 工具调用列表)</pre>
+
+  <h3>2.2 关键组件接口定义</h3>
+
+  <h4>KpiCard</h4>
+  <pre class="code">interface KpiCardProps {
+  label: string;          // "目标完成率"
+  value: number;          // 72.5
+  unit: '%' | '个' | '人';
+  trend: 'up' | 'down' | 'flat';
+  trendValue?: number;    // 较上周期变化
+  loading?: boolean;
+  onClick?: () => void;   // 下钻
+}</pre>
+
+  <h4>CaseStageStepper</h4>
+  <pre class="code">interface StageStepperProps {
+  stages: Stage[];  // [{key:'dismantle',label:'拆解',status:'done'},...]
+  currentStage: string;
+  canAdvance: boolean;         // 是否满足进入下一阶段条件
+  onStageClick: (stage: string) => void;
+}
+
+interface Stage {
+  key: string;
+  label: string;
+  status: 'pending' | 'current' | 'done' | 'locked';
+}</pre>
+
+  <h4>FeedbackForm</h4>
+  <pre class="code">interface FeedbackFormData {
+  taskId: string;
+  todayGoal: string;    // minLength: 5, maxLength: 500
+  result: string;       // minLength: 5, maxLength: 500
+  blocker: string;      // minLength: 1, maxLength: 500
+  nextAction: string;   // minLength: 5, maxLength: 500
+}
+
+// Zod Schema
+const feedbackSchema = z.object({
+  taskId: z.string().uuid(),
+  todayGoal: z.string().min(5, '请至少写 5 个字').max(500),
+  result: z.string().min(5, '请至少写 5 个字').max(500),
+  blocker: z.string().min(1, '卡点不能为空（无卡点填"无"）').max(500),
+  nextAction: z.string().min(5, '请至少写 5 个字').max(500),
+});</pre>
+</section>
+
+<section id="fe-state">
+  <h2>三、前端状态管理</h2>
+
+  <h3>3.1 Zustand 全局 Store</h3>
+  <pre class="code">// stores/user-store.ts
+interface UserState {
+  user: User | null;
+  token: string | null;
+  permissions: PermissionSet;
+  login: (email: string, password: string) => Promise&lt;void&gt;;
+  logout: () => void;
+  hasPermission: (resource: string, action: string) => boolean;
+}
+
+// stores/ui-store.ts
+interface UIState {
+  sidebarCollapsed: boolean;
+  currentOrg: Organization | null;
+  toggleSidebar: () => void;
+  setCurrentOrg: (org: Organization) => void;
+}</pre>
+
+  <h3>3.2 React Query 服务端状态</h3>
+  <table>
+    <thead><tr><th>Query Key</th><th>接口</th><th>staleTime</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>['dashboard','boss']</code></td><td>GET /api/dashboard/boss</td><td>5min</td><td>驾驶舱聚合数据</td></tr>
+      <tr><td><code>['goals', filters]</code></td><td>GET /api/goals</td><td>30s</td><td>目标列表</td></tr>
+      <tr><td><code>['goal', id]</code></td><td>GET /api/goals/:id</td><td>30s</td><td>目标详情</td></tr>
+      <tr><td><code>['decision-case', id]</code></td><td>GET /api/decision-cases/:id</td><td>30s</td><td>决策案例聚合视图</td></tr>
+      <tr><td><code>['tasks', filters]</code></td><td>GET /api/tasks</td><td>10s</td><td>任务列表（高频更新）</td></tr>
+      <tr><td><code>['agent-runs', filters]</code></td><td>GET /api/agent-runs</td><td>10s</td><td>Agent 运行列表</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 Mutation 后缓存失效策略</h3>
+  <pre class="code">// 创建目标 → 失效 goals 列表 + dashboard 缓存
+mutation.onSuccess = () => {
+  queryClient.invalidateQueries({ queryKey: ['goals'] });
+  queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+};
+
+// 提交反馈 → 失效 tasks 详情 + dashboard 缓存
+mutation.onSuccess = () => {
+  queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+  queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+};</pre>
+</section>
+
+<section id="be-modules">
+  <h2>四、后端模块详细设计</h2>
+
+  <h3>4.1 Goal 模块</h3>
+  <table>
+    <tr><th style="width:140px">层级</th><th>类/文件</th><th>关键方法</th><th>说明</th></tr>
+    <tr><td>Controller</td><td><code>GoalController</code></td><td><code>create, findAll, findOne, breakdown, updateStatus</code></td><td>@Auth('manager') 守卫</td></tr>
+    <tr><td>DTO</td><td><code>CreateGoalDto</code></td><td>-</td><td>class-validator 装饰器：name(IsString,Length), ownerId(IsUUID), metricType(IsIn), targetValue(IsNumber,Min), deadline(IsDateString)</td></tr>
+    <tr><td>UseCase</td><td><code>CreateGoalUseCase</code></td><td><code>execute(dto, userId): Promise&lt;Goal&gt;</code></td><td>校验 owner 存在 → 校验 org → 创建 Goal → 发布 GoalCreated 事件</td></tr>
+    <tr><td>UseCase</td><td><code>BreakdownGoalUseCase</code></td><td><code>execute(parentId, dto): Promise&lt;Goal&gt;</code></td><td>校验父目标存在+active → 创建子目标 → 更新父目标 has_children 标记</td></tr>
+    <tr><td>Domain</td><td><code>GoalAggregate</code></td><td><code>isOverdue(): boolean</code></td><td>deadline < now() AND status != completed</td></tr>
+    <tr><td>Repository</td><td><code>GoalRepository</code></td><td><code>findByOwner, findByOrg, findTree</code></td><td>递归查询目标树（WITH RECURSIVE）</td></tr>
+  </table>
+
+  <h3>4.2 Decision 模块</h3>
+  <table>
+    <tr><th style="width:140px">层级</th><th>类/文件</th><th>关键方法</th><th>说明</th></tr>
+    <tr><td>Controller</td><td><code>DecisionCaseController</code></td><td><code>create, findOne, addHypothesis, forecast, evaluate, simulateRoi, generateReport</code></td><td>逐阶段调用</td></tr>
+    <tr><td>Domain</td><td><code>DecisionCaseAggregate</code></td><td><code>canAdvanceTo(nextStage): boolean</code></td><td>阶段前置条件检查</td></tr>
+    <tr><td>Domain</td><td><code>EvaluationService</code></td><td><code>calculateWeightedScore(scores): number</code></td><td>4 维加权（资源 0.2/时间 0.3/风险 0.3/可行性 0.2）</td></tr>
+    <tr><td>Domain</td><td><code>RoiCalculator</code></td><td><code>calculate(cost, revenue): {roi,paybackDays}</code></td><td>roi = (revenue-cost)/cost, paybackDays = cost/(revenue/365)</td></tr>
+  </table>
+
+  <h3>4.3 Task 模块</h3>
+  <table>
+    <tr><th style="width:140px">层级</th><th>类/文件</th><th>关键方法</th><th>说明</th></tr>
+    <tr><td>Domain</td><td><code>TaskStateMachine</code></td><td><code>transition(task, event): Task</code></td><td>状态机核心：todo→in_progress(start)→done(complete)；todo→delayed(auto)；done→不可变</td></tr>
+  </table>
+  <pre class="code">// TaskStateMachine 状态转换表
+const transitions = {
+  todo:     { start: 'in_progress', auto_delay: 'delayed' },
+  in_progress: { complete: 'done', auto_delay: 'delayed' },
+  delayed:  { start: 'in_progress', complete: 'done' },
+  done:     {},  // 终态，不可转换
+  cancelled: {},
+};</pre>
+
+  <h3>4.4 Agent Runtime 模块</h3>
+  <table>
+    <tr><th style="width:140px">层级</th><th>类/文件</th><th>关键方法</th><th>说明</th></tr>
+    <tr><td>Service</td><td><code>AgentRunService</code></td><td><code>startRun(agentType, triggerType, context): AgentRun</code></td><td>创建 AgentRun → 入队 BullMQ</td></tr>
+    <tr><td>Processor</td><td><code>AgentRunProcessor</code></td><td><code>process(job): Promise&lt;void&gt;</code></td><td>BullMQ Worker: CONTEXT_BUILDING → PLANNING → TOOL_CALLING → VERIFYING</td></tr>
+    <tr><td>Service</td><td><code>ToolRouter</code></td><td><code>route(toolName, input): ToolResult</code></td><td>权限校验 L1-L5 → 执行工具 → 记录 tool_calls</td></tr>
+    <tr><td>Service</td><td><code>PolicyGuard</code></td><td><code>checkPermission(agentType, toolName, action): boolean</code></td><td>Agent 权限拦截，L3+ 写操作检查人工确认</td></tr>
+    <tr><td>Service</td><td><code>TraceLogger</code></td><td><code>logPhase(runId, phase, data): void</code></td><td>写入 AgentRun 阶段日志</td></tr>
+  </table>
+</section>
+
+<section id="be-usecases">
+  <h2>五、核心 UseCase 编排</h2>
+
+  <h3>5.1 CreateGoalUseCase 执行步骤</h3>
+  <pre class="code">async execute(dto: CreateGoalDto, userId: string): Promise&lt;Goal&gt; {
+  // 1. 校验负责人存在且状态 active
+  const owner = await this.userRepo.findById(dto.ownerId);
+  if (!owner || owner.status !== 'active') throw new NotFoundException('负责人不存在或已禁用');
+
+  // 2. 校验组织存在
+  const org = await this.orgRepo.findById(dto.orgId);
+
+  // 3. 如果有父目标，校验父目标存在且为 active
+  if (dto.parentId) {
+    const parent = await this.goalRepo.findById(dto.parentId);
+    if (!parent || parent.status === 'cancelled') throw new BadRequestException('父目标不可用');
+  }
+
+  // 4. 创建 Goal 实体
+  const goal = Goal.create({ ...dto, createdBy: userId, status: 'draft' });
+
+  // 5. 持久化
+  const saved = await this.goalRepo.save(goal);
+
+  // 6. 发布领域事件
+  await this.eventBus.publish(new GoalCreatedEvent(saved));
+
+  // 7. 写审计日志
+  await this.auditService.log({ actorId: userId, action: 'CREATE', resourceType: 'goal', resourceId: saved.id });
+
+  return saved;
+}</pre>
+
+  <h3>5.2 SubmitFeedbackUseCase 执行步骤</h3>
+  <pre class="code">async execute(dto: SubmitFeedbackDto, userId: string): Promise&lt;Feedback&gt; {
+  // 1. 校验任务存在且用户为 owner 或协作者
+  const task = await this.taskRepo.findById(dto.taskId);
+  if (task.ownerId !== userId) throw new ForbiddenException('仅任务负责人可提交反馈');
+
+  // 2. 检查今日是否已有反馈
+  const existing = await this.feedbackRepo.findTodayByTask(dto.taskId, userId);
+  if (existing) {
+    // 更新已有反馈（非重复创建）
+    existing.update(dto);
+    return this.feedbackRepo.save(existing);
+  }
+
+  // 3. 创建反馈
+  const feedback = Feedback.create({ ...dto, userId, submittedAt: new Date() });
+  const saved = await this.feedbackRepo.save(feedback);
+
+  // 4. 触发异步质量评估
+  await this.agentRunService.startRun('feedback_quality', 'event', { feedbackId: saved.id });
+
+  // 5. 发布 FeedbackSubmitted 事件（驾驶舱 KPI 刷新）
+  await this.eventBus.publish(new FeedbackSubmittedEvent(saved));
+
+  return saved;
+}</pre>
+
+  <h3>5.3 GenerateDecisionReportUseCase 执行步骤</h3>
+  <pre class="code">async execute(caseId: string): Promise&lt;DecisionReport&gt; {
+  const case = await this.caseRepo.findByIdWithRelations(caseId);
+  // case = { problem, hypotheses[], evaluation, roiSimulation, plan }
+
+  // 1. 校验全流程阶段完成
+  if (case.stage !== 'calculate') throw new BadRequestException('请先完成评估与试算');
+
+  // 2. 组装报告
+  const report: DecisionReport = {
+    problem: { title: case.problem.title, severity: case.problem.severity },
+    hypotheses: case.hypotheses.map(h => ({ content: h.content, confidence: h.confidence, counter: h.counterExample })),
+    evaluation: { resource: case.evaluation.resourceScore, time: case.evaluation.timeScore, risk: case.evaluation.riskScore, feasibility: case.evaluation.feasibilityScore },
+    roi: { cost: case.roiSimulation.cost, revenue: case.roiSimulation.revenue, roi: case.roiSimulation.roi, paybackDays: case.roiSimulation.paybackDays },
+    plan: case.plan ? { title: case.plan.title, description: case.plan.description } : null,
+    generatedAt: new Date(),
+  };
+
+  // 3. 更新案例状态
+  case.stage = 'report';
+  case.status = 'resolved';
+  await this.caseRepo.save(case);
+
+  return report;
+}</pre>
+</section>
+
+<section id="be-jobs">
+  <h2>六、定时任务与异步任务设计</h2>
+  <table>
+    <thead><tr><th>任务</th><th>队列</th><th>Cron / 触发</th><th>重试</th><th>幂等</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>任务延期检测</td><td><code>task-overdue-check</code></td><td><code>0 */1 * * *</code> (每小时)</td><td>3 次</td><td>是 (status != delayed)</td><td>扫描 dueTime < now() 且 status != done/delayed 的任务</td></tr>
+      <tr><td>未反馈提醒</td><td><code>feedback-reminder</code></td><td><code>0 18 * * 1-5</code> (工作日 18:00)</td><td>1 次</td><td>是 (今日已有提醒则跳过)</td><td>查找当日未提交反馈的活跃任务 owner</td></tr>
+      <tr><td>事件清理</td><td><code>event-cleanup</code></td><td><code>0 2 * * *</code> (每日 2:00)</td><td>0</td><td>是</td><td>DELETE domain_events WHERE created_at < now() - 90d</td></tr>
+      <tr><td>审计日志归档</td><td><code>audit-archive</code></td><td><code>0 3 1 * *</code> (每月 1 日 3:00)</td><td>3 次</td><td>是 (检查归档标记)</td><td>归档 > 1 年的 audit_logs → 对象存储</td></tr>
+      <tr><td>Agent Run 清理</td><td><code>agent-run-cleanup</code></td><td><code>0 4 * * 0</code> (每周日 4:00)</td><td>0</td><td>是</td><td>归档 > 180 天 AgentRun → 保留摘要</td></tr>
+      <tr><td>反馈质量评估</td><td><code>agent-feedback-quality</code></td><td>事件触发 (FeedbackSubmitted)</td><td>3 次</td><td>是 (qualityScore 已非 null)</td><td>新的反馈提交后异步评分</td></tr>
+    </tbody>
+  </table>
+
+  <h3>幂等性设计原则</h3>
+  <pre class="code">// 延期检测幂等：只处理 status 不是 delayed/done/cancelled 的
+UPDATE tasks SET status = 'delayed'
+WHERE due_time < NOW()
+  AND status NOT IN ('delayed', 'done', 'cancelled');
+
+// 反馈提醒幂等：检查今日提醒记录
+const alreadyReminded = await redis.get(`reminder:${userId}:${today}`);
+if (alreadyReminded) return; // 跳过</pre>
+</section>
+
+<section id="cache-keys">
+  <h2>七、缓存键设计详细规格</h2>
+  <table>
+    <thead><tr><th>缓存对象</th><th>Redis Key</th><th>类型</th><th>TTL</th><th>更新时机</th></tr></thead>
+    <tbody>
+      <tr><td>用户 Token</td><td><code>auth:token:{userId}</code></td><td>String</td><td>24h</td><td>登录 SET, 登出 DEL</td></tr>
+      <tr><td>角色权限</td><td><code>auth:role:{roleId}</code></td><td>Hash</td><td>1h</td><td>权限变更 DEL</td></tr>
+      <tr><td>驾驶舱 KPI</td><td><code>dashboard:kpi:{orgId}</code></td><td>Hash</td><td>5min</td><td>目标/任务/反馈变更时 DEL</td></tr>
+      <tr><td>目标进度</td><td><code>goal:progress:{goalId}</code></td><td>String</td><td>10min</td><td>子任务状态变更 DEL</td></tr>
+      <tr><td>Agent Run 结果</td><td><code>agent:result:{runId}</code></td><td>JSON</td><td>30min</td><td>Agent Run completed SET</td></tr>
+      <tr><td>组织树</td><td><code>org:tree</code></td><td>JSON</td><td>30min</td><td>组织 CRUD 时 DEL</td></tr>
+      <tr><td>用户会话状态</td><td><code>session:user:{userId}</code></td><td>Hash</td><td>24h</td><td>活跃自动续期</td></tr>
+      <tr><td>限流计数器</td><td><code>rate:{userId}:{endpoint}</code></td><td>String (INCR)</td><td>1min</td><td>每次请求 INCR + EXPIRE</td></tr>
+    </tbody>
+  </table>
+
+  <h3>缓存防护实现要点</h3>
+  <pre class="code">// 缓存穿透：布隆过滤器 + 空值缓存
+const exists = await bloomFilter.mayContain(`goal:${id}`);
+if (!exists) throw new NotFoundException('目标不存在');
+// 如果 DB 返回 null，缓存空标记 60s
+await redis.setex(`goal:${id}`, 60, 'NULL');
+
+// 缓存击穿：热点 Key 互斥锁
+const lockKey = `lock:goal:${id}`;
+const locked = await redis.setnx(lockKey, '1', 'EX', 5);
+if (!locked) { await sleep(100); return getFromCache(key); } // 自旋等锁释放
+
+// 缓存雪崩：TTL 随机化
+const ttl = baseTTL * (0.8 + Math.random() * 0.4); // ±20% 抖动</pre>
+</section>
+
+<div class="footer">XCDOS 详细设计文档 LLD V1.0 · 柔电科技 · 2026</div>
+</main>
+</div>
+</body>
+</html>
