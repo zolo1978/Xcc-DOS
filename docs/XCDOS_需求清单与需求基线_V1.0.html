@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 需求清单与需求基线 V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225; --navy-900:#071A33; --navy-800:#0B2B52; --navy-700:#103B70; --navy-600:#15508F;
+  --bluegray-50:#F6F8FB; --bluegray-100:#EEF2F7; --bluegray-200:#DDE5EF; --bluegray-300:#C7D2E1; --bluegray-500:#66788A; --bluegray-700:#334155;
+  --cyan-500:#1BA6D9; --cyan-100:#E8F7FC;
+  --white:#FFFFFF; --text-main:#0F172A; --text-secondary:#475569; --text-tertiary:#8492A6; --border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06); --shadow-md:0 10px 28px rgba(7,26,51,.08); --shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:44px;line-height:1.16;letter-spacing:-.8px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:28px;line-height:1.25;color:var(--navy-900);letter-spacing:-.4px}h3{margin:24px 0 12px;font-size:20px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:16px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}
+.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.badge{display:inline-flex;align-items:center;height:26px;padding:0 9px;border-radius:999px;background:var(--cyan-100);color:var(--navy-800);border:1px solid rgba(27,166,217,.24);font-size:12px;margin:3px}.badge.gray{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}
+.badge.must{background:var(--cyan-100);color:var(--navy-800);border-color:rgba(27,166,217,.25)}.badge.should{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}.badge.nice{background:var(--bluegray-50);color:var(--text-tertiary);border-color:var(--bluegray-200)}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}th,td{padding:14px 16px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-size:12px}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.warn{border-left:5px solid var(--navy-800);background:var(--bluegray-100);padding:18px;border-radius:0 16px 16px 0;color:var(--text-secondary)}
+.status{display:inline-flex;border-radius:999px;padding:2px 8px;background:var(--bluegray-100);border:1px solid var(--bluegray-200);font-size:12px;color:var(--text-secondary)}
+.status.must{background:var(--cyan-100);color:var(--navy-800);border-color:rgba(27,166,217,.25)}
+.checklist{columns:2;column-gap:28px}.checklist li{break-inside:avoid;margin:8px 0;color:var(--text-secondary)}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.checklist{columns:1}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">BL</div><div><b>XCDOS 需求基线</b><span>Baseline V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#info">文档信息</a>
+    <a href="#version">版本迭代</a>
+    <a href="#features">功能清单</a>
+    <a href="#scope">范围定义</a>
+    <a href="#change">需求变更</a>
+    <a href="#env">上线范围</a>
+    <a href="#lock">基线锁定</a>
+    <a href="#crossref">交叉引用</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Requirement Baseline · V1.0</span>
+  <h1>XCDOS 需求清单与需求基线<br/>V1.0</h1>
+  <p>对齐 PRD V1.0、TDD V1.0、ARD V2.0，锁定 MVP 迭代需求范围、优先级、验收基线、变更流程。作为研发编码与测试准入的唯一需求依据，杜绝需求蔓延。</p>
+  <div class="meta">
+    <span>产品：企业决策与执行操作系统</span>
+    <span>MVP：销售/PMC 试点</span>
+    <span>核心模型：拆-推-评-算</span>
+    <span>基线状态：锁定</span>
+  </div>
+</header>
+
+<section id="info">
+  <h2>一、文档信息</h2>
+  <table>
+    <tr><th style="width:160px">属性</th><th>内容</th></tr>
+    <tr><td>文档名称</td><td>XCDOS 需求清单与需求基线 V1.0</td></tr>
+    <tr><td>版本号</td><td>V1.0</td></tr>
+    <tr><td>编写人</td><td>产品负责人</td></tr>
+    <tr><td>审核人</td><td>技术负责人 / 测试负责人</td></tr>
+    <tr><td>最后更新</td><td>2026-06-11</td></tr>
+    <tr><td>前置依赖</td><td>PRD V1.0, TDD V1.0, ARD V2.0</td></tr>
+    <tr><td>关联文档</td><td>XCDOS_PRD_V1, XCDOS_TDD_V1, XCDOS_ARD_V2, XCDOS_API接口文档_V1, XCDOS_数据库设计文档_V1</td></tr>
+  </table>
+</section>
+
+<section id="version">
+  <h2>二、版本迭代信息</h2>
+  <div class="grid grid-2">
+    <div class="card"><b>迭代编号</b><p class="muted">XCDOS-MVP-V1.0</p></div>
+    <div class="card"><b>需求来源</b><p class="muted">内部产品规划 + 柔电科技管理层需求调研</p></div>
+    <div class="card"><b>业务背景</b><p class="muted">企业决策缺乏结构化工具，目标到执行链路断裂，老板看不到业务全貌。亟需一套"目标→问题→决策方案→任务→反馈→看板"的闭环系统。</p></div>
+    <div class="card"><b>价值收益</b><p class="muted">目标执行可追踪、决策过程可审计、异常可预警，预期减少 30% 管理沟通成本</p></div>
+  </div>
+</section>
+
+<section id="features">
+  <h2>三、MVP 功能清单</h2>
+  <p class="desc">以下功能按 PRD V1.0 第四章功能模块需求整理，标注优先级与对应 PRD 章节。</p>
+
+  <h3>3.1 老板驾驶舱</h3>
+  <table>
+    <thead><tr><th>编号</th><th>功能</th><th>优先级</th><th>PRD 章节</th><th>验收标准摘要</th></tr></thead>
+    <tbody>
+      <tr><td>F-01</td><td>核心指标 KPI 卡片（目标完成率、任务执行率、反馈及时率、异常数）</td><td><span class="badge must">P0</span></td><td>4.1.1</td><td>4 个核心 KPI 实时展示，数据 5 分钟内更新</td></tr>
+      <tr><td>F-02</td><td>异常预警面板（严重/高危异常高亮）</td><td><span class="badge must">P0</span></td><td>4.1.2</td><td>按严重度分级展示，支持点击下钻</td></tr>
+      <tr><td>F-03</td><td>目标进度概览（部门/个人维度）</td><td><span class="badge must">P0</span></td><td>4.1.3</td><td>支持按组织层级下钻</td></tr>
+      <tr><td>F-04</td><td>决策案例快捷入口</td><td><span class="badge should">P1</span></td><td>4.1.4</td><td>显示最近 5 条待审批决策案例</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 目标管理</h3>
+  <table>
+    <thead><tr><th>编号</th><th>功能</th><th>优先级</th><th>PRD 章节</th><th>验收标准摘要</th></tr></thead>
+    <tbody>
+      <tr><td>F-05</td><td>目标创建（名称、类型、指标、期限、负责人）</td><td><span class="badge must">P0</span></td><td>4.2.1</td><td>支持 SMART 目标字段完整录入</td></tr>
+      <tr><td>F-06</td><td>目标拆解（父子目标关联）</td><td><span class="badge must">P0</span></td><td>4.2.2</td><td>支持多级目标层级树</td></tr>
+      <tr><td>F-07</td><td>目标进度追踪（当前值 vs 目标值）</td><td><span class="badge must">P0</span></td><td>4.2.3</td><td>进度条展示，颜色区分达标/滞后</td></tr>
+      <tr><td>F-08</td><td>目标列表筛选与搜索</td><td><span class="badge should">P1</span></td><td>4.2.4</td><td>支持按状态/负责人/期限筛选</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 拆推评算中心</h3>
+  <table>
+    <thead><tr><th>编号</th><th>功能</th><th>优先级</th><th>PRD 章节</th><th>验收标准摘要</th></tr></thead>
+    <tbody>
+      <tr><td>F-09</td><td>问题录入与关联目标</td><td><span class="badge must">P0</span></td><td>4.3.1</td><td>问题自动关联到目标</td></tr>
+      <tr><td>F-10</td><td>假设登记与证据打分（拆解阶段）</td><td><span class="badge must">P0</span></td><td>4.3.2</td><td>支持多假设并列，含证据强度/置信度评分</td></tr>
+      <tr><td>F-11</td><td>方案推演（推荐方案生成）</td><td><span class="badge must">P0</span></td><td>4.3.2</td><td>基于假设生成推演方案</td></tr>
+      <tr><td>F-12</td><td>多维评估（资源/时间/风险/可行性）</td><td><span class="badge must">P0</span></td><td>4.3.3</td><td>4 维度雷达图 + 文本说明</td></tr>
+      <tr><td>F-13</td><td>ROI 试算（成本/收入/ROI/回收期）</td><td><span class="badge must">P0</span></td><td>4.3.4</td><td>输入假设参数，输出 ROI 计算</td></tr>
+      <tr><td>F-14</td><td>决策报告生成</td><td><span class="badge must">P0</span></td><td>4.3.5</td><td>自动汇总拆推评算全流程，导出可分享</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.4 任务与过程追踪</h3>
+  <table>
+    <thead><tr><th>编号</th><th>功能</th><th>优先级</th><th>PRD 章节</th><th>验收标准摘要</th></tr></thead>
+    <tbody>
+      <tr><td>F-15</td><td>任务创建与分配</td><td><span class="badge must">P0</span></td><td>4.4.1</td><td>关联决策方案/目标，指定负责人与期限</td></tr>
+      <tr><td>F-16</td><td>任务状态流转（待办→进行中→完成→延期）</td><td><span class="badge must">P0</span></td><td>4.4.2</td><td>状态机驱动，延期自动标记</td></tr>
+      <tr><td>F-17</td><td>任务列表与筛选</td><td><span class="badge must">P0</span></td><td>4.4.3</td><td>按负责人/状态/期限筛选</td></tr>
+      <tr><td>F-18</td><td>任务执行标准关联</td><td><span class="badge should">P1</span></td><td>4.4.4</td><td>任务关联执行标准（检查规则）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.5 强制反馈</h3>
+  <table>
+    <thead><tr><th>编号</th><th>功能</th><th>优先级</th><th>PRD 章节</th><th>验收标准摘要</th></tr></thead>
+    <tbody>
+      <tr><td>F-19</td><td>每日反馈提交（今日目标/结果/卡点/下一步）</td><td><span class="badge must">P0</span></td><td>4.5.1</td><td>结构化表单，4 字段必填</td></tr>
+      <tr><td>F-20</td><td>未反馈检测与提醒</td><td><span class="badge must">P0</span></td><td>4.5.2</td><td>每日 18:00 未反馈自动提醒</td></tr>
+      <tr><td>F-21</td><td>反馈质量评分</td><td><span class="badge should">P1</span></td><td>4.5.3</td><td>AI 辅助评分（充实度/具体度）</td></tr>
+      <tr><td>F-22</td><td>反馈历史查看</td><td><span class="badge should">P1</span></td><td>4.5.4</td><td>按日期/任务查看历史反馈</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.6 Agent 辅助能力（MVP 基础版）</h3>
+  <table>
+    <thead><tr><th>编号</th><th>功能</th><th>优先级</th><th>PRD 章节</th><th>验收标准摘要</th></tr></thead>
+    <tbody>
+      <tr><td>F-23</td><td>Agent 辅助拆解（基于目标自动生成问题假设）</td><td><span class="badge should">P1</span></td><td>4.3</td><td>输入目标，Agent 输出 2-5 条假设</td></tr>
+      <tr><td>F-24</td><td>Agent 辅助评估（多维度打分 + 说明）</td><td><span class="badge should">P1</span></td><td>4.3</td><td>输入方案，Agent 输出 4 维度评分</td></tr>
+      <tr><td>F-25</td><td>Agent Run 追踪与审计</td><td><span class="badge must">P0</span></td><td>TDD 8</td><td>每次 Agent 调用记录输入/输出/工具调用</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="scope">
+  <h2>四、MVP 范围定义</h2>
+
+  <h3>4.1 范围内（In Scope）</h3>
+  <div class="grid grid-3">
+    <div class="card"><b>核心闭环</b><p class="muted">目标 → 问题 → 决策方案 → 任务 → 反馈 → 看板</p></div>
+    <div class="card"><b>用户角色</b><p class="muted">老板 / 高管 / 中层管理者 / 员工 / 系统管理员 共 5 角色</p></div>
+    <div class="card"><b>Agent 辅助</b><p class="muted">Agent 辅助拆解、评估、报告生成，所有输出可审计</p></div>
+    <div class="card"><b>数据看板</b><p class="muted">老板驾驶舱含 KPI/异常/进度 3 大面板</p></div>
+    <div class="card"><b>权限体系</b><p class="muted">RBAC 五级权限，按角色控制页面/操作/数据范围</p></div>
+    <div class="card"><b>审计日志</b><p class="muted">全量操作留痕，支持追溯</p></div>
+  </div>
+
+  <h3>4.2 范围外（Out of Scope）</h3>
+  <ul>
+    <li>不做完整微服务拆分（MVP 采用模块化单体 + DDD 分层）</li>
+    <li>不替代 ERP / MES / WMS / CRM 等外部业务系统</li>
+    <li>不允许 Agent 自动执行高风险写操作（删除/批量修改需人工审批）</li>
+    <li>不做复杂 BI 分析平台（仅做核心驾驶舱）</li>
+    <li>不做移动端原生 App（MVP 仅 Web Admin + H5）</li>
+    <li>不做外部系统 API 集成对接（MVP 后二期规划）</li>
+    <li>不做多语言/国际化</li>
+  </ul>
+</section>
+
+<section id="change">
+  <h2>五、需求变更记录</h2>
+  <table>
+    <thead><tr><th>变更编号</th><th>变更日期</th><th>变更人</th><th>变更内容</th><th>变更原因</th><th>影响范围</th><th>审批人</th></tr></thead>
+    <tbody>
+      <tr><td colspan="7" style="text-align:center;color:var(--text-tertiary)">暂无变更记录。基线锁定后，所有变更须走 CR 流程，在此登记。</td></tr>
+    </tbody>
+  </table>
+  <div class="callout" style="margin-top:16px">变更流程：提出变更(CR) → 影响评估(技术+产品) → 技术评审 → 产品确认 → 更新本文档 → 同步通知研发/测试/运维</div>
+</section>
+
+<section id="env">
+  <h2>六、上线范围与环境规划</h2>
+  <table>
+    <thead><tr><th>环境</th><th>部署方式</th><th>用户群体</th><th>数据</th><th>灰度策略</th></tr></thead>
+    <tbody>
+      <tr><td>研发</td><td>单机 Docker Compose</td><td>开发团队</td><td>Mock 数据</td><td>全量</td></tr>
+      <tr><td>测试</td><td>单机 Docker Compose</td><td>测试团队</td><td>测试用例数据</td><td>全量</td></tr>
+      <tr><td>预发</td><td>类生产集群（2 节点）</td><td>试点部门（销售/PMC）</td><td>脱敏生产数据</td><td>试点用户 100%</td></tr>
+      <tr><td>生产</td><td>集群（≥2 应用节点 + 主从 DB）</td><td>全部企业内部用户</td><td>生产数据</td><td>灰度 10% → 观察 48h → 全量</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="lock">
+  <h2>七、需求基线锁定</h2>
+
+  <h3>7.1 锁定信息</h3>
+  <table>
+    <tr><th style="width:180px">属性</th><th>内容</th></tr>
+    <tr><td>基线锁定日期</td><td>MVP 需求评审通过当日</td></tr>
+    <tr><td>锁定范围</td><td>本文档第三~四章节所列全部功能</td></tr>
+    <tr><td>锁定人</td><td>产品负责人</td></tr>
+  </table>
+
+  <h3>7.2 锁定原则</h3>
+  <ol>
+    <li>需求基线一旦锁定，任何功能性新增/修改/删除须走变更流程（CR）</li>
+    <li><span class="badge must">P0</span> 功能变更须技术负责人 + 产品负责人双审批</li>
+    <li><span class="badge should">P1</span> / <span class="badge gray">P2</span> 功能变更由产品负责人审批</li>
+    <li>所有变更必须更新本文档第五章变更记录并留痕</li>
+    <li>变更影响评估需包含：工时影响、测试回归范围、上线风险</li>
+  </ol>
+
+  <h3>7.3 锁定后允许的直接调整（不走变更流程）</h3>
+  <ul>
+    <li>UI 文案优化（不改变交互逻辑与功能行为）</li>
+    <li>错误提示语调整</li>
+    <li>非功能性的性能优化（不改变 API 契约）</li>
+    <li>Bug 修复（对齐 PRD 原意，非功能变更）</li>
+  </ul>
+</section>
+
+<section id="crossref">
+  <h2>八、需求-设计-测试交叉引用矩阵</h2>
+  <p class="desc">确保每个功能需求有对应的技术设计、API 端点、数据库表和测试用例。</p>
+  <table>
+    <thead><tr><th>功能编号</th><th>功能名称</th><th>PRD 章节</th><th>TDD 章节</th><th>API 端点</th><th>DB 表</th><th>测试用例</th></tr></thead>
+    <tbody>
+      <tr><td>F-05</td><td>目标创建</td><td>4.2.1</td><td>5.3</td><td>POST /goals</td><td>goals</td><td>TC-GOAL-001</td></tr>
+      <tr><td>F-06</td><td>目标拆解</td><td>4.2.2</td><td>5.3</td><td>POST /goals/{id}/children</td><td>goals</td><td>TC-GOAL-002</td></tr>
+      <tr><td>F-09</td><td>问题录入</td><td>4.3.1</td><td>5.3</td><td>POST /problems</td><td>problems</td><td>TC-DEC-001</td></tr>
+      <tr><td>F-10</td><td>假设登记</td><td>4.3.2</td><td>5.3</td><td>POST /hypotheses</td><td>hypotheses</td><td>TC-DEC-002</td></tr>
+      <tr><td>F-12</td><td>多维评估</td><td>4.3.3</td><td>5.3</td><td>POST /evaluations</td><td>evaluations</td><td>TC-DEC-003</td></tr>
+      <tr><td>F-13</td><td>ROI 试算</td><td>4.3.4</td><td>5.3</td><td>POST /roi-simulations</td><td>roi_simulations</td><td>TC-DEC-004</td></tr>
+      <tr><td>F-15</td><td>任务创建</td><td>4.4.1</td><td>5.3</td><td>POST /tasks</td><td>tasks</td><td>TC-TASK-001</td></tr>
+      <tr><td>F-16</td><td>任务状态流转</td><td>4.4.2</td><td>5.3</td><td>PATCH /tasks/{id}/status</td><td>tasks</td><td>TC-TASK-002</td></tr>
+      <tr><td>F-19</td><td>每日反馈</td><td>4.5.1</td><td>5.3</td><td>POST /feedbacks</td><td>feedbacks</td><td>TC-FB-001</td></tr>
+      <tr><td>F-20</td><td>未反馈提醒</td><td>4.5.2</td><td>9.1</td><td>BullMQ: feedback-reminder</td><td>feedbacks</td><td>TC-FB-002</td></tr>
+      <tr><td>F-01</td><td>KPI 卡片</td><td>4.1.1</td><td>5.3</td><td>GET /dashboard/kpis</td><td>goals, tasks, feedbacks</td><td>TC-DASH-001</td></tr>
+      <tr><td>F-02</td><td>异常预警</td><td>4.1.2</td><td>5.3</td><td>GET /dashboard/exceptions</td><td>exceptions</td><td>TC-DASH-002</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="footer">XCDOS 需求清单与需求基线 V1.0 · 柔电科技 · 2026</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 产品验收用例 V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225; --navy-900:#071A33; --navy-800:#0B2B52; --navy-700:#103B70; --navy-600:#15508F;
+  --bluegray-50:#F6F8FB; --bluegray-100:#EEF2F7; --bluegray-200:#DDE5EF; --bluegray-300:#C7D2E1; --bluegray-500:#66788A; --bluegray-700:#334155;
+  --cyan-500:#1BA6D9; --cyan-100:#E8F7FC; --red-400:#E0556A; --green-500:#38A169;
+  --white:#FFFFFF; --text-main:#0F172A; --text-secondary:#475569; --text-tertiary:#8492A6; --border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06); --shadow-md:0 10px 28px rgba(7,26,51,.08); --shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:44px;line-height:1.16;letter-spacing:-.8px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:28px;line-height:1.25;color:var(--navy-900);letter-spacing:-.4px}h3{margin:24px 0 12px;font-size:20px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:16px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}
+.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.badge{display:inline-flex;align-items:center;height:26px;padding:0 9px;border-radius:999px;font-size:12px;margin:3px}
+.badge.p0{background:var(--cyan-100);color:var(--navy-800);border:1px solid rgba(27,166,217,.24)}.badge.p1{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}.badge.p2{background:var(--bluegray-50);color:var(--text-tertiary);border-color:var(--bluegray-200)}
+.badge.normal{background:#E8F7FC;color:var(--navy-800)}.badge.exception{background:#FFF0F0;color:#C53030}.badge.boundary{background:#FFF8E1;color:#975A16}.badge.permission{background:#F0EFFF;color:#553C9A}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}th,td{padding:14px 16px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;text-align:center}
+.summary-item{background:var(--bluegray-50);border:1px solid var(--border);border-radius:14px;padding:18px}
+.summary-item .num{font-size:32px;font-weight:780;color:var(--navy-900)}.summary-item .label{font-size:13px;color:var(--text-tertiary);margin-top:4px}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.summary-grid{grid-template-columns:repeat(2,1fr)}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">AC</div><div><b>XCDOS 验收用例</b><span>Acceptance V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#summary">概览</a>
+    <a href="#dashboard">老板驾驶舱</a>
+    <a href="#goals">目标管理</a>
+    <a href="#decision">拆推评算中心</a>
+    <a href="#tasks">任务与过程追踪</a>
+    <a href="#feedback">强制反馈</a>
+    <a href="#agent">Agent 辅助</a>
+    <a href="#permission">权限验收</a>
+    <a href="#cross">交叉场景</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Product Acceptance Criteria · V1.0</span>
+  <h1>XCDOS 产品验收用例<br/>V1.0</h1>
+  <p>基于 PRD V1.0 第十章验收标准 + 第四章功能模块，输出面向产品视角的业务验收用例。区别于测试用例，侧重业务场景完整性、交互合理性、权限边界。产品最终把关依据。</p>
+  <div class="meta">
+    <span>用例总数：36 条</span>
+    <span>覆盖模块：7 个</span>
+    <span>场景类型：正常/异常/边界/权限</span>
+    <span>对齐 PRD V1.0</span>
+  </div>
+</header>
+
+<section id="summary">
+  <h2>验收用例概览</h2>
+  <div class="summary-grid">
+    <div class="summary-item"><div class="num">36</div><div class="label">验收用例总数</div></div>
+    <div class="summary-item"><div class="num">7</div><div class="label">覆盖模块</div></div>
+    <div class="summary-item"><div class="num">22</div><div class="label">正常流程</div></div>
+    <div class="summary-item"><div class="num">6</div><div class="label">异常场景</div></div>
+    <div class="summary-item"><div class="num">8</div><div class="label">权限/边界</div></div>
+  </div>
+  <table style="margin-top:20px">
+    <thead><tr><th>模块</th><th>用例编号</th><th>数量</th><th>P0</th><th>P1</th></tr></thead>
+    <tbody>
+      <tr><td>老板驾驶舱</td><td>AC-DASH-001 ~ 005</td><td>5</td><td>3</td><td>2</td></tr>
+      <tr><td>目标管理</td><td>AC-GOAL-001 ~ 006</td><td>6</td><td>4</td><td>2</td></tr>
+      <tr><td>拆推评算中心</td><td>AC-DEC-001 ~ 009</td><td>9</td><td>6</td><td>3</td></tr>
+      <tr><td>任务与过程追踪</td><td>AC-TASK-001 ~ 005</td><td>5</td><td>3</td><td>2</td></tr>
+      <tr><td>强制反馈</td><td>AC-FB-001 ~ 006</td><td>6</td><td>3</td><td>3</td></tr>
+      <tr><td>Agent 辅助</td><td>AC-AGT-001 ~ 003</td><td>3</td><td>1</td><td>2</td></tr>
+      <tr><td>权限验收</td><td>AC-PERM-001 ~ 004</td><td>4</td><td>4</td><td>-</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="dashboard">
+  <h2>一、老板驾驶舱 (AC-DASH-001 ~ 005)</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-DASH-001</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>老板登录后查看驾驶舱 KPI 面板</td>
+        <td>系统有至少 1 个目标、5 个任务、3 条反馈数据</td>
+        <td>1. 以 boss 角色登录<br>2. 进入 /dashboard/boss<br>3. 查看 4 个 KPI 卡片</td>
+        <td>4 个 KPI（目标完成率/任务执行率/反馈及时率/异常数）正确展示，数据与数据库一致，更新时间在 5 分钟内</td>
+      </tr>
+      <tr>
+        <td>AC-DASH-002</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>异常预警面板展示高危异常</td>
+        <td>存在 ≥1 条 severity=P0 或 P1 的未解决异常</td>
+        <td>1. 以 boss 角色登录<br>2. 进入驾驶舱<br>3. 查看异常预警面板</td>
+        <td>P0/P1 异常红色高亮置顶，P2 灰色展示，按严重度降序排列</td>
+      </tr>
+      <tr>
+        <td>AC-DASH-003</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p1">P1</span></td>
+        <td>驾驶舱支持下钻查看详情</td>
+        <td>AC-DASH-001 通过</td>
+        <td>1. 点击 KPI "异常数"<br>2. 点击异常条目</td>
+        <td>跳转至异常详情页，显示异常标题/关联目标/处理人/状态</td>
+      </tr>
+      <tr>
+        <td>AC-DASH-004</td><td><span class="badge boundary">边界</span></td><td><span class="badge p0">P0</span></td>
+        <td>空数据状态下的驾驶舱展示</td>
+        <td>系统无任何目标/任务/反馈（首次使用）</td>
+        <td>1. 以 boss 角色登录<br>2. 进入驾驶舱</td>
+        <td>KPI 全部展示为 0 或 "--"，无报错，无空白页面，显示引导性空状态提示</td>
+      </tr>
+      <tr>
+        <td>AC-DASH-005</td><td><span class="badge permission">权限</span></td><td><span class="badge p1">P1</span></td>
+        <td>非 boss/admin 角色看不到驾驶舱入口</td>
+        <td>存在 employee 角色账号</td>
+        <td>1. 以 employee 角色登录<br>2. 查看侧边导航</td>
+        <td>侧边导航不显示"老板驾驶舱"入口，手动输入 URL 返回 403 或重定向</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="goals">
+  <h2>二、目标管理 (AC-GOAL-001 ~ 006)</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-GOAL-001</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>创建完整 SMART 目标</td>
+        <td>以 manager 角色登录，所在组织已存在</td>
+        <td>1. 进入 /goals<br>2. 点击"新建目标"<br>3. 填写名称/描述/指标类型/目标值/期限/负责人<br>4. 提交</td>
+        <td>目标创建成功，列表可见，状态为 draft；字段完整无丢失</td>
+      </tr>
+      <tr>
+        <td>AC-GOAL-002</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>目标拆解为子目标</td>
+        <td>存在一个活跃目标（父目标）</td>
+        <td>1. 在父目标详情页<br>2. 点击"拆解子目标"<br>3. 创建子目标<br>4. 查看目标树</td>
+        <td>子目标创建成功，parent_id 指向父目标，目标树正确展示父子关系</td>
+      </tr>
+      <tr>
+        <td>AC-GOAL-003</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>目标进度更新</td>
+        <td>存在状态为 active 的目标</td>
+        <td>1. 目标负责人登录<br>2. 进入目标详情<br>3. 更新 current_value</td>
+        <td>进度条实时变化，百分比正确计算 (current/target*100)</td>
+      </tr>
+      <tr>
+        <td>AC-GOAL-004</td><td><span class="badge exception">异常</span></td><td><span class="badge p0">P0</span></td>
+        <td>创建目标时必填字段缺失</td>
+        <td>无</td>
+        <td>1. 进入新建目标<br>2. 不填名称/目标值/期限<br>3. 提交</td>
+        <td>表单校验拦截，必填字段标红提示，不创建空数据</td>
+      </tr>
+      <tr>
+        <td>AC-GOAL-005</td><td><span class="badge boundary">边界</span></td><td><span class="badge p1">P1</span></td>
+        <td>目标 deadline 为过去日期</td>
+        <td>无</td>
+        <td>1. 新建目标<br>2. deadline 选择过去日期<br>3. 提交</td>
+        <td>允许创建但标注"已过期"状态，或前端给出二次确认提示</td>
+      </tr>
+      <tr>
+        <td>AC-GOAL-006</td><td><span class="badge permission">权限</span></td><td><span class="badge p1">P1</span></td>
+        <td>员工只能查看自己负责或关联的目标</td>
+        <td>存在 2 个不同 owner 的目标</td>
+        <td>1. employee A 登录<br>2. 进入目标列表</td>
+        <td>仅显示 employee A 为目标负责人或参与人的目标，不显示他人目标</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="decision">
+  <h2>三、拆推评算中心 (AC-DEC-001 ~ 009)</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-DEC-001</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>从目标关联问题并录入</td>
+        <td>存在活跃目标</td>
+        <td>1. 进入目标详情<br>2. 点击"关联问题"<br>3. 填写问题标题/严重度/描述<br>4. 提交</td>
+        <td>问题创建成功，goal_id 正确关联，状态 open</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-002</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>完整拆推评算流程——拆解</td>
+        <td>存在问题状态=open</td>
+        <td>1. 问题详情 → 创建决策案例<br>2. 添加假设（≥2 条）<br>3. 为假设填写证据强度/置信度<br>4. 添加反例</td>
+        <td>决策案例 stage=dismantle，假设列表完整展示</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-003</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>完整拆推评算流程——推演</td>
+        <td>AC-DEC-002 通过，假设 ≥2 条</td>
+        <td>1. 基于假设选择推演方向<br>2. 生成推演方案<br>3. 确认推演结果</td>
+        <td>案例阶段进入 hypothesize，生成 ≥1 个推演方案</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-004</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>完整拆推评算流程——评估与试算</td>
+        <td>AC-DEC-003 通过</td>
+        <td>1. 进入评估阶段<br>2. 4 维度打分（资源/时间/风险/可行性）<br>3. 填写评估说明<br>4. ROI 试算（输入成本/收入/假设）</td>
+        <td>案例阶段进入 evaluate→calculate；评估 4 维度分数+说明保存成功；ROI/回收期计算正确</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-005</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>决策报告生成与导出</td>
+        <td>AC-DEC-004 通过</td>
+        <td>1. 进入报告阶段<br>2. 点击"生成报告"<br>3. 查看报告内容</td>
+        <td>报告自动汇总：问题→假设→评估 4 维分→ROI→推演结论；报告可导出/分享</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-006</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p1">P1</span></td>
+        <td>决策案例状态流转</td>
+        <td>存在不同阶段的决策案例</td>
+        <td>1. 决策案例从 draft→in_progress→resolved→approved<br>2. 每一阶段检查前置条件</td>
+        <td>状态流转符合规则：draft 不可直接跳到 approved；stage 和 status 联动正确</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-007</td><td><span class="badge exception">异常</span></td><td><span class="badge p0">P0</span></td>
+        <td>未完成拆解就尝试评估</td>
+        <td>决策案例 stage=dismantle</td>
+        <td>1. 跳过假设登记<br>2. 直接点击"进入评估"</td>
+        <td>系统拦截，提示"请先完成拆解阶段的假设登记"，不允许跳阶段</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-008</td><td><span class="badge boundary">边界</span></td><td><span class="badge p1">P1</span></td>
+        <td>假设反例为空时的置信度计算</td>
+        <td>假设登记中 counter_example 为空</td>
+        <td>1. 创建假设<br>2. 不填反例<br>3. 提交</td>
+        <td>允许保存，但置信度评分受限（最高不超过 70）或提示补充反例</td>
+      </tr>
+      <tr>
+        <td>AC-DEC-009</td><td><span class="badge permission">权限</span></td><td><span class="badge p1">P1</span></td>
+        <td>非创建者不能修改他人决策案例</td>
+        <td>存在 user A 创建的决策案例</td>
+        <td>1. user B 登录（同角色）<br>2. 进入 user A 的决策案例详情<br>3. 尝试编辑/修改</td>
+        <td>编辑按钮不可见或置灰，API 返回 403</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="tasks">
+  <h2>四、任务与过程追踪 (AC-TASK-001 ~ 005)</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-TASK-001</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>创建任务并分配给执行人</td>
+        <td>存在已审批的决策方案(plan)</td>
+        <td>1. 进入 /tasks<br>2. 新建任务<br>3. 关联方案/目标<br>4. 指定负责人和截止时间<br>5. 提交</td>
+        <td>任务创建成功，owner 收到任务通知，plan_id/goal_id 正确关联</td>
+      </tr>
+      <tr>
+        <td>AC-TASK-002</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>任务状态流转（待办→进行中→完成）</td>
+        <td>存在状态 todo 的任务</td>
+        <td>1. owner 点击"开始执行" → in_progress<br>2. 完成工作后点击"标记完成" → done</td>
+        <td>状态正确流转，done 后不可再修改状态（需管理员重置）</td>
+      </tr>
+      <tr>
+        <td>AC-TASK-003</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>任务延期自动标记</td>
+        <td>存在 due_time 在过去且状态≠done 的任务</td>
+        <td>1. 系统定时检测<br>2. 查看延期任务列表</td>
+        <td>overdue 任务自动标记 delayed 状态，驾驶舱异常数 +1</td>
+      </tr>
+      <tr>
+        <td>AC-TASK-004</td><td><span class="badge boundary">边界</span></td><td><span class="badge p1">P1</span></td>
+        <td>任务到期当天 23:59 前不算延期</td>
+        <td>任务 due_time 为今日 23:59</td>
+        <td>1. 今日 18:00 查看任务状态<br>2. 次日 00:01 查看任务状态</td>
+        <td>18:00 时状态仍为 todo/in_progress（未延期）；次日 00:01 变为 delayed</td>
+      </tr>
+      <tr>
+        <td>AC-TASK-005</td><td><span class="badge exception">异常</span></td><td><span class="badge p1">P1</span></td>
+        <td>任务负责人被禁用后的任务处理</td>
+        <td>存在任务，其 owner 用户状态变为 inactive</td>
+        <td>1. 管理员禁用某用户<br>2. 查看该用户的任务</td>
+        <td>任务列表中任务状态正常显示，可重新分配 owner，不丢失数据</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="feedback">
+  <h2>五、强制反馈 (AC-FB-001 ~ 006)</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-FB-001</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>提交每日反馈（4 字段完整）</td>
+        <td>存在状态 in_progress 的任务</td>
+        <td>1. 进入 /feedback<br>2. 选择关联任务<br>3. 填写 今日目标/结果/卡点/下一步<br>4. 提交</td>
+        <td>反馈提交成功，submitted_at 记录正确，关联 task_id 正确</td>
+      </tr>
+      <tr>
+        <td>AC-FB-002</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>未反馈自动提醒</td>
+        <td>存在任务 owner 当日 18:00 前未提交反馈</td>
+        <td>1. 系统定时 18:00 检测<br>2. 查看提醒发送情况</td>
+        <td>未反馈用户收到站内通知+（可选）邮件/IM 提醒</td>
+      </tr>
+      <tr>
+        <td>AC-FB-003</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>反馈质量评分</td>
+        <td>提交了一条反馈</td>
+        <td>1. Agent 分析反馈内容<br>2. 查看 quality_score</td>
+        <td>quality_score 在 0-100 之间；内容充实→高分，简短敷衍→低分</td>
+      </tr>
+      <tr>
+        <td>AC-FB-004</td><td><span class="badge exception">异常</span></td><td><span class="badge p1">P1</span></td>
+        <td>表单 4 字段只填了 2 个</td>
+        <td>无</td>
+        <td>1. 进入反馈表单<br>2. 仅填写"今日目标""今日结果"<br>3. 提交</td>
+        <td>表单拦截，"卡点""下一步"标红，提示必填</td>
+      </tr>
+      <tr>
+        <td>AC-FB-005</td><td><span class="badge boundary">边界</span></td><td><span class="badge p1">P1</span></td>
+        <td>同一任务同一天重复提交反馈</td>
+        <td>某任务当日已有反馈</td>
+        <td>1. 再次提交同任务反馈</td>
+        <td>提示"今日已提交反馈，是否更新？"——允许更新但显示覆盖确认</td>
+      </tr>
+      <tr>
+        <td>AC-FB-006</td><td><span class="badge permission">权限</span></td><td><span class="badge p1">P1</span></td>
+        <td>上级查看下属反馈</td>
+        <td>manager A 管理 employee B</td>
+        <td>1. manager A 登录<br>2. 进入"团队反馈"页面</td>
+        <td>可查看下属 employee B 的反馈列表，但不可编辑</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="agent">
+  <h2>六、Agent 辅助能力 (AC-AGT-001 ~ 003)</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-AGT-001</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p1">P1</span></td>
+        <td>Agent 辅助拆解——基于目标生成问题假设</td>
+        <td>存在活跃目标（含名称/描述/指标）</td>
+        <td>1. 进入目标详情<br>2. 点击"Agent 辅助拆解"<br>3. 等待 Agent 输出</td>
+        <td>Agent 输出 2-5 条问题假设，每条含置信度。可人工采纳/修改/拒绝</td>
+      </tr>
+      <tr>
+        <td>AC-AGT-002</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p1">P1</span></td>
+        <td>Agent 辅助评估——多维度打分</td>
+        <td>存在决策案例 stage=evaluate</td>
+        <td>1. 进入评估阶段<br>2. 点击"Agent 辅助评估"<br>3. 查看评估结果</td>
+        <td>Agent 输出 4 维评分+简要说明，可人工调整后确认</td>
+      </tr>
+      <tr>
+        <td>AC-AGT-003</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>Agent Run 全程可追踪审计</td>
+        <td>存在至少 1 次 Agent 调用记录</td>
+        <td>1. 管理员进入 /agent-runs<br>2. 查看某次 Agent Run 详情<br>3. 查看 input_summary/output_summary/tool_calls</td>
+        <td>展示完整 Agent 执行链路：触发方式/输入摘要/输出摘要/工具调用列表/耗时/状态</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="permission">
+  <h2>七、权限验收 (AC-PERM-001 ~ 004)</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-PERM-001</td><td><span class="badge permission">权限</span></td><td><span class="badge p0">P0</span></td>
+        <td>5 角色权限矩阵验证</td>
+        <td>5 个角色各至少 1 个测试账号</td>
+        <td>1. 依次以 boss/admin/manager/employee/agent 登录<br>2. 访问所有页面路由<br>3. 执行 CRUD 操作</td>
+        <td>各角色仅能访问 PRD 定义范围内的页面和操作，越权返回 403</td>
+      </tr>
+      <tr>
+        <td>AC-PERM-002</td><td><span class="badge permission">权限</span></td><td><span class="badge p0">P0</span></td>
+        <td>数据范围隔离——员工仅见自己的任务</td>
+        <td>存在 2 个不同 owner 的任务</td>
+        <td>1. employee A 登录<br>2. 进入任务列表</td>
+        <td>仅显示 owner=employee A 的任务，不显示他人任务</td>
+      </tr>
+      <tr>
+        <td>AC-PERM-003</td><td><span class="badge permission">权限</span></td><td><span class="badge p0">P0</span></td>
+        <td>管理员可查看全量数据</td>
+        <td>系统中存在跨部门的多条数据</td>
+        <td>1. admin 登录<br>2. 访问目标/任务/反馈列表</td>
+        <td>admin 可见全部组织和用户的数据，无数据范围限制</td>
+      </tr>
+      <tr>
+        <td>AC-PERM-004</td><td><span class="badge permission">权限</span></td><td><span class="badge p0">P0</span></td>
+        <td>未登录用户无法访问任何功能页面</td>
+        <td>无 token / session</td>
+        <td>1. 清除浏览器 Cookie/Token<br>2. 直接访问 /goals, /tasks 等 URL</td>
+        <td>所有受保护路由重定向至登录页</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="cross">
+  <h2>八、交叉场景验收</h2>
+  <table>
+    <thead><tr><th style="width:110px">编号</th><th style="width:90px">类型</th><th style="width:70px">优先级</th><th>验收场景</th><th>前置条件</th><th>操作步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>AC-CROSS-001</td><td><span class="badge normal">正常流程</span></td><td><span class="badge p0">P0</span></td>
+        <td>端到端主链路：目标→问题→决策→方案→任务→反馈→看板</td>
+        <td>新系统，有 boss/manager/employee 三类账号</td>
+        <td>1. boss 创建目标<br>2. manager 拆解子目标<br>3. manager 在拆推评算中心录入问题→假设→评估→试算→生成方案<br>4. manager 分配任务给 employee<br>5. employee 执行并每日提交反馈<br>6. boss 在驾驶舱看到数据变化</td>
+        <td>全链路数据贯通：驾驶舱 KPI 实时反映目标的子目标进度、任务完成率、反馈及时率、异常数</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout" style="margin-top:20px">
+    <b>验收判定标准</b>：所有 <span class="badge p0" style="vertical-align:middle">P0</span> 用例 100% 通过，<span class="badge p1" style="vertical-align:middle">P1</span> 用例 ≥90% 通过，且无阻塞性 Bug（P0 缺陷清零），方可判定产品验收通过。
+  </div>
+</section>
+
+<div class="footer">XCDOS 产品验收用例 V1.0 · 柔电科技 · 2026</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 数据库设计文档 DB Design V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225; --navy-900:#071A33; --navy-800:#0B2B52; --navy-700:#103B70; --navy-600:#15508F;
+  --bluegray-50:#F6F8FB; --bluegray-100:#EEF2F7; --bluegray-200:#DDE5EF; --bluegray-300:#C7D2E1; --bluegray-500:#66788A; --bluegray-700:#334155;
+  --cyan-500:#1BA6D9; --cyan-100:#E8F7FC;
+  --white:#FFFFFF; --text-main:#0F172A; --text-secondary:#475569; --text-tertiary:#8492A6; --border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06); --shadow-md:0 10px 28px rgba(7,26,51,.08); --shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:44px;line-height:1.16;letter-spacing:-.8px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:28px;line-height:1.25;color:var(--navy-900);letter-spacing:-.4px}h3{margin:24px 0 12px;font-size:20px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:16px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}
+.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.badge{display:inline-flex;align-items:center;height:26px;padding:0 9px;border-radius:999px;background:var(--cyan-100);color:var(--navy-800);border:1px solid rgba(27,166,217,.24);font-size:12px;margin:3px}.badge.gray{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}th,td{padding:14px 16px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-size:12px}
+pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;padding:20px;overflow:auto;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;line-height:1.65;border:1px solid rgba(255,255,255,.08)}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.warn{border-left:5px solid var(--navy-800);background:var(--bluegray-100);padding:18px;border-radius:0 16px 16px 0;color:var(--text-secondary)}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">DB</div><div><b>XCDOS DB Design</b><span>V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#overview">选型与概述</a>
+    <a href="#schemas">全量表结构</a>
+    <a href="#indexes">索引设计</a>
+    <a href="#dictionary">数据字典</a>
+    <a href="#lifecycle">数据生命周期</a>
+    <a href="#security">脱敏与加密</a>
+    <a href="#cache">缓存与读写分离</a>
+    <a href="#er">ER 关系总览</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Database Design Document · V1.0</span>
+  <h1>XCDOS 数据库设计文档<br/>DB Design V1.0</h1>
+  <p>基于 TDD V1.0 第六章与 ARD V2.0 第五章，输出完整可落地的数据库设计。涵盖选型、17 表完整结构、索引策略、数据字典、生命周期管理、脱敏加密规则、缓存联动方案。</p>
+  <div class="meta">
+    <span>数据库：PostgreSQL 16</span>
+    <span>字符集：UTF-8 / utf8mb4</span>
+    <span>引擎：InnoDB (如用 MySQL)</span>
+    <span>ORM：TypeORM / Prisma</span>
+  </div>
+</header>
+
+<section id="overview">
+  <h2>一、数据库选型与基础配置</h2>
+  <table>
+    <tr><th style="width:180px">配置项</th><th>选型</th><th>理由</th></tr>
+    <tr><td>数据库系统</td><td>PostgreSQL 16</td><td>事务可靠、JSONB 灵活、pgvector 扩展、生态成熟</td></tr>
+    <tr><td>字符集</td><td>UTF-8</td><td>全中文支持，统一编码</td></tr>
+    <tr><td>Collation</td><td>zh_CN.UTF-8</td><td>中文排序规则</td></tr>
+    <tr><td>时区</td><td>Asia/Shanghai (UTC+8)</td><td>业务统一北京时间</td></tr>
+    <tr><td>ORM</td><td>TypeORM / Prisma (待定)</td><td>NestJS 生态首选</td></tr>
+    <tr><td>迁移工具</td><td>TypeORM Migration / Prisma Migrate</td><td>版本化数据库变更</td></tr>
+    <tr><td>连接池</td><td>pgBouncer (生产) / 内置池 (开发)</td><td>控制连接数，防止打满</td></tr>
+    <tr><td>分库分表</td><td>MVP 不做（模块化单体）</td><td>二期按租户/时间分片</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:16px">MVP 采用单库多 Schema（public），不做物理分库。连接池设 20-50。所有表统一 4 个审计字段：<code>id</code> (UUID 主键), <code>created_at</code>, <code>updated_at</code>, <code>deleted_at</code> (软删除)。</div>
+</section>
+
+<section id="schemas">
+  <h2>二、全量表结构</h2>
+
+  <h3>2.1 组织与用户域</h3>
+
+  <h4>organizations — 组织/部门</h4>
+  <table>
+    <tr><th style="width:130px">字段</th><th style="width:90px">类型</th><th style="width:60px">长度</th><th style="width:60px">必填</th><th style="width:70px">默认值</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>-</td><td>✓</td><td>gen_random_uuid()</td><td>主键</td></tr>
+    <tr><td>name</td><td>VARCHAR</td><td>100</td><td>✓</td><td>-</td><td>组织名称</td></tr>
+    <tr><td>parent_id</td><td>UUID</td><td>-</td><td></td><td>NULL</td><td>父组织 ID，NULL = 根节点</td></tr>
+    <tr><td>type</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'department'</td><td>类型：company / department / team</td></tr>
+    <tr><td>status</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'active'</td><td>active / inactive</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>-</td><td>✓</td><td>NOW()</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>users — 用户</h4>
+  <table>
+    <tr><th style="width:130px">字段</th><th style="width:90px">类型</th><th style="width:60px">长度</th><th style="width:60px">必填</th><th style="width:70px">默认值</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>-</td><td>✓</td><td>gen_random_uuid()</td><td>主键</td></tr>
+    <tr><td>org_id</td><td>UUID</td><td>-</td><td>✓</td><td>-</td><td>FK → organizations.id</td></tr>
+    <tr><td>role_id</td><td>UUID</td><td>-</td><td>✓</td><td>-</td><td>FK → roles.id</td></tr>
+    <tr><td>name</td><td>VARCHAR</td><td>50</td><td>✓</td><td>-</td><td>姓名</td></tr>
+    <tr><td>email</td><td>VARCHAR</td><td>100</td><td>✓</td><td>-</td><td>邮箱（唯一）</td></tr>
+    <tr><td>phone</td><td>VARCHAR</td><td>20</td><td></td><td>NULL</td><td>手机号</td></tr>
+    <tr><td>password_hash</td><td>VARCHAR</td><td>255</td><td>✓</td><td>-</td><td>bcrypt 哈希</td></tr>
+    <tr><td>status</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'active'</td><td>active / inactive / locked</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>-</td><td>✓</td><td>NOW()</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>roles — 角色</h4>
+  <table>
+    <tr><th style="width:130px">字段</th><th style="width:90px">类型</th><th style="width:60px">长度</th><th style="width:60px">必填</th><th style="width:70px">默认值</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>-</td><td>✓</td><td>gen_random_uuid()</td><td>主键</td></tr>
+    <tr><td>name</td><td>VARCHAR</td><td>30</td><td>✓</td><td>-</td><td>角色名称 boss/manager/employee/admin</td></tr>
+    <tr><td>level</td><td>SMALLINT</td><td>-</td><td>✓</td><td>-</td><td>权限等级 1-5</td></tr>
+    <tr><td>permission_set</td><td>JSONB</td><td>-</td><td>✓</td><td>'{}'</td><td>权限 JSON</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>-</td><td>✓</td><td>NOW()</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h3>2.2 目标与决策域</h3>
+
+  <h4>goals — 目标</h4>
+  <table>
+    <tr><th style="width:140px">字段</th><th style="width:90px">类型</th><th style="width:60px">必填</th><th style="width:80px">默认值</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>✓</td><td>gen_random_uuid()</td><td>主键</td></tr>
+    <tr><td>parent_id</td><td>UUID</td><td></td><td>NULL</td><td>FK → goals.id，父目标</td></tr>
+    <tr><td>org_id</td><td>UUID</td><td>✓</td><td>-</td><td>FK → organizations.id</td></tr>
+    <tr><td>owner_id</td><td>UUID</td><td>✓</td><td>-</td><td>FK → users.id，目标负责人</td></tr>
+    <tr><td>name</td><td>VARCHAR</td><td>200</td><td>✓</td><td>-</td><td>目标名称</td></tr>
+    <tr><td>description</td><td>TEXT</td><td></td><td></td><td>NULL</td><td>目标描述</td></tr>
+    <tr><td>metric_type</td><td>VARCHAR</td><td>30</td><td>✓</td><td>-</td><td>指标类型：percentage / amount / count / boolean</td></tr>
+    <tr><td>target_value</td><td>DECIMAL(18,4)</td><td></td><td>✓</td><td>-</td><td>目标值</td></tr>
+    <tr><td>current_value</td><td>DECIMAL(18,4)</td><td></td><td></td><td>0</td><td>当前值</td></tr>
+    <tr><td>start_date / deadline</td><td>DATE</td><td></td><td>✓</td><td>-</td><td>起止日期</td></tr>
+    <tr><td>status</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'draft'</td><td>draft / active / completed / cancelled</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td></td><td>✓</td><td>NOW()</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>problems — 问题</h4>
+  <table>
+    <tr><th style="width:140px">字段</th><th style="width:90px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>goal_id</td><td>UUID</td><td>FK → goals.id</td></tr>
+    <tr><td>source_type</td><td>VARCHAR(30)</td><td>来源：goal_gap / exception / manual / agent</td></tr>
+    <tr><td>severity</td><td>VARCHAR(10)</td><td>严重度：P0 / P1 / P2 / P3</td></tr>
+    <tr><td>title</td><td>VARCHAR(200)</td><td>问题标题</td></tr>
+    <tr><td>description</td><td>TEXT</td><td>问题描述</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>open / analyzing / resolved / closed</td></tr>
+    <tr><td>created_by</td><td>UUID</td><td>FK → users.id</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>decision_cases — 决策案例</h4>
+  <table>
+    <tr><th style="width:150px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>problem_id</td><td>UUID</td><td>FK → problems.id</td></tr>
+    <tr><td>title</td><td>VARCHAR(200)</td><td>决策标题</td></tr>
+    <tr><td>stage</td><td>VARCHAR(20)</td><td>阶段：dismantle / hypothesize / evaluate / calculate / report</td></tr>
+    <tr><td>confidence</td><td>DECIMAL(5,2)</td><td>综合置信度 0-100</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>draft / in_progress / resolved / approved / rejected</td></tr>
+    <tr><td>created_by</td><td>UUID</td><td>FK → users.id</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>hypotheses — 假设</h4>
+  <table>
+    <tr><th style="width:160px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>case_id</td><td>UUID</td><td>FK → decision_cases.id</td></tr>
+    <tr><td>content</td><td>TEXT</td><td>假设内容</td></tr>
+    <tr><td>evidence_score</td><td>DECIMAL(5,2)</td><td>证据强度 0-100</td></tr>
+    <tr><td>confidence</td><td>DECIMAL(5,2)</td><td>置信度 0-100</td></tr>
+    <tr><td>counter_example</td><td>TEXT</td><td>反例 / 反驳证据</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>proposed / validated / rejected</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>evaluations — 评估</h4>
+  <table>
+    <tr><th style="width:160px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>case_id</td><td>UUID</td><td>FK → decision_cases.id</td></tr>
+    <tr><td>resource_score</td><td>DECIMAL(5,2)</td><td>资源维度 0-100</td></tr>
+    <tr><td>time_score</td><td>DECIMAL(5,2)</td><td>时间维度 0-100</td></tr>
+    <tr><td>risk_score</td><td>DECIMAL(5,2)</td><td>风险维度 0-100</td></tr>
+    <tr><td>feasibility_score</td><td>DECIMAL(5,2)</td><td>可行性维度 0-100</td></tr>
+    <tr><td>comment</td><td>TEXT</td><td>评估说明</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>roi_simulations — ROI 试算</h4>
+  <table>
+    <tr><th style="width:160px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>case_id</td><td>UUID</td><td>FK → decision_cases.id</td></tr>
+    <tr><td>cost</td><td>DECIMAL(18,2)</td><td>预估成本</td></tr>
+    <tr><td>revenue</td><td>DECIMAL(18,2)</td><td>预估收入</td></tr>
+    <tr><td>roi</td><td>DECIMAL(8,4)</td><td>ROI 值</td></tr>
+    <tr><td>payback_days</td><td>INTEGER</td><td>投资回收期（天）</td></tr>
+    <tr><td>assumptions</td><td>JSONB</td><td>假设参数 JSON</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>plans — 执行方案</h4>
+  <table>
+    <tr><th style="width:140px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>case_id</td><td>UUID</td><td>FK → decision_cases.id</td></tr>
+    <tr><td>owner_id</td><td>UUID</td><td>FK → users.id</td></tr>
+    <tr><td>title</td><td>VARCHAR(200)</td><td>方案标题</td></tr>
+    <tr><td>description</td><td>TEXT</td><td>方案描述</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>draft / submitted / approved / executing / completed</td></tr>
+    <tr><td>approved_by</td><td>UUID</td><td>FK → users.id，审批人</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h3>2.3 执行与反馈域</h3>
+
+  <h4>standards — 执行标准</h4>
+  <table>
+    <tr><th style="width:140px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>role_id</td><td>UUID</td><td>FK → roles.id，适用角色</td></tr>
+    <tr><td>name</td><td>VARCHAR(100)</td><td>标准名称</td></tr>
+    <tr><td>check_rule</td><td>JSONB</td><td>检查规则 JSON</td></tr>
+    <tr><td>version</td><td>INTEGER</td><td>版本号</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>draft / active / deprecated</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>tasks — 任务</h4>
+  <table>
+    <tr><th style="width:140px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>plan_id</td><td>UUID</td><td>FK → plans.id</td></tr>
+    <tr><td>goal_id</td><td>UUID</td><td>FK → goals.id</td></tr>
+    <tr><td>owner_id</td><td>UUID</td><td>FK → users.id</td></tr>
+    <tr><td>standard_id</td><td>UUID</td><td>FK → standards.id</td></tr>
+    <tr><td>title</td><td>VARCHAR(200)</td><td>任务标题</td></tr>
+    <tr><td>description</td><td>TEXT</td><td>任务描述</td></tr>
+    <tr><td>due_time</td><td>TIMESTAMPTZ</td><td>截止时间</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>todo / in_progress / done / delayed / cancelled</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>feedbacks — 反馈</h4>
+  <table>
+    <tr><th style="width:150px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>task_id</td><td>UUID</td><td>FK → tasks.id</td></tr>
+    <tr><td>user_id</td><td>UUID</td><td>FK → users.id</td></tr>
+    <tr><td>today_goal</td><td>TEXT</td><td>今日目标</td></tr>
+    <tr><td>result</td><td>TEXT</td><td>今日结果</td></tr>
+    <tr><td>blocker</td><td>TEXT</td><td>卡点 / 阻塞</td></tr>
+    <tr><td>next_action</td><td>TEXT</td><td>下一步行动</td></tr>
+    <tr><td>quality_score</td><td>DECIMAL(5,2)</td><td>质量评分 0-100（AI 辅助）</td></tr>
+    <tr><td>submitted_at</td><td>TIMESTAMPTZ</td><td>提交时间</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>exceptions — 异常</h4>
+  <table>
+    <tr><th style="width:140px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>task_id</td><td>UUID</td><td>FK → tasks.id</td></tr>
+    <tr><td>goal_id</td><td>UUID</td><td>FK → goals.id</td></tr>
+    <tr><td>severity</td><td>VARCHAR(10)</td><td>严重度：P0 / P1 / P2</td></tr>
+    <tr><td>title</td><td>VARCHAR(200)</td><td>异常标题</td></tr>
+    <tr><td>description</td><td>TEXT</td><td>异常描述</td></tr>
+    <tr><td>owner_id</td><td>UUID</td><td>FK → users.id，处理人</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>open / acknowledged / resolving / resolved</td></tr>
+    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>results — 执行结果</h4>
+  <table>
+    <tr><th style="width:150px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>task_id</td><td>UUID</td><td>FK → tasks.id</td></tr>
+    <tr><td>metric_value</td><td>DECIMAL(18,4)</td><td>指标实际值</td></tr>
+    <tr><td>quality_score</td><td>DECIMAL(5,2)</td><td>质量评分</td></tr>
+    <tr><td>verified_by</td><td>UUID</td><td>FK → users.id，验证人</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h3>2.4 Agent 与审计域</h3>
+
+  <h4>agent_runs — Agent 运行记录</h4>
+  <table>
+    <tr><th style="width:160px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>agent_type</td><td>VARCHAR(30)</td><td>Agent 类型：dismantle / evaluate / report / feedback_quality</td></tr>
+    <tr><td>trigger_type</td><td>VARCHAR(20)</td><td>触发方式：manual / scheduled / event</td></tr>
+    <tr><td>case_id</td><td>UUID</td><td>FK → decision_cases.id (nullable)</td></tr>
+    <tr><td>task_id</td><td>UUID</td><td>FK → tasks.id (nullable)</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>pending / running / completed / failed / cancelled</td></tr>
+    <tr><td>input_summary</td><td>TEXT</td><td>输入摘要</td></tr>
+    <tr><td>output_summary</td><td>TEXT</td><td>输出摘要</td></tr>
+    <tr><td>trace_id</td><td>VARCHAR(64)</td><td>Trace 追踪 ID</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+  </table>
+
+  <h4>tool_calls — Agent 工具调用</h4>
+  <table>
+    <tr><th style="width:150px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>run_id</td><td>UUID</td><td>FK → agent_runs.id</td></tr>
+    <tr><td>tool_name</td><td>VARCHAR(50)</td><td>工具名称</td></tr>
+    <tr><td>input_hash</td><td>VARCHAR(64)</td><td>输入 SHA-256</td></tr>
+    <tr><td>output_hash</td><td>VARCHAR(64)</td><td>输出 SHA-256</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>success / failed</td></tr>
+    <tr><td>duration_ms</td><td>INTEGER</td><td>耗时（毫秒）</td></tr>
+    <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>调用时间</td></tr>
+  </table>
+
+  <h4>domain_events — 领域事件</h4>
+  <table>
+    <tr><th style="width:160px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>aggregate_type</td><td>VARCHAR(30)</td><td>聚合类型：Goal / Task / DecisionCase / Feedback</td></tr>
+    <tr><td>aggregate_id</td><td>UUID</td><td>聚合 ID</td></tr>
+    <tr><td>event_type</td><td>VARCHAR(50)</td><td>事件类型如 GoalCreated / TaskDelayed</td></tr>
+    <tr><td>payload</td><td>JSONB</td><td>事件负载</td></tr>
+    <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>事件时间</td></tr>
+  </table>
+
+  <h4>audit_logs — 审计日志</h4>
+  <table>
+    <tr><th style="width:160px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>actor_id</td><td>UUID</td><td>FK → users.id</td></tr>
+    <tr><td>action</td><td>VARCHAR(30)</td><td>操作：CREATE / UPDATE / DELETE / LOGIN / EXPORT</td></tr>
+    <tr><td>resource_type</td><td>VARCHAR(30)</td><td>资源类型</td></tr>
+    <tr><td>resource_id</td><td>UUID</td><td>资源 ID</td></tr>
+    <tr><td>before_value</td><td>JSONB</td><td>变更前值</td></tr>
+    <tr><td>after_value</td><td>JSONB</td><td>变更后值</td></tr>
+    <tr><td>ip_address</td><td>INET</td><td>操作 IP</td></tr>
+    <tr><td>user_agent</td><td>VARCHAR(500)</td><td>User Agent</td></tr>
+    <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>操作时间</td></tr>
+  </table>
+</section>
+
+<section id="indexes">
+  <h2>三、索引设计</h2>
+  <table>
+    <thead><tr><th>表</th><th>索引名</th><th>字段</th><th>类型</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td>organizations</td><td>idx_orgs_parent</td><td>(parent_id)</td><td>B-Tree</td><td>组织树查询</td></tr>
+      <tr><td>users</td><td>idx_users_org</td><td>(org_id)</td><td>B-Tree</td><td>按组织查用户</td></tr>
+      <tr><td>users</td><td>uq_users_email</td><td>(email)</td><td>UNIQUE</td><td>邮箱唯一约束</td></tr>
+      <tr><td>goals</td><td>idx_goals_owner_status</td><td>(owner_id, status)</td><td>B-Tree</td><td>我的目标列表</td></tr>
+      <tr><td>goals</td><td>idx_goals_deadline</td><td>(deadline)</td><td>B-Tree</td><td>到期目标查询</td></tr>
+      <tr><td>goals</td><td>idx_goals_org</td><td>(org_id)</td><td>B-Tree</td><td>按组织查目标</td></tr>
+      <tr><td>problems</td><td>idx_problems_goal</td><td>(goal_id)</td><td>B-Tree</td><td>按目标查问题</td></tr>
+      <tr><td>decision_cases</td><td>idx_cases_problem</td><td>(problem_id)</td><td>B-Tree</td><td>按问题查决策</td></tr>
+      <tr><td>hypotheses</td><td>idx_hyp_case</td><td>(case_id)</td><td>B-Tree</td><td>按决策查假设</td></tr>
+      <tr><td>tasks</td><td>idx_tasks_owner_status</td><td>(owner_id, status)</td><td>B-Tree</td><td>我的任务列表</td></tr>
+      <tr><td>tasks</td><td>idx_tasks_due</td><td>(due_time)</td><td>B-Tree</td><td>延期检测</td></tr>
+      <tr><td>tasks</td><td>idx_tasks_goal</td><td>(goal_id)</td><td>B-Tree</td><td>按目标查任务</td></tr>
+      <tr><td>tasks</td><td>idx_tasks_plan</td><td>(plan_id)</td><td>B-Tree</td><td>按方案查任务</td></tr>
+      <tr><td>feedbacks</td><td>idx_fb_user_date</td><td>(user_id, submitted_at DESC)</td><td>B-Tree</td><td>用户反馈时间线</td></tr>
+      <tr><td>feedbacks</td><td>idx_fb_task</td><td>(task_id)</td><td>B-Tree</td><td>按任务查反馈</td></tr>
+      <tr><td>exceptions</td><td>idx_exc_severity_status</td><td>(severity, status)</td><td>B-Tree</td><td>驾驶舱异常面板</td></tr>
+      <tr><td>exceptions</td><td>idx_exc_owner</td><td>(owner_id)</td><td>B-Tree</td><td>我的异常</td></tr>
+      <tr><td>agent_runs</td><td>idx_ar_type_status</td><td>(agent_type, status)</td><td>B-Tree</td><td>Agent 运行列表</td></tr>
+      <tr><td>agent_runs</td><td>uq_ar_trace</td><td>(trace_id)</td><td>UNIQUE</td><td>Trace ID 唯一</td></tr>
+      <tr><td>tool_calls</td><td>idx_tc_run</td><td>(run_id)</td><td>B-Tree</td><td>按 Run 查工具调用</td></tr>
+      <tr><td>domain_events</td><td>idx_de_type_time</td><td>(event_type, created_at DESC)</td><td>B-Tree</td><td>事件类型+时间查询</td></tr>
+      <tr><td>domain_events</td><td>idx_de_aggregate</td><td>(aggregate_type, aggregate_id)</td><td>B-Tree</td><td>聚合事件回放</td></tr>
+      <tr><td>audit_logs</td><td>idx_aud_actor</td><td>(actor_id, created_at DESC)</td><td>B-Tree</td><td>用户操作审计</td></tr>
+      <tr><td>audit_logs</td><td>idx_aud_resource</td><td>(resource_type, resource_id)</td><td>B-Tree</td><td>资源变更追溯</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="dictionary">
+  <h2>四、数据字典与枚举值</h2>
+  <div class="grid grid-2">
+    <div>
+      <h4>goal.status</h4>
+      <pre class="code">draft     → 草稿
+active    → 进行中
+completed → 已完成
+cancelled → 已取消</pre>
+    </div>
+    <div>
+      <h4>task.status</h4>
+      <pre class="code">todo       → 待办
+in_progress → 进行中
+done       → 已完成
+delayed    → 延期
+cancelled  → 已取消</pre>
+    </div>
+    <div>
+      <h4>decision_cases.stage</h4>
+      <pre class="code">dismantle   → 拆解阶段
+hypothesize → 推演阶段
+evaluate    → 评估阶段
+calculate   → 试算阶段
+report      → 报告阶段</pre>
+    </div>
+    <div>
+      <h4>problem.severity / exception.severity</h4>
+      <pre class="code">P0 → 严重（阻断业务）
+P1 → 高危（需当日处理）
+P2 → 中等（本周处理）
+P3 → 低（排期处理）</pre>
+    </div>
+    <div>
+      <h4>agent_runs.status</h4>
+      <pre class="code">pending   → 等待中
+running   → 运行中
+completed → 已完成
+failed    → 失败
+cancelled → 已取消</pre>
+    </div>
+    <div>
+      <h4>agent_runs.agent_type</h4>
+      <pre class="code">dismantle       → 目标拆解 Agent
+evaluate        → 多维评估 Agent
+report          → 报告生成 Agent
+feedback_quality → 反馈质量 Agent</pre>
+    </div>
+  </div>
+</section>
+
+<section id="lifecycle">
+  <h2>五、数据生命周期管理</h2>
+  <table>
+    <thead><tr><th>数据类别</th><th>保留周期</th><th>清理策略</th><th>归档规则</th></tr></thead>
+    <tbody>
+      <tr><td>domain_events</td><td>90 天</td><td>定时任务每日清理 90 天前事件</td><td>可选：归档至 ClickHouse（二期）</td></tr>
+      <tr><td>audit_logs</td><td>1 年</td><td>月度归档，超过 1 年物理删除</td><td>归档至对象存储（JSON 格式）</td></tr>
+      <tr><td>agent_runs / tool_calls</td><td>180 天</td><td>季度清理 180 天前记录</td><td>可选：保留摘要，删除详情</td></tr>
+      <tr><td>feedbacks</td><td>2 年</td><td>超过 2 年，保留统计摘要后删除明细</td><td>年度归档</td></tr>
+      <tr><td>goals / tasks / plans</td><td>永久</td><td>软删除 (deleted_at)，不物理删除</td><td>已删除数据保留 3 年后评估清理</td></tr>
+      <tr><td>organizations / users / roles</td><td>永久</td><td>仅逻辑删除，不物理删除</td><td>不归档</td></tr>
+    </tbody>
+  </table>
+  <div class="warn" style="margin-top:16px">所有清理操作必须在业务低峰期（凌晨 2:00-4:00）执行，清理前备份，清理后验证。不允许在生产高峰时段执行 DELETE / TRUNCATE。</div>
+</section>
+
+<section id="security">
+  <h2>六、数据脱敏与加密规则</h2>
+  <table>
+    <thead><tr><th>表</th><th>敏感字段</th><th>保护方式</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>users</td><td>email</td><td>传输加密 + 日志脱敏</td><td>日志中显示为 u***@domain.com</td></tr>
+      <tr><td>users</td><td>phone</td><td>存储加密 + 日志脱敏</td><td>日志中显示为 138****1234</td></tr>
+      <tr><td>users</td><td>password_hash</td><td>bcrypt (cost=12)</td><td>永不输出到日志/API 响应</td></tr>
+      <tr><td>feedbacks</td><td>today_goal / result / blocker</td><td>访问控制</td><td>仅直属上级 + 本人可见</td></tr>
+      <tr><td>all</td><td>deleted_at</td><td>逻辑删除</td><td>查询默认过滤 deleted_at IS NOT NULL</td></tr>
+    </tbody>
+  </table>
+
+  <h4>传输加密</h4>
+  <ul>
+    <li>所有 API 强制 HTTPS/TLS 1.3</li>
+    <li>数据库连接强制 TLS</li>
+    <li>Redis 连接强制 TLS (生产环境)</li>
+  </ul>
+
+  <h4>存储加密</h4>
+  <ul>
+    <li>PostgreSQL 透明数据加密 (TDE) — 生产环境推荐</li>
+    <li>应用层加密：phone 字段 AES-256-GCM 加密存储</li>
+  </ul>
+</section>
+
+<section id="cache">
+  <h2>七、缓存与读写分离</h2>
+
+  <h3>7.1 缓存策略</h3>
+  <table>
+    <thead><tr><th>缓存对象</th><th>Redis Key 模式</th><th>TTL</th><th>更新策略</th></tr></thead>
+    <tbody>
+      <tr><td>用户会话/Token</td><td><code>auth:token:{user_id}</code></td><td>24h</td><td>登录写入，登出删除</td></tr>
+      <tr><td>角色权限</td><td><code>auth:role:{role_id}</code></td><td>1h</td><td>权限变更时主动失效</td></tr>
+      <tr><td>驾驶舱 KPI</td><td><code>dashboard:kpi:{org_id}</code></td><td>5min</td><td>定时刷新 / 事件驱动更新</td></tr>
+      <tr><td>目标进度</td><td><code>goal:progress:{goal_id}</code></td><td>10min</td><td>任务/反馈变更时失效</td></tr>
+      <tr><td>Agent Run 结果</td><td><code>agent:result:{run_id}</code></td><td>30min</td><td>运行完成写入，过期自动清除</td></tr>
+      <tr><td>组织树</td><td><code>org:tree</code></td><td>30min</td><td>组织变更时主动刷新</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 缓存防护</h3>
+  <ul>
+    <li><b>缓存穿透</b>：布隆过滤器 + 空值缓存 (TTL 60s)</li>
+    <li><b>缓存击穿</b>：热点 Key 互斥锁 (SETNX)</li>
+    <li><b>缓存雪崩</b>：TTL 随机化（±20% 抖动）+ 多级缓存</li>
+  </ul>
+
+  <h3>7.3 读写分离</h3>
+  <ul>
+    <li>MVP 阶段：单主库，读写不分离</li>
+    <li>二期引入：主库写 + 只读副本读（pgPool-II 或应用层路由）</li>
+    <li>读写分离规则：写操作走主库，报表查询/驾驶舱聚合查询走只读副本</li>
+  </ul>
+</section>
+
+<section id="er">
+  <h2>八、ER 关系总览</h2>
+  <p class="desc">以下为 17 表的核心关系。完整 ER 图见 ARD V2.0 第五章。</p>
+  <pre class="code">
+organizations ──┬── users ──┬── goals ──┬── problems ── decision_cases ──┬── hypotheses
+                │           │           │                                 ├── evaluations
+                │           │           │                                 ├── roi_simulations
+                │           │           │                                 └── plans ── tasks ──┬── feedbacks
+                │           │           │                                                      ├── exceptions
+                │           │           │                                                      └── results
+                │           │           └── standards
+                │           └── roles
+                │
+                └── agent_runs ── tool_calls
+
+domain_events ──── (aggregate_type + aggregate_id)
+audit_logs ─────── (actor_id + resource_type + resource_id)
+  </pre>
+</section>
+
+<div class="footer">XCDOS 数据库设计文档 DB Design V1.0 · 柔电科技 · 2026</div>
+</main>
+</div>
+</body>
+</html>
