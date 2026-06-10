@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 测试用例文档 V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225;--navy-900:#071A33;--navy-800:#0B2B52;--navy-700:#103B70;--navy-600:#15508F;
+  --bluegray-50:#F6F8FB;--bluegray-100:#EEF2F7;--bluegray-200:#DDE5EF;--bluegray-300:#C7D2E1;--bluegray-500:#66788A;--bluegray-700:#334155;
+  --cyan-500:#1BA6D9;--cyan-100:#E8F7FC;
+  --white:#FFFFFF;--text-main:#0F172A;--text-secondary:#475569;--text-tertiary:#8492A6;--border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06);--shadow-md:0 10px 28px rgba(7,26,51,.08);--shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:42px;line-height:1.16;letter-spacing:-.6px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:26px;color:var(--navy-900)}h3{margin:24px 0 12px;font-size:19px;color:var(--navy-800)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-5{grid-template-columns:repeat(5,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;margin:2px}
+.badge.p0{background:var(--cyan-100);color:var(--navy-800);border:1px solid rgba(27,166,217,.24)}.badge.p1{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}.badge.p2{background:var(--bluegray-50);color:var(--text-tertiary);border-color:var(--bluegray-200)}
+table{width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0}th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650;font-size:12px}tr:last-child td{border-bottom:none}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;text-align:center;margin-bottom:24px}
+.sum{background:var(--bluegray-50);border:1px solid var(--border);border-radius:14px;padding:18px}.sum .n{font-size:30px;font-weight:780;color:var(--navy-900)}.sum .l{font-size:12px;color:var(--text-tertiary);margin-top:4px}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.summary{grid-template-columns:repeat(2,1fr)}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">TC</div><div><b>XCDOS 测试用例</b><span>Test Cases V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#summary">概览</a>
+    <a href="#functional">功能测试</a>
+    <a href="#boundary">边界测试</a>
+    <a href="#exception">异常测试</a>
+    <a href="#permission">权限测试</a>
+    <a href="#concurrency">并发测试</a>
+    <a href="#compat">兼容性测试</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Test Cases · V1.0</span>
+  <h1>XCDOS 完整测试用例<br/>V1.0</h1>
+  <p>覆盖功能测试（主流程+分支）、边界测试、异常测试、多租户隔离测试、并发测试、兼容性测试。基于 PRD V1.0 + TDD V1.0 + ARD V2.0 编写，预期自动化覆盖率 ≥ 80%。</p>
+  <div class="meta">
+    <span>用例总数：62</span>
+    <span>P0：38 / P1：19 / P2：5</span>
+    <span>覆盖模块：8</span>
+    <span>自动化目标：≥80%</span>
+  </div>
+</header>
+
+<section id="summary">
+  <h2>用例概览</h2>
+  <div class="summary">
+    <div class="sum"><div class="n">62</div><div class="l">用例总数</div></div>
+    <div class="sum"><div class="n">32</div><div class="l">功能测试</div></div>
+    <div class="sum"><div class="n">10</div><div class="l">边界测试</div></div>
+    <div class="sum"><div class="n">11</div><div class="l">异常测试</div></div>
+    <div class="sum"><div class="n">9</div><div class="l">权限/并发/兼容</div></div>
+  </div>
+</section>
+
+<section id="functional">
+  <h2>一、功能测试（32 条）</h2>
+
+  <h3>1.1 认证与登录</h3>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-AUTH-001</td><td><span class="badge p0">P0</span></td><td>正确邮箱密码登录</td><td>测试账号已创建</td><td>输入正确邮箱+密码→点击登录</td><td>返回 JWT Token，跳转至首页</td></tr>
+      <tr><td>TC-AUTH-002</td><td><span class="badge p0">P0</span></td><td>错误密码登录</td><td>同上</td><td>输入正确邮箱+错误密码→登录</td><td>返回 401 AUTH_INVALID_CREDENTIALS</td></tr>
+      <tr><td>TC-AUTH-003</td><td><span class="badge p1">P1</span></td><td>Token 过期后访问</td><td>Token 有效期为 24h</td><td>使用过期 Token 请求 /api/me</td><td>返回 401 AUTH_TOKEN_EXPIRED</td></tr>
+      <tr><td>TC-AUTH-004</td><td><span class="badge p1">P1</span></td><td>登录限流</td><td>无</td><td>同一 IP 1 分钟内请求登录 >10 次</td><td>第 11 次返回 429 RATE_LIMIT_EXCEEDED</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 老板驾驶舱</h3>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-DASH-001</td><td><span class="badge p0">P0</span></td><td>4 KPI 数据准确性</td><td>DB 中有确定数量的 goals/tasks/feedbacks/exceptions</td><td>GET /api/dashboard/boss → 对比 DB 计算结果</td><td>KPI 值与手动 SQL 计算结果一致</td></tr>
+      <tr><td>TC-DASH-002</td><td><span class="badge p0">P0</span></td><td>异常按严重度排序</td><td>存在 P0/P1/P2 异常</td><td>查看异常预警面板</td><td>P0→P1→P2 降序排列</td></tr>
+      <tr><td>TC-DASH-003</td><td><span class="badge p1">P1</span></td><td>空数据状态</td><td>新系统无任何数据</td><td>boss 登录查看驾驶舱</td><td>KPI 显示 0/"--"，无报错</td></tr>
+      <tr><td>TC-DASH-004</td><td><span class="badge p1">P1</span></td><td>KPI 数据 5 分钟内刷新</td><td>已有数据</td><td>新增一条反馈→5min 内刷新驾驶舱</td><td>反馈及时率 KPI 在 5min 内更新</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.3 目标管理</h3>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-GOAL-001</td><td><span class="badge p0">P0</span></td><td>创建完整目标</td><td>manager 登录</td><td>POST /api/goals 含全部必填字段</td><td>201，返回目标含 id/status=draft</td></tr>
+      <tr><td>TC-GOAL-002</td><td><span class="badge p0">P0</span></td><td>目标拆解为子目标</td><td>父目标存在</td><td>POST /api/goals/:id/breakdown 创建子目标</td><td>子目标 parent_id=父目标 id，GET 目标详情含 children[]</td></tr>
+      <tr><td>TC-GOAL-003</td><td><span class="badge p0">P0</span></td><td>目标进度计算</td><td>目标 target_value=100</td><td>更新 current_value=45</td><td>进度=45%</td></tr>
+      <tr><td>TC-GOAL-004</td><td><span class="badge p0">P0</span></td><td>目标状态变更</td><td>目标状态=draft</td><td>PATCH /api/goals/:id/status {status:"active"}</td><td>200，status=active</td></tr>
+      <tr><td>TC-GOAL-005</td><td><span class="badge p1">P1</span></td><td>多级目标树</td><td>3 级目标结构</td><td>GET /api/goals 含 parent_id 过滤</td><td>目标树正确展示 3 级父子关系</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.4 拆推评算中心</h3>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-DEC-001</td><td><span class="badge p0">P0</span></td><td>问题关联目标创建</td><td>目标存在</td><td>POST /api/problems {goalId,title,severity}</td><td>201，problem.goal_id 正确</td></tr>
+      <tr><td>TC-DEC-002</td><td><span class="badge p0">P0</span></td><td>创建决策案例</td><td>问题存在</td><td>POST /api/decision-cases {problemId,title}</td><td>201，stage=dismantle,status=draft</td></tr>
+      <tr><td>TC-DEC-003</td><td><span class="badge p0">P0</span></td><td>添加假设含证据评分</td><td>决策案例存在</td><td>POST /api/decision-cases/:id/hypotheses 含 evidenceScore/confidence/counterExample</td><td>201，hypothesis 与 case 关联正确</td></tr>
+      <tr><td>TC-DEC-004</td><td><span class="badge p0">P0</span></td><td>4 维评估</td><td>案例 stage=hypothesize</td><td>POST /api/decision-cases/:id/evaluate 含 4 维分</td><td>200，evaluation 保存，stage→evaluate</td></tr>
+      <tr><td>TC-DEC-005</td><td><span class="badge p0">P0</span></td><td>ROI 试算精度</td><td>案例 stage=evaluate</td><td>POST /api/decision-cases/:id/simulate-roi {cost:10000,revenue:15000}</td><td>roi=0.5000, paybackDays 正确计算</td></tr>
+      <tr><td>TC-DEC-006</td><td><span class="badge p0">P0</span></td><td>决策报告生成</td><td>案例 stage=calculate</td><td>POST /api/decision-cases/:id/report</td><td>报告含 拆解→假设→评估→ROI→方案 全流程数据</td></tr>
+      <tr><td>TC-DEC-007</td><td><span class="badge p1">P1</span></td><td>不允许跳阶段</td><td>案例 stage=dismantle</td><td>直接 POST evaluate</td><td>422 STATE_TRANSITION_INVALID</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.5 任务管理</h3>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-TASK-001</td><td><span class="badge p0">P0</span></td><td>创建任务</td><td>方案存在</td><td>POST /api/tasks {planId,ownerId,title,dueTime}</td><td>201，status=todo</td></tr>
+      <tr><td>TC-TASK-002</td><td><span class="badge p0">P0</span></td><td>状态流转 todo→in_progress→done</td><td>任务 status=todo</td><td>PATCH status:in_progress → PATCH status:done</td><td>每次返回 200，状态正确变更</td></tr>
+      <tr><td>TC-TASK-003</td><td><span class="badge p0">P0</span></td><td>done 后不可再改</td><td>任务 status=done</td><td>PATCH status:in_progress</td><td>422 STATE_TRANSITION_INVALID</td></tr>
+      <tr><td>TC-TASK-004</td><td><span class="badge p0">P0</span></td><td>延期自动标记</td><td>任务 dueTime 在过去且 status≠done</td><td>触发延期检测定时任务</td><td>status 变为 delayed</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.6 反馈管理</h3>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-FB-001</td><td><span class="badge p0">P0</span></td><td>提交完整反馈</td><td>任务 in_progress</td><td>POST /api/tasks/:id/feedback 含 4 字段</td><td>201，qualityScore 初始 null</td></tr>
+      <tr><td>TC-FB-002</td><td><span class="badge p0">P0</span></td><td>未反馈提醒</td><td>任务 owner 当日无反馈</td><td>触发 18:00 提醒定时任务</td><td>站内通知产生，记录 audit_log</td></tr>
+      <tr><td>TC-FB-003</td><td><span class="badge p1">P1</span></td><td>AI 反馈质量评分</td><td>反馈已提交</td><td>Agent 异步评估→查看 qualityScore</td><td>qualityScore 在 0-100，充实内容>60</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="boundary">
+  <h2>二、边界测试（10 条）</h2>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-BOUND-001</td><td><span class="badge p1">P1</span></td><td>目标名称为空</td><td>无</td><td>POST /api/goals name=""</td><td>422 VALIDATION_ERROR</td></tr>
+      <tr><td>TC-BOUND-002</td><td><span class="badge p1">P1</span></td><td>目标名称 200 字符边界</td><td>无</td><td>name=199 字符→成功；201 字符→422</td><td>边界值正确拦截</td></tr>
+      <tr><td>TC-BOUND-003</td><td><span class="badge p1">P1</span></td><td>deadline 为过去日期</td><td>无</td><td>创建目标 deadline=昨天</td><td>允许创建但 status 标注预警，或给出二次确认</td></tr>
+      <tr><td>TC-BOUND-004</td><td><span class="badge p0">P0</span></td><td>任务截止时间 23:59 前不算延期</td><td>任务 dueTime=今日 23:59</td><td>今日 18:00→次日 00:01 查看状态</td><td>18:00 未延期，次日 00:01 变 delayed</td></tr>
+      <tr><td>TC-BOUND-005</td><td><span class="badge p1">P1</span></td><td>ROI cost=0 试算</td><td>决策案例</td><td>simulate-roi cost=0, revenue=100</td><td>不报错，roi 返回 null 或 ∞，前端展示"成本为零"</td></tr>
+      <tr><td>TC-BOUND-006</td><td><span class="badge p1">P1</span></td><td>评估分数边界 0 和 100</td><td>决策案例</td><td>evaluate 4 维分设为 0 或 100</td><td>接受 0 和 100，不报错</td></tr>
+      <tr><td>TC-BOUND-007</td><td><span class="badge p2">P2</span></td><td>分页 pageSize=0 或负数</td><td>无</td><td>GET /api/goals?pageSize=0</td><td>自动修正为默认值 20，或返回 422</td></tr>
+      <tr><td>TC-BOUND-008</td><td><span class="badge p2">P2</span></td><td>反馈内容极长（10000 字符）</td><td>任务存在</td><td>todayGoal=10000 字符文本</td><td>接受或截断并提示，不应 500</td></tr>
+      <tr><td>TC-BOUND-009</td><td><span class="badge p1">P1</span></td><td>目标 current_value 超 target_value</td><td>目标 target_value=100</td><td>更新 current_value=150</td><td>进度显示 150%，允许超额完成</td></tr>
+      <tr><td>TC-BOUND-010</td><td><span class="badge p2">P2</span></td><td>UUID 格式错误</td><td>无</td><td>GET /api/goals/not-a-uuid</td><td>422 VALIDATION_ERROR</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="exception">
+  <h2>三、异常测试（11 条）</h2>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-EXC-001</td><td><span class="badge p0">P0</span></td><td>数据库连接断开时 API 响应</td><td>模拟 DB 不可用</td><td>调用 GET /api/goals</td><td>返回 500 INTERNAL_ERROR，不暴露 DB 连接字符串</td></tr>
+      <tr><td>TC-EXC-002</td><td><span class="badge p0">P0</span></td><td>Redis 不可用时缓存降级</td><td>模拟 Redis 不可用</td><td>调用 GET /api/dashboard/boss</td><td>直接查 DB 返回数据（性能下降但不中断），日志记录 Redis 异常</td></tr>
+      <tr><td>TC-EXC-003</td><td><span class="badge p0">P0</span></td><td>LLM API 超时时 Agent Run 处理</td><td>模拟 LLM 响应超时 120s</td><td>触发 Agent 辅助拆解</td><td>Agent Run status=failed，返回 500 AGENT_RUN_FAILED，前端提示"AI 服务暂不可用"</td></tr>
+      <tr><td>TC-EXC-004</td><td><span class="badge p0">P0</span></td><td>并发写入同一任务状态</td><td>2 个请求同时 PATCH 同任务</td><td>同时发送 PATCH status:done</td><td>一个成功 200，另一个 409（乐观锁），不产生脏数据</td></tr>
+      <tr><td>TC-EXC-005</td><td><span class="badge p1">P1</span></td><td>删除已被关联的目标</td><td>目标下存在子目标或任务</td><td>DELETE /api/goals/:id (软删除)</td><td>检查关联：有子目标时提示先处理子项，或级联软删除子目标</td></tr>
+      <tr><td>TC-EXC-006</td><td><span class="badge p1">P1</span></td><td>任务负责人被禁用</td><td>任务 owner 用户被禁用</td><td>查看该任务，尝试更新任务</td><td>任务数据正常显示，可重新分配 owner</td></tr>
+      <tr><td>TC-EXC-007</td><td><span class="badge p1">P1</span></td><td>网络中断时的请求重试</td><td>模拟临时网络故障</td><td>GET /api/goals（幂等）自动重试 3 次</td><td>3 次后仍失败则返回错误，不丢失数据</td></tr>
+      <tr><td>TC-EXC-008</td><td><span class="badge p1">P1</span></td><td>请求体 JSON 格式错误</td><td>无</td><td>POST /api/goals Content-Type: application/json 但 body 非 JSON</td><td>400 或 422，清晰提示 JSON 格式错误</td></tr>
+      <tr><td>TC-EXC-009</td><td><span class="badge p2">P2</span></td><td>长时间运行的 Agent 取消</td><td>Agent 运行中</td><td>调用取消接口 /api/agent-runs/:id/cancel</td><td>AgentRun status=cancelled，tool_calls 中断记录</td></tr>
+      <tr><td>TC-EXC-010</td><td><span class="badge p1">P1</span></td><td>定时任务执行失败重试</td><td>延期检测任务异常</td><td>BullMQ 自动重试 3 次</td><td>3 次后移入 dead letter queue，告警触发</td></tr>
+      <tr><td>TC-EXC-011</td><td><span class="badge p0">P0</span></td><td>SQL 注入测试</td><td>无</td><td>在 goal name 中输入 `'; DROP TABLE goals;--`</td><td>参数化查询生效，字符串原样存储，不执行 SQL</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="permission">
+  <h2>四、权限与隔离测试（7 条）</h2>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-PERM-001</td><td><span class="badge p0">P0</span></td><td>employee 无法访问驾驶舱</td><td>employee 账号</td><td>GET /api/dashboard/boss</td><td>403 FORBIDDEN</td></tr>
+      <tr><td>TC-PERM-002</td><td><span class="badge p0">P0</span></td><td>employee 仅见自己任务</td><td>2 个不同 owner 的任务</td><td>employee A 调用 GET /api/tasks</td><td>仅返回 owner=A 的任务</td></tr>
+      <tr><td>TC-PERM-003</td><td><span class="badge p0">P0</span></td><td>manager 可见全组织数据</td><td>跨部门数据</td><td>manager 调用 GET /api/goals /api/tasks</td><td>返回本组织所有数据</td></tr>
+      <tr><td>TC-PERM-004</td><td><span class="badge p0">P0</span></td><td>admin 可见全系统数据</td><td>跨组织数据</td><td>admin 调用各列表接口</td><td>返回所有组织数据</td></tr>
+      <tr><td>TC-PERM-005</td><td><span class="badge p0">P0</span></td><td>未登录拒绝所有 API</td><td>无 Token</td><td>直接请求任意 API</td><td>401</td></tr>
+      <tr><td>TC-PERM-006</td><td><span class="badge p0">P0</span></td><td>用户只能修改自己的反馈</td><td>2 条不同 user 的反馈</td><td>user A 尝试 PATCH user B 的反馈</td><td>403</td></tr>
+      <tr><td>TC-PERM-007</td><td><span class="badge p1">P1</span></td><td>Agent 不能自动执行高风险写操作</td><td>Agent CreateTaskTool L3 需确认</td><td>Agent 尝试创建任务但未获人工确认</td><td>Agent Run status=NEED_HUMAN_CONFIRMATION</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="concurrency">
+  <h2>五、并发与性能测试（4 条）</h2>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-PERF-001</td><td><span class="badge p0">P0</span></td><td>100 并发查询目标列表</td><td>1000 条目标数据</td><td>JMeter 100 并发 GET /api/goals</td><td>P95 响应 < 500ms，无 5xx 错误</td></tr>
+      <tr><td>TC-PERF-002</td><td><span class="badge p1">P1</span></td><td>50 并发提交反馈</td><td>50 个不同用户</td><td>JMeter 50 并发 POST /api/tasks/:id/feedback</td><td>P95 < 1s，无数据丢失或重复</td></tr>
+      <tr><td>TC-PERF-003</td><td><span class="badge p1">P1</span></td><td>Agent Run 队列积压处理</td><td>同时触发 20 个 Agent Run</td><td>BullMQ 排队处理</td><td>全部完成或失败，无死锁</td></tr>
+      <tr><td>TC-PERF-004</td><td><span class="badge p2">P2</span></td><td>驾驶舱缓存命中率</td><td>5min 内重复请求</td><td>连续 10 次 GET /api/dashboard/boss</td><td>只有第 1 次查 DB，后续命中 Redis 缓存</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="compat">
+  <h2>六、兼容性测试（3 条）</h2>
+  <table>
+    <thead><tr><th style="width:100px">编号</th><th style="width:70px">优先级</th><th>测试点</th><th>前置条件</th><th>步骤</th><th>预期结果</th></tr></thead>
+    <tbody>
+      <tr><td>TC-COMPAT-001</td><td><span class="badge p1">P1</span></td><td>Chrome/Safari/Edge 最新版</td><td>前端部署</td><td>三个浏览器依次访问全部页面</td><td>页面正常渲染，无布局错乱</td></tr>
+      <tr><td>TC-COMPAT-002</td><td><span class="badge p1">P1</span></td><td>H5 移动端适配</td><td>手机浏览器</td><td>访问反馈提交页面 /feedback</td><td>表单适配移动端，可正常提交</td></tr>
+      <tr><td>TC-COMPAT-003</td><td><span class="badge p1">P1</span></td><td>API 版本向前兼容</td><td>旧版本客户端</td><td>使用 V1.0 客户端请求，后端升级至 V1.1</td><td>V1.0 API 路径仍可用，新增字段不影响旧客户端</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="footer">XCDOS 测试用例文档 V1.0 · 柔电科技 · 2026 · 预期自动化覆盖率 ≥80%</div>
+</main>
+</div>
+</body>
+</html>

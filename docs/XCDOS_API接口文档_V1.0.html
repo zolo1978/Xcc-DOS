@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS API 接口文档 V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225;--navy-900:#071A33;--navy-800:#0B2B52;--navy-700:#103B70;--navy-600:#15508F;
+  --bluegray-50:#F6F8FB;--bluegray-100:#EEF2F7;--bluegray-200:#DDE5EF;--bluegray-300:#C7D2E1;--bluegray-500:#66788A;--bluegray-700:#334155;
+  --cyan-500:#1BA6D9;--cyan-100:#E8F7FC;--green-500:#38A169;--orange-500:#ED8936;--red-500:#E53E3E;
+  --white:#FFFFFF;--text-main:#0F172A;--text-secondary:#475569;--text-tertiary:#8492A6;--border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06);--shadow-md:0 10px 28px rgba(7,26,51,.08);--shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:42px;line-height:1.16;letter-spacing:-.6px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:26px;color:var(--navy-900);letter-spacing:-.3px}h3{margin:24px 0 12px;font-size:19px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:15px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.method{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:4px;font-size:11px;font-weight:700;font-family:"SFMono-Regular",Consolas,Menlo,monospace;margin-right:6px}
+.method.get{background:#E8F7FC;color:#0B7B9E}.method.post{background:#E6FFFA;color:#1A7A5A}.method.patch{background:#FFF8E1;color:#975A16}.method.delete{background:#FFF0F0;color:#C53030}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0}th,td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-size:12px}
+pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;padding:20px;overflow:auto;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;line-height:1.65;border:1px solid rgba(255,255,255,.08)}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.endpoint{border:1px solid var(--border);border-radius:14px;margin:16px 0;overflow:hidden}
+.endpoint-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bluegray-50);border-bottom:1px solid var(--border)}
+.endpoint-head .path{font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:14px;color:var(--navy-800);font-weight:600}
+.endpoint-body{padding:18px}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">API</div><div><b>XCDOS API</b><span>V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#conventions">API 约定</a>
+    <a href="#auth">认证</a>
+    <a href="#dashboard">驾驶舱</a>
+    <a href="#goals">目标管理</a>
+    <a href="#problems">问题管理</a>
+    <a href="#decisions">决策案例</a>
+    <a href="#tasks">任务管理</a>
+    <a href="#feedbacks">反馈管理</a>
+    <a href="#exceptions">异常管理</a>
+    <a href="#agent">Agent Run</a>
+    <a href="#errors">错误码</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">API Documentation · V1.0</span>
+  <h1>XCDOS API 接口文档<br/>V1.0</h1>
+  <p>基于 TDD V1.0 第七章与 ARD V2.0 第七章，定义 XCDOS 全部 REST API 端点的请求/响应契约、认证方式、限流规则、错误码体系。前后端联调唯一依据。</p>
+  <div class="meta">
+    <span>端点总数：28</span>
+    <span>Base URL：/api</span>
+    <span>Content-Type：application/json</span>
+    <span>协议：HTTPS only</span>
+  </div>
+</header>
+
+<section id="conventions">
+  <h2>一、API 约定</h2>
+  <table>
+    <tr><th style="width:160px">项</th><th>规范</th></tr>
+    <tr><td>Base URL</td><td><code>/api</code>（生产：<code>https://{domain}/api</code>）</td></tr>
+    <tr><td>Content-Type</td><td><code>application/json; charset=utf-8</code></td></tr>
+    <tr><td>字符编码</td><td>UTF-8</td></tr>
+    <tr><td>认证方式</td><td>Bearer Token (JWT)，Header: <code>Authorization: Bearer &lt;token&gt;</code></td></tr>
+    <tr><td>追踪 ID</td><td>Header: <code>X-Trace-Id</code>（客户端传入或网关自动生成 UUID）</td></tr>
+    <tr><td>限流</td><td>默认 100 req/min per user；登录接口 10 req/min per IP</td></tr>
+    <tr><td>超时</td><td>默认 30s；Agent Run 接口 120s</td></tr>
+    <tr><td>重试策略</td><td>幂等 GET 请求可重试 3 次（间隔 1s/2s/4s）；写操作不自动重试</td></tr>
+    <tr><td>时间格式</td><td>ISO 8601 (<code>2026-06-11T14:30:00+08:00</code>)</td></tr>
+    <tr><td>分页</td><td>Query: <code>?page=1&pageSize=20</code>；Response: <code>{ items, total, page, pageSize }</code></td></tr>
+  </table>
+
+  <h3>统一响应信封</h3>
+  <pre class="code">{
+  "success": true,
+  "data": { ... },
+  "error": null,
+  "traceId": "req_a1b2c3d4",
+  "timestamp": "2026-06-11T14:30:00+08:00"
+}
+
+// 错误时
+{
+  "success": false,
+  "data": null,
+  "error": { "code": "GOAL_NOT_FOUND", "message": "目标不存在或已删除" },
+  "traceId": "req_a1b2c3d4",
+  "timestamp": "2026-06-11T14:30:00+08:00"
+}</pre>
+</section>
+
+<section id="auth">
+  <h2>二、认证接口</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/auth/login</span></div>
+    <div class="endpoint-body">
+      <p class="desc">用户登录，返回 JWT Token。限流：10 req/min/IP。</p>
+      <table>
+        <tr><th style="width:80px">参数</th><th style="width:70px">位置</th><th style="width:80px">类型</th><th style="width:60px">必填</th><th>说明</th></tr>
+        <tr><td>email</td><td>Body</td><td>string</td><td>✓</td><td>登录邮箱</td></tr>
+        <tr><td>password</td><td>Body</td><td>string</td><td>✓</td><td>密码（明文，HTTPS 传输加密）</td></tr>
+      </table>
+      <p><b>Response 200:</b> <code>{ success: true, data: { token, user: { id, name, email, role } } }</code></p>
+      <p><b>Error 401:</b> <code>AUTH_INVALID_CREDENTIALS</code></p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/me</span></div>
+    <div class="endpoint-body">
+      <p class="desc">获取当前登录用户信息。</p>
+      <p><b>Response 200:</b> <code>{ id, name, email, phone, role: { id, name, level, permission_set }, org: { id, name } }</code></p>
+    </div>
+  </div>
+</section>
+
+<section id="dashboard">
+  <h2>三、老板驾驶舱</h2>
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/dashboard/boss</span></div>
+    <div class="endpoint-body">
+      <p class="desc">老板驾驶舱聚合数据。权限：boss, admin。数据缓存 5min。</p>
+      <p><b>Response 200:</b></p>
+      <pre class="code">{
+  "kpis": {
+    "goal_completion_rate": 72.5,
+    "task_execution_rate": 85.3,
+    "feedback_timeliness_rate": 68.0,
+    "exception_count": { "P0": 2, "P1": 5, "P2": 12 }
+  },
+  "exceptions": [{ "id", "severity", "title", "goal_name", "status", "created_at" }],
+  "goal_progress": [{ "org_name", "completion_rate", "total_goals", "completed_goals" }]
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section id="goals">
+  <h2>四、目标管理</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/goals</span></div>
+    <div class="endpoint-body">
+      <p class="desc">创建目标。权限：manager+。</p>
+      <table>
+        <tr><th style="width:100px">参数</th><th style="width:70px">类型</th><th style="width:60px">必填</th><th>说明</th></tr>
+        <tr><td>name</td><td>string</td><td>✓</td><td>目标名称，1-200 字符</td></tr>
+        <tr><td>description</td><td>string</td><td></td><td>目标描述</td></tr>
+        <tr><td>ownerId</td><td>UUID</td><td>✓</td><td>目标负责人</td></tr>
+        <tr><td>metricType</td><td>enum</td><td>✓</td><td>amount / count / percentage / boolean</td></tr>
+        <tr><td>targetValue</td><td>number</td><td>✓</td><td>目标值</td></tr>
+        <tr><td>startDate</td><td>date</td><td>✓</td><td>开始日期</td></tr>
+        <tr><td>deadline</td><td>date</td><td>✓</td><td>截止日期</td></tr>
+        <tr><td>parentId</td><td>UUID</td><td></td><td>父目标 ID（拆解时使用）</td></tr>
+        <tr><td>orgId</td><td>UUID</td><td>✓</td><td>所属组织</td></tr>
+      </table>
+      <p><b>Response 201:</b> <code>{ id, name, status: "draft", ... }</code></p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/goals</span></div>
+    <div class="endpoint-body">
+      <p class="desc">目标列表（分页）。Query: <code>?status=active&ownerId=xxx&orgId=xxx&page=1&pageSize=20</code>。权限：manager+ 见全组织，employee 仅见自己相关。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/goals/:id</span></div>
+    <div class="endpoint-body"><p class="desc">目标详情，含子目标列表、关联任务/问题摘要。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/goals/:id/breakdown</span></div>
+    <div class="endpoint-body">
+      <p class="desc">目标拆解——创建子目标。Body 同 create goal（parentId 自动设置为 :id）。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method patch">PATCH</span><span class="path">/api/goals/:id/status</span></div>
+    <div class="endpoint-body">
+      <p class="desc">更新目标状态。Body: <code>{ status: "active" | "completed" | "cancelled" }</code>。权限：目标 owner 或 manager+。</p>
+    </div>
+  </div>
+</section>
+
+<section id="problems">
+  <h2>五、问题管理</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/problems</span></div>
+    <div class="endpoint-body">
+      <p class="desc">创建问题。权限：manager+。</p>
+      <table>
+        <tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr>
+        <tr><td>goalId</td><td>UUID</td><td>✓</td><td>关联目标</td></tr>
+        <tr><td>title</td><td>string</td><td>✓</td><td>问题标题</td></tr>
+        <tr><td>description</td><td>string</td><td></td><td>问题描述</td></tr>
+        <tr><td>severity</td><td>enum</td><td>✓</td><td>P0 / P1 / P2 / P3</td></tr>
+        <tr><td>sourceType</td><td>enum</td><td>✓</td><td>goal_gap / exception / manual / agent</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/problems/:id/decompose</span></div>
+    <div class="endpoint-body"><p class="desc">触发 Agent 辅助拆解问题。返回 agentRunId 供追踪。响应: <code>{ agentRunId, status: "pending" }</code>。</p></div>
+  </div>
+</section>
+
+<section id="decisions">
+  <h2>六、决策案例（拆推评算）</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases</span></div>
+    <div class="endpoint-body"><p class="desc">创建决策案例。Body: <code>{ problemId, title, stage: "dismantle" }</code>。权限：manager+。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/decision-cases/:id</span></div>
+    <div class="endpoint-body"><p class="desc">决策案例详情，含假设列表、评估分数、ROI、方案。聚合视图。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/hypotheses</span></div>
+    <div class="endpoint-body">
+      <p class="desc">添加假设。Body: <code>{ content, evidenceScore, confidence, counterExample }</code>。案例 stage 变为 dismantle。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/forecast</span></div>
+    <div class="endpoint-body"><p class="desc">推演阶段。基于假设生成推演方案。Body: <code>{ selectedHypothesisIds: [...] }</code>。案例 stage → hypothesize。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/evaluate</span></div>
+    <div class="endpoint-body">
+      <p class="desc">多维评估。Body: <code>{ resourceScore, timeScore, riskScore, feasibilityScore, comment }</code>。案例 stage → evaluate。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/simulate-roi</span></div>
+    <div class="endpoint-body">
+      <p class="desc">ROI 试算。Body: <code>{ cost, revenue, assumptions: {...} }</code>。返回 <code>{ roi, paybackDays }</code>。案例 stage → calculate。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/report</span></div>
+    <div class="endpoint-body"><p class="desc">生成决策报告。自动汇总拆推评算全流程数据。案例 stage → report，status → resolved。</p></div>
+  </div>
+</section>
+
+<section id="tasks">
+  <h2>七、任务管理</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/tasks</span></div>
+    <div class="endpoint-body">
+      <table>
+        <tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr>
+        <tr><td>planId</td><td>UUID</td><td>✓</td><td>关联执行方案</td></tr>
+        <tr><td>goalId</td><td>UUID</td><td></td><td>关联目标</td></tr>
+        <tr><td>ownerId</td><td>UUID</td><td>✓</td><td>负责人</td></tr>
+        <tr><td>title</td><td>string</td><td>✓</td><td>任务标题</td></tr>
+        <tr><td>description</td><td>string</td><td></td><td>任务描述</td></tr>
+        <tr><td>dueTime</td><td>datetime</td><td>✓</td><td>截止时间</td></tr>
+        <tr><td>standardId</td><td>UUID</td><td></td><td>关联执行标准</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/tasks</span></div>
+    <div class="endpoint-body"><p class="desc">任务列表。Query: <code>?ownerId=&status=&goalId=&page=&pageSize=</code>。权限：manager+ 见全组织，employee 仅见自己的。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method patch">PATCH</span><span class="path">/api/tasks/:id/status</span></div>
+    <div class="endpoint-body">
+      <p class="desc">更新任务状态。Body: <code>{ status: "todo" | "in_progress" | "done" }</code>。</p>
+      <p>状态机规则：todo→in_progress→done；done 后不可再改（需管理员重置）。超过 dueTime 未 done 自动 delayed。</p>
+    </div>
+  </div>
+</section>
+
+<section id="feedbacks">
+  <h2>八、反馈管理</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/tasks/:id/feedback</span></div>
+    <div class="endpoint-body">
+      <p class="desc">提交任务反馈。同一任务同一天重复提交时更新已有反馈。</p>
+      <table>
+        <tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr>
+        <tr><td>todayGoal</td><td>string</td><td>✓</td><td>今日目标</td></tr>
+        <tr><td>result</td><td>string</td><td>✓</td><td>今日结果</td></tr>
+        <tr><td>blocker</td><td>string</td><td>✓</td><td>卡点 / 阻塞</td></tr>
+        <tr><td>nextAction</td><td>string</td><td>✓</td><td>下一步行动</td></tr>
+      </table>
+      <p><b>Response 201:</b> <code>{ id, taskId, qualityScore, submittedAt }</code></p>
+      <p>qualityScore 由 Agent 异步评估（0-100），初始为 null。</p>
+    </div>
+  </div>
+</section>
+
+<section id="exceptions">
+  <h2>九、异常管理</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/exceptions</span></div>
+    <div class="endpoint-body"><p class="desc">异常列表。Query: <code>?severity=&status=&ownerId=&page=&pageSize=</code>。权限：manager+ 见全组织，employee 见自己被指派的。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method patch">PATCH</span><span class="path">/api/exceptions/:id/status</span></div>
+    <div class="endpoint-body"><p class="desc">更新异常状态。Body: <code>{ status: "acknowledged" | "resolving" | "resolved" }</code>。权限：异常 owner 或 manager+。</p></div>
+  </div>
+</section>
+
+<section id="agent">
+  <h2>十、Agent Run 追踪</h2>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/agent-runs</span></div>
+    <div class="endpoint-body"><p class="desc">Agent 运行记录列表。Query: <code>?agentType=&status=&page=&pageSize=</code>。权限：admin。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/agent-runs/:id/trace</span></div>
+    <div class="endpoint-body">
+      <p class="desc">Agent Run 完整追踪。权限：admin。</p>
+      <p><b>Response:</b></p>
+      <pre class="code">{
+  "id": "...",
+  "agentType": "dismantle",
+  "triggerType": "manual",
+  "status": "completed",
+  "phases": [
+    { "phase": "CONTEXT_BUILDING", "startAt": "...", "endAt": "...", "input": "..." },
+    { "phase": "PLANNING", "startAt": "...", "endAt": "...", "plan": "..." },
+    { "phase": "TOOL_CALLING", "startAt": "...", "endAt": "...", "tools": [...] },
+    { "phase": "VERIFYING", "startAt": "...", "endAt": "..." }
+  ],
+  "toolCalls": [{ "toolName", "inputHash", "outputHash", "status", "durationMs" }],
+  "inputSummary": "...",
+  "outputSummary": "...",
+  "traceId": "trace_xxx"
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section id="errors">
+  <h2>十一、错误码体系</h2>
+  <table>
+    <thead><tr><th>错误码</th><th>HTTP 状态</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>AUTH_INVALID_CREDENTIALS</code></td><td>401</td><td>邮箱或密码错误</td></tr>
+      <tr><td><code>AUTH_TOKEN_EXPIRED</code></td><td>401</td><td>Token 过期，需重新登录</td></tr>
+      <tr><td><code>FORBIDDEN</code></td><td>403</td><td>权限不足</td></tr>
+      <tr><td><code>NOT_FOUND</code></td><td>404</td><td>资源不存在</td></tr>
+      <tr><td><code>GOAL_NOT_FOUND</code></td><td>404</td><td>目标不存在或已删除</td></tr>
+      <tr><td><code>TASK_NOT_FOUND</code></td><td>404</td><td>任务不存在或已删除</td></tr>
+      <tr><td><code>DECISION_CASE_NOT_FOUND</code></td><td>404</td><td>决策案例不存在</td></tr>
+      <tr><td><code>VALIDATION_ERROR</code></td><td>422</td><td>请求参数校验失败</td></tr>
+      <tr><td><code>STATE_TRANSITION_INVALID</code></td><td>422</td><td>状态流转不合法（如跳过拆解直接评估）</td></tr>
+      <tr><td><code>DUPLICATE_FEEDBACK</code></td><td>409</td><td>同一任务同日重复提交（已自动更新为最新）</td></tr>
+      <tr><td><code>RATE_LIMIT_EXCEEDED</code></td><td>429</td><td>请求频率超限</td></tr>
+      <tr><td><code>AGENT_RUN_FAILED</code></td><td>500</td><td>Agent 执行失败</td></tr>
+      <tr><td><code>INTERNAL_ERROR</code></td><td>500</td><td>服务器内部错误</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="footer">XCDOS API 接口文档 V1.0 · 柔电科技 · 2026</div>
+</main>
+</div>
+</body>
+</html>
