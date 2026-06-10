@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS ARD V2.0｜领域模型 + DDD + Agent Runtime + ER + Event Storming</title>
+<style>
+:root{
+  --navy-950:#041225;
+  --navy-900:#071A33;
+  --navy-800:#0B2B52;
+  --navy-700:#103B70;
+  --navy-600:#15508F;
+  --bluegray-50:#F6F8FB;
+  --bluegray-100:#EEF2F7;
+  --bluegray-200:#DDE5EF;
+  --bluegray-300:#C7D2E1;
+  --bluegray-500:#66788A;
+  --bluegray-700:#334155;
+  --cyan-500:#1BA6D9;
+  --cyan-100:#E8F7FC;
+  --white:#FFFFFF;
+  --text-main:#0F172A;
+  --text-secondary:#475569;
+  --text-tertiary:#8492A6;
+  --border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06);
+  --shadow-md:0 10px 28px rgba(7,26,51,.08);
+  --shadow-lg:0 18px 44px rgba(7,26,51,.14);
+  --radius-md:10px;
+  --radius-lg:16px;
+  --radius-xl:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bluegray-50);
+  color:var(--text-main);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;
+  line-height:1.65;
+}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{
+  position:sticky;top:0;height:100vh;overflow:auto;
+  background:var(--navy-950);color:#fff;padding:24px 18px;
+}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{
+  width:44px;height:44px;border-radius:14px;
+  background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));
+  display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)
+}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{
+  display:block;text-decoration:none;color:rgba(255,255,255,.72);
+  padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px
+}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--navy-950),var(--navy-700));
+  color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg);
+}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.hero:after{content:"";position:absolute;left:0;bottom:0;width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(27,166,217,.7),transparent)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:44px;line-height:1.16;letter-spacing:-.8px}
+.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{
+  background:#fff;border:1px solid var(--border);border-radius:22px;
+  box-shadow:var(--shadow-md);padding:30px;margin:24px 0;
+}
+h2{margin:0 0 10px;font-size:28px;line-height:1.25;color:var(--navy-900);letter-spacing:-.4px}
+h3{margin:24px 0 12px;font-size:20px;color:var(--navy-800)}
+h4{margin:16px 0 8px;font-size:16px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}
+.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.badge{display:inline-flex;align-items:center;height:26px;padding:0 9px;border-radius:999px;background:var(--cyan-100);color:var(--navy-800);border:1px solid rgba(27,166,217,.24);font-size:12px;margin:3px}
+.badge.gray{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+th,td{padding:14px 16px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}
+tr:last-child td{border-bottom:none}
+code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-size:12px}
+pre{margin:0}
+.code{
+  background:var(--navy-950);color:#D7E6F7;border-radius:16px;
+  padding:20px;overflow:auto;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;line-height:1.65;border:1px solid rgba(255,255,255,.08)
+}
+.diagram{
+  background:linear-gradient(180deg,#fff,var(--bluegray-50));border:1px solid var(--border);
+  border-radius:18px;padding:20px;overflow:auto
+}
+.layer{border:1px solid var(--bluegray-200);background:#fff;border-radius:14px;padding:16px;margin:10px 0;box-shadow:var(--shadow-sm)}
+.layer-title{font-weight:800;color:var(--navy-900);display:flex;justify-content:space-between;gap:12px;align-items:center}
+.layer-items{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.node{padding:8px 10px;border-radius:10px;background:var(--bluegray-100);color:var(--text-secondary);border:1px solid var(--bluegray-200);font-size:13px}
+.node.strong{background:var(--cyan-100);color:var(--navy-800);border-color:rgba(27,166,217,.24);font-weight:700}
+.arrow{text-align:center;color:var(--cyan-500);font-weight:900;font-size:22px;line-height:1;margin:6px}
+.context-map{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.context{border:1px solid var(--border);border-radius:16px;background:#fff;padding:16px;box-shadow:var(--shadow-sm);min-height:130px}
+.context h4{margin:0 0 8px}.context p{margin:0;color:var(--text-tertiary);font-size:13px}
+.event-board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.event-col{background:var(--bluegray-50);border:1px solid var(--border);border-radius:16px;padding:12px;min-height:280px}
+.event-col h4{margin:0 0 10px;color:var(--navy-900)}
+.sticky{background:#fff;border:1px solid var(--bluegray-200);border-left:4px solid var(--cyan-500);border-radius:10px;padding:10px;margin:8px 0;font-size:13px;color:var(--text-secondary);box-shadow:var(--shadow-sm)}
+.sticky.cmd{border-left-color:var(--navy-700)}.sticky.policy{border-left-color:var(--navy-800)}.sticky.read{border-left-color:var(--bluegray-500)}
+.er{font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;color:var(--text-secondary);line-height:1.7}
+.entity{display:inline-block;vertical-align:top;width:31%;margin:1%;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.entity b{display:block;background:var(--navy-900);color:#fff;padding:10px 12px;font-size:13px}
+.entity ul{margin:0;padding:10px 12px 12px 28px}
+.entity li{margin:4px 0}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.warn{border-left:5px solid var(--navy-800);background:var(--bluegray-100);padding:18px;border-radius:0 16px 16px 0;color:var(--text-secondary)}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.grid-2,.grid-3,.grid-4,.context-map,.event-board{grid-template-columns:1fr}.entity{width:100%;margin:8px 0}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}.event-board,.context-map{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">AR</div><div><b>XCDOS ARD V2.0</b><span>架构需求文档</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#status">认知状态</a>
+    <a href="#scope">架构目标</a>
+    <a href="#domain">领域模型</a>
+    <a href="#ddd">DDD 架构</a>
+    <a href="#runtime">Agent Runtime</a>
+    <a href="#data">数据模型 ER</a>
+    <a href="#event">事件风暴</a>
+    <a href="#api">核心接口</a>
+    <a href="#security">权限与安全</a>
+    <a href="#mvp">MVP 路线</a>
+    <a href="#risk">风险与验证</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Architecture Requirement Document · V2.0</span>
+  <h1>XCDOS 企业决策与执行操作系统<br/>ARD V2.0</h1>
+  <p>本版本面向研发架构评审，覆盖领域模型、DDD 边界上下文、Agent Runtime 架构、数据模型 ER 图、事件风暴 Event Storming 与 MVP 技术落地路径。</p>
+  <div class="meta">
+    <span>产品：芯诚企业决策与执行操作系统</span>
+    <span>版本：V2.0</span>
+    <span>主色：深蓝三色专业版</span>
+    <span>定位：Management Pipeline OS</span>
+  </div>
+</header>
+
+<section id="status">
+  <h2>A. 当前认知状态</h2>
+  <p class="desc">先把不确定性摆出来，免得人类又把“老板一句话”误认为“完整需求”。当前文档是架构假设 V2.0，不是终局定义。</p>
+  <div class="grid grid-4">
+    <div class="card"><b>已知事实</b><p class="muted">产品核心是“拆-推-评-算 + 定标准追过程拿结果 + 强制反馈 + 实时数据”。</p></div>
+    <div class="card"><b>当前推测</b><p class="muted">XCDOS 更接近企业决策与执行操作系统，而非单一 HR / PMC / OA 工具。</p></div>
+    <div class="card"><b>缺失信息</b><p class="muted">尚未确定 ERP、MES、WMS、CRM、飞书、钉钉等系统对接边界。</p></div>
+    <div class="card"><b>不能下定论原因</b><p class="muted">业务流程、组织权限、数据源质量、Agent 自动执行边界仍需试点验证。</p></div>
+  </div>
+
+  <h3>假设池评分</h3>
+  <table>
+    <thead><tr><th>假设</th><th>证据强度 30</th><th>解释力 25</th><th>反例抗压 15</th><th>可验证性 15</th><th>行动价值 15</th><th>总分</th><th>段位</th></tr></thead>
+    <tbody>
+      <tr><td>H1：XCDOS 是企业决策与执行操作系统</td><td>28</td><td>24</td><td>13</td><td>14</td><td>15</td><td><b>94</b></td><td>S</td></tr>
+      <tr><td>H2：XCDOS 是管理流水线 Agent 平台</td><td>26</td><td>23</td><td>12</td><td>13</td><td>15</td><td><b>89</b></td><td>S</td></tr>
+      <tr><td>H3：XCDOS 是 HR + PMC + 精益管理工具集合</td><td>22</td><td>20</td><td>10</td><td>12</td><td>12</td><td><b>76</b></td><td>A</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="scope">
+  <h2>一、架构目标与边界</h2>
+  <p class="desc">本 ARD 的目标是把产品从“说明书”推进到“可研发拆解”的架构层。架构不是装饰，是为了防止项目长成一坨会登录的 Excel。</p>
+  <div class="grid grid-3">
+    <div class="card"><b>目标 1：统一决策流程</b><p class="muted">目标/问题进入拆推评算，形成可追溯决策链。</p></div>
+    <div class="card"><b>目标 2：统一执行闭环</b><p class="muted">标准、任务、过程、反馈、结果统一建模。</p></div>
+    <div class="card"><b>目标 3：统一 Agent 运行底座</b><p class="muted">业务 Agent 不各自乱飞，统一由 Runtime 调度。</p></div>
+  </div>
+
+  <h3>系统边界</h3>
+  <table>
+    <thead><tr><th>边界项</th><th>包含</th><th>暂不包含</th></tr></thead>
+    <tbody>
+      <tr><td>决策</td><td>拆解、预测、可行性评估、ROI 测算、决策报告</td><td>完全替代老板决策</td></tr>
+      <tr><td>执行</td><td>标准、任务、过程、反馈、异常、结果</td><td>复杂 ERP/MES 全量替代</td></tr>
+      <tr><td>Agent</td><td>Decision / HR / PMC / Sales / Lean / Report Agent</td><td>无边界自动执行生产或财务动作</td></tr>
+      <tr><td>数据</td><td>目标、任务、反馈、结果、事件、指标</td><td>一次性接入所有历史系统脏数据</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="domain">
+  <h2>二、领域模型 Domain Model</h2>
+  <p class="desc">XCDOS 的核心领域不是“人事”或“生产”，而是“企业目标如何被拆解、推演、评估、测算、执行、反馈和复盘”。</p>
+
+  <div class="diagram">
+    <div class="layer"><div class="layer-title">战略目标域 Strategic Goal Domain <span class="badge">目标来源</span></div><div class="layer-items"><span class="node strong">CompanyGoal</span><span class="node">DepartmentGoal</span><span class="node">RoleGoal</span><span class="node">Metric</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">拆推评算域 Decision Domain <span class="badge">核心引擎</span></div><div class="layer-items"><span class="node strong">Problem</span><span class="node strong">DecompositionTree</span><span class="node">Hypothesis</span><span class="node">Forecast</span><span class="node">FeasibilityScore</span><span class="node">ROISimulation</span><span class="node">DecisionReport</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">执行闭环域 Execution Domain <span class="badge">过程治理</span></div><div class="layer-items"><span class="node strong">Standard</span><span class="node">Task</span><span class="node">ProcessNode</span><span class="node">Checkpoint</span><span class="node">Exception</span><span class="node">Result</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">反馈与复盘域 Feedback Domain <span class="badge">纠偏沉淀</span></div><div class="layer-items"><span class="node strong">Feedback</span><span class="node">DailyReport</span><span class="node">WeeklyReview</span><span class="node">Improvement</span><span class="node">LearningRecord</span></div></div>
+  </div>
+
+  <h3>核心领域对象</h3>
+  <table>
+    <thead><tr><th>对象</th><th>含义</th><th>关键字段</th><th>生命周期</th></tr></thead>
+    <tbody>
+      <tr><td>Goal</td><td>公司/部门/岗位目标</td><td>goal_id, owner_id, metric, target_value, deadline</td><td>创建 → 拆解 → 执行 → 验收 → 复盘</td></tr>
+      <tr><td>Problem</td><td>目标、异常、机会转化来的待解决问题</td><td>problem_id, source_type, severity, description</td><td>提出 → 拆解 → 推演 → 方案化 → 关闭</td></tr>
+      <tr><td>Hypothesis</td><td>解决问题的候选假设</td><td>hypothesis_id, evidence, confidence, counter_example</td><td>生成 → 评分 → 验证 → 保留/推翻</td></tr>
+      <tr><td>Plan</td><td>通过评估后的行动方案</td><td>plan_id, feasibility_score, roi, risk_level</td><td>生成 → 审批 → 执行 → 评估</td></tr>
+      <tr><td>Task</td><td>执行动作</td><td>task_id, owner_id, standard_id, due_time, status</td><td>创建 → 执行 → 反馈 → 完成/延期</td></tr>
+      <tr><td>Feedback</td><td>强制反馈记录</td><td>feedback_id, task_id, today_goal, result, blocker, next_action</td><td>提交 → 审核 → 触发异常/复盘</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="ddd">
+  <h2>三、DDD 架构设计</h2>
+  <p class="desc">按领域驱动设计拆分边界上下文，避免 HR、PMC、销售、精益模块互相污染。系统不怕大，怕的是边界不清，大锅炖软件通常最后只有锅活着。</p>
+
+  <h3>3.1 限界上下文 Context Map</h3>
+  <div class="context-map">
+    <div class="context"><h4>Goal Context</h4><p>目标建模、指标配置、目标拆解、责任归属。</p><span class="badge">Core</span></div>
+    <div class="context"><h4>Decision Context</h4><p>拆推评算、假设池、预测、可行性评分、ROI 测算。</p><span class="badge">Core</span></div>
+    <div class="context"><h4>Execution Context</h4><p>标准、任务、节点、过程追踪、结果验收。</p><span class="badge">Core</span></div>
+    <div class="context"><h4>Feedback Context</h4><p>日报、周报、强制反馈、异常升级、复盘沉淀。</p><span class="badge">Core</span></div>
+    <div class="context"><h4>Agent Context</h4><p>Agent 注册、运行、工具调用、记忆、任务编排。</p><span class="badge">Core</span></div>
+    <div class="context"><h4>Organization Context</h4><p>组织、岗位、角色、人员、权限、汇报关系。</p><span class="badge gray">Support</span></div>
+    <div class="context"><h4>Integration Context</h4><p>ERP/MES/WMS/CRM/飞书/钉钉/Excel 数据接入。</p><span class="badge gray">Support</span></div>
+    <div class="context"><h4>Analytics Context</h4><p>指标看板、事件分析、趋势分析、经营驾驶舱。</p><span class="badge gray">Support</span></div>
+    <div class="context"><h4>Audit Context</h4><p>审计日志、权限变更、Agent 决策追踪、合规记录。</p><span class="badge gray">Generic</span></div>
+  </div>
+
+  <h3>3.2 分层架构</h3>
+  <div class="diagram">
+    <div class="layer"><div class="layer-title">Interface Layer</div><div class="layer-items"><span class="node">Web UI</span><span class="node">Mobile H5</span><span class="node">Open API</span><span class="node">Webhook</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Application Layer</div><div class="layer-items"><span class="node">UseCase Service</span><span class="node">Command Handler</span><span class="node">Query Handler</span><span class="node">Workflow Orchestrator</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Domain Layer</div><div class="layer-items"><span class="node strong">Aggregate</span><span class="node">Entity</span><span class="node">Value Object</span><span class="node">Domain Service</span><span class="node">Domain Event</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Infrastructure Layer</div><div class="layer-items"><span class="node">PostgreSQL</span><span class="node">Redis</span><span class="node">ClickHouse</span><span class="node">Vector DB</span><span class="node">LLM Provider</span><span class="node">Message Queue</span></div></div>
+  </div>
+
+  <h3>3.3 聚合根设计</h3>
+  <table>
+    <thead><tr><th>聚合根</th><th>所属上下文</th><th>内部实体</th><th>核心不变量</th></tr></thead>
+    <tbody>
+      <tr><td>GoalAggregate</td><td>Goal Context</td><td>Goal, GoalMetric, GoalOwner, GoalBreakdown</td><td>一个目标必须有负责人、指标、截止时间</td></tr>
+      <tr><td>DecisionCaseAggregate</td><td>Decision Context</td><td>Problem, Hypothesis, Forecast, Evaluation, Simulation</td><td>未完成拆推评算不能生成正式决策报告</td></tr>
+      <tr><td>ExecutionPlanAggregate</td><td>Execution Context</td><td>Plan, Task, Checkpoint, Standard, Result</td><td>任务必须绑定标准或明确例外原因</td></tr>
+      <tr><td>FeedbackAggregate</td><td>Feedback Context</td><td>Feedback, Blocker, NextAction, Escalation</td><td>反馈必须包含目标、结果、卡点、下一步</td></tr>
+      <tr><td>AgentRunAggregate</td><td>Agent Context</td><td>AgentRun, ToolCall, Memory, Trace, Output</td><td>Agent 输出必须可追踪、可审计、可回放</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="runtime">
+  <h2>四、Agent Runtime 架构</h2>
+  <p class="desc">Agent 不能像实习生一样到处乱点系统。Runtime 负责身份、权限、上下文、工具、记忆、工作流、审计与回滚。</p>
+
+  <div class="diagram">
+    <div class="layer"><div class="layer-title">Agent Entry</div><div class="layer-items"><span class="node strong">Decision Agent</span><span class="node">HR Agent</span><span class="node">PMC Agent</span><span class="node">Sales Agent</span><span class="node">Lean Agent</span><span class="node">Report Agent</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Runtime Orchestrator</div><div class="layer-items"><span class="node strong">Task Planner</span><span class="node">Context Builder</span><span class="node">Policy Guard</span><span class="node">Tool Router</span><span class="node">Memory Manager</span><span class="node">Trace Logger</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Skill / Tool Layer</div><div class="layer-items"><span class="node">Goal Skill</span><span class="node">Decompose Skill</span><span class="node">Forecast Skill</span><span class="node">Evaluate Skill</span><span class="node">ROI Skill</span><span class="node">Report Skill</span><span class="node">Integration Tool</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Model & Rule Layer</div><div class="layer-items"><span class="node">LLM</span><span class="node">Prolog Rule Engine</span><span class="node">Embedding Model</span><span class="node">Scoring Model</span><span class="node">Forecast Model</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Data & Audit Layer</div><div class="layer-items"><span class="node">Operational DB</span><span class="node">Vector Store</span><span class="node">Event Store</span><span class="node">Audit Log</span><span class="node">Dashboard Store</span></div></div>
+  </div>
+
+  <h3>4.1 Agent Run 生命周期</h3>
+  <table>
+    <thead><tr><th>阶段</th><th>输入</th><th>动作</th><th>输出</th></tr></thead>
+    <tbody>
+      <tr><td>1. Intent Capture</td><td>用户问题 / 系统事件</td><td>识别意图、业务上下文、权限主体</td><td>AgentIntent</td></tr>
+      <tr><td>2. Context Build</td><td>目标、任务、反馈、历史记录</td><td>构建最小必要上下文</td><td>ContextBundle</td></tr>
+      <tr><td>3. Plan</td><td>Intent + Context</td><td>生成执行计划和工具调用序列</td><td>AgentPlan</td></tr>
+      <tr><td>4. Tool Execute</td><td>AgentPlan</td><td>调用 Skill / Tool / Rule Engine</td><td>ToolResult</td></tr>
+      <tr><td>5. Verify</td><td>ToolResult</td><td>权限校验、事实校验、规则校验</td><td>VerifiedOutput</td></tr>
+      <tr><td>6. Commit</td><td>VerifiedOutput</td><td>写入数据库、触发事件、记录审计</td><td>DomainEvent</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 Agent 权限分级</h3>
+  <table>
+    <thead><tr><th>级别</th><th>能力</th><th>示例</th><th>是否需要人工确认</th></tr></thead>
+    <tbody>
+      <tr><td>L1 只读分析</td><td>查询、总结、分析</td><td>生成日报摘要</td><td>否</td></tr>
+      <tr><td>L2 建议生成</td><td>生成方案、评分、测算</td><td>输出拆推评算报告</td><td>否/按配置</td></tr>
+      <tr><td>L3 工作流变更</td><td>创建任务、调整节点、提醒人员</td><td>创建异常处理任务</td><td>部分需要</td></tr>
+      <tr><td>L4 业务系统写入</td><td>写入 ERP/MES/CRM 等外部系统</td><td>变更排产、调整订单</td><td>需要</td></tr>
+      <tr><td>L5 高风险动作</td><td>财务、人事处分、生产停线</td><td>冻结订单、处罚员工</td><td>必须人工确认</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="data">
+  <h2>五、数据模型 ER 图</h2>
+  <p class="desc">以下是 V2.0 阶段的核心 ER 模型。先保证主链路闭环：Goal → Problem → DecisionCase → Plan → Task → Feedback → Result → Review。</p>
+
+  <div class="diagram er">
+    <div class="entity"><b>organizations</b><ul><li>org_id PK</li><li>name</li><li>parent_org_id FK</li><li>type</li></ul></div>
+    <div class="entity"><b>users</b><ul><li>user_id PK</li><li>org_id FK</li><li>role_id FK</li><li>name</li><li>status</li></ul></div>
+    <div class="entity"><b>roles</b><ul><li>role_id PK</li><li>name</li><li>permission_set</li><li>level</li></ul></div>
+
+    <div class="entity"><b>goals</b><ul><li>goal_id PK</li><li>owner_id FK</li><li>parent_goal_id FK</li><li>metric_id FK</li><li>target_value</li><li>deadline</li><li>status</li></ul></div>
+    <div class="entity"><b>metrics</b><ul><li>metric_id PK</li><li>name</li><li>unit</li><li>calculation_rule</li><li>baseline_value</li></ul></div>
+    <div class="entity"><b>problems</b><ul><li>problem_id PK</li><li>goal_id FK</li><li>source_type</li><li>severity</li><li>description</li><li>status</li></ul></div>
+
+    <div class="entity"><b>decision_cases</b><ul><li>case_id PK</li><li>problem_id FK</li><li>created_by FK</li><li>stage</li><li>confidence</li><li>status</li></ul></div>
+    <div class="entity"><b>hypotheses</b><ul><li>hypothesis_id PK</li><li>case_id FK</li><li>content</li><li>evidence_score</li><li>confidence</li><li>status</li></ul></div>
+    <div class="entity"><b>evaluations</b><ul><li>evaluation_id PK</li><li>case_id FK</li><li>resource_score</li><li>risk_score</li><li>feasibility_score</li><li>comment</li></ul></div>
+
+    <div class="entity"><b>roi_simulations</b><ul><li>simulation_id PK</li><li>case_id FK</li><li>cost</li><li>revenue</li><li>roi</li><li>payback_days</li></ul></div>
+    <div class="entity"><b>plans</b><ul><li>plan_id PK</li><li>case_id FK</li><li>owner_id FK</li><li>approved_by FK</li><li>status</li></ul></div>
+    <div class="entity"><b>standards</b><ul><li>standard_id PK</li><li>role_id FK</li><li>name</li><li>check_rule</li><li>version</li></ul></div>
+
+    <div class="entity"><b>tasks</b><ul><li>task_id PK</li><li>plan_id FK</li><li>owner_id FK</li><li>standard_id FK</li><li>due_time</li><li>status</li></ul></div>
+    <div class="entity"><b>feedbacks</b><ul><li>feedback_id PK</li><li>task_id FK</li><li>user_id FK</li><li>today_goal</li><li>result</li><li>blocker</li><li>next_action</li></ul></div>
+    <div class="entity"><b>results</b><ul><li>result_id PK</li><li>task_id FK</li><li>metric_value</li><li>quality_score</li><li>verified_by FK</li></ul></div>
+
+    <div class="entity"><b>agent_runs</b><ul><li>run_id PK</li><li>agent_type</li><li>trigger_type</li><li>case_id FK</li><li>status</li><li>trace_id</li></ul></div>
+    <div class="entity"><b>tool_calls</b><ul><li>tool_call_id PK</li><li>run_id FK</li><li>tool_name</li><li>input_hash</li><li>output_hash</li><li>status</li></ul></div>
+    <div class="entity"><b>domain_events</b><ul><li>event_id PK</li><li>aggregate_type</li><li>aggregate_id</li><li>event_type</li><li>payload</li><li>created_at</li></ul></div>
+  </div>
+
+  <h3>核心关系</h3>
+  <pre class="code">Organization 1 ── N User
+Role 1 ── N User
+Goal 1 ── N Problem
+Problem 1 ── N DecisionCase
+DecisionCase 1 ── N Hypothesis
+DecisionCase 1 ── N Evaluation
+DecisionCase 1 ── N ROISimulation
+DecisionCase 1 ── N Plan
+Plan 1 ── N Task
+Task 1 ── N Feedback
+Task 1 ── N Result
+DecisionCase / Task / Feedback ── N DomainEvent
+AgentRun 1 ── N ToolCall</pre>
+</section>
+
+<section id="event">
+  <h2>六、事件风暴 Event Storming</h2>
+  <p class="desc">事件风暴用于把业务流、领域事件、命令、策略、读模型串起来。别小看这一步，不做事件风暴，研发就会凭直觉建表，然后系统用一年祭天。</p>
+
+  <h3>6.1 主链路事件流</h3>
+  <div class="event-board">
+    <div class="event-col"><h4>命令 Command</h4>
+      <div class="sticky cmd">CreateGoal</div>
+      <div class="sticky cmd">DecomposeProblem</div>
+      <div class="sticky cmd">GenerateHypotheses</div>
+      <div class="sticky cmd">EvaluatePlan</div>
+      <div class="sticky cmd">SimulateROI</div>
+      <div class="sticky cmd">ApprovePlan</div>
+      <div class="sticky cmd">SubmitFeedback</div>
+    </div>
+    <div class="event-col"><h4>领域事件 Event</h4>
+      <div class="sticky">GoalCreated</div>
+      <div class="sticky">ProblemDecomposed</div>
+      <div class="sticky">HypothesisGenerated</div>
+      <div class="sticky">ForecastCompleted</div>
+      <div class="sticky">FeasibilityEvaluated</div>
+      <div class="sticky">ROISimulated</div>
+      <div class="sticky">TaskAssigned</div>
+      <div class="sticky">FeedbackSubmitted</div>
+    </div>
+    <div class="event-col"><h4>策略 Policy</h4>
+      <div class="sticky policy">目标必须绑定负责人</div>
+      <div class="sticky policy">P0 异常自动升级</div>
+      <div class="sticky policy">未反馈视为未完成</div>
+      <div class="sticky policy">L4 操作需人工确认</div>
+      <div class="sticky policy">低置信方案不得自动执行</div>
+    </div>
+    <div class="event-col"><h4>读模型 Read Model</h4>
+      <div class="sticky read">老板驾驶舱</div>
+      <div class="sticky read">目标完成看板</div>
+      <div class="sticky read">异常看板</div>
+      <div class="sticky read">Agent Trace</div>
+      <div class="sticky read">反馈率报表</div>
+      <div class="sticky read">ROI 方案库</div>
+    </div>
+    <div class="event-col"><h4>外部系统 External</h4>
+      <div class="sticky read">ERP</div>
+      <div class="sticky read">MES</div>
+      <div class="sticky read">WMS</div>
+      <div class="sticky read">CRM</div>
+      <div class="sticky read">飞书 / 钉钉</div>
+      <div class="sticky read">Excel 导入</div>
+    </div>
+  </div>
+
+  <h3>6.2 关键事件说明</h3>
+  <table>
+    <thead><tr><th>事件</th><th>触发条件</th><th>订阅方</th><th>后续动作</th></tr></thead>
+    <tbody>
+      <tr><td>GoalCreated</td><td>创建公司/部门/岗位目标</td><td>Decision Agent, Analytics</td><td>建议拆解目标、生成指标看板</td></tr>
+      <tr><td>ProblemDecomposed</td><td>问题完成拆解</td><td>Decision Agent</td><td>生成假设池并进入预测</td></tr>
+      <tr><td>FeasibilityEvaluated</td><td>方案完成可行性评分</td><td>ROI Skill, Boss Dashboard</td><td>触发投入产出测算</td></tr>
+      <tr><td>TaskAssigned</td><td>方案审批后生成任务</td><td>Execution Context, Feedback Context</td><td>启动过程追踪与强制反馈</td></tr>
+      <tr><td>FeedbackMissed</td><td>超过截止时间未反馈</td><td>Feedback Context, Audit</td><td>提醒、升级、记录</td></tr>
+      <tr><td>ExceptionEscalated</td><td>P0/P1 异常未处理或影响扩大</td><td>Boss Dashboard, Report Agent</td><td>进入老板驾驶舱重点异常</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="api">
+  <h2>七、核心接口设计</h2>
+  <p class="desc">以下接口为架构级草案，供后续 PRD/TDD 拆解。命名先保持领域语义清晰，别上来就搞一堆 /api/list1，人类已经受够了。</p>
+
+  <h3>7.1 Command API</h3>
+  <pre class="code">POST /api/goals
+POST /api/problems/decompose
+POST /api/decision-cases/{caseId}/hypotheses
+POST /api/decision-cases/{caseId}/forecast
+POST /api/decision-cases/{caseId}/evaluate
+POST /api/decision-cases/{caseId}/simulate-roi
+POST /api/plans/{planId}/approve
+POST /api/tasks/{taskId}/feedback
+POST /api/agent-runs</pre>
+
+  <h3>7.2 Query API</h3>
+  <pre class="code">GET /api/dashboard/boss
+GET /api/goals/{goalId}
+GET /api/decision-cases/{caseId}
+GET /api/tasks?ownerId=&status=
+GET /api/feedbacks?userId=&date=
+GET /api/agent-runs/{runId}/trace
+GET /api/analytics/feedback-rate
+GET /api/analytics/exception-trends</pre>
+
+  <h3>7.3 事件消息 Topic</h3>
+  <pre class="code">xcdos.goal.created
+xcdos.problem.decomposed
+xcdos.decision.forecast_completed
+xcdos.decision.feasibility_evaluated
+xcdos.decision.roi_simulated
+xcdos.execution.task_assigned
+xcdos.feedback.submitted
+xcdos.feedback.missed
+xcdos.exception.escalated
+xcdos.agent.run_completed</pre>
+</section>
+
+<section id="security">
+  <h2>八、权限、安全与审计架构</h2>
+  <p class="desc">企业管理系统里的 Agent 如果没有权限边界，就是一个会写报告的安全事故。当前阶段更建议“人机协同审批”，不要让 Agent 一上来就拥有改变世界的幻觉。</p>
+
+  <table>
+    <thead><tr><th>主体</th><th>权限范围</th><th>关键限制</th></tr></thead>
+    <tbody>
+      <tr><td>老板</td><td>全局看板、决策审批、异常处理</td><td>高风险操作仍需二次确认</td></tr>
+      <tr><td>总监</td><td>部门目标、任务、反馈、异常</td><td>不可查看非授权部门敏感数据</td></tr>
+      <tr><td>经理</td><td>团队目标、任务分配、反馈审核</td><td>不可修改历史反馈记录</td></tr>
+      <tr><td>员工</td><td>个人任务、反馈、结果</td><td>不可删除已提交反馈</td></tr>
+      <tr><td>Agent</td><td>按授权执行查询、建议、任务创建</td><td>L4/L5 操作必须人工确认</td></tr>
+    </tbody>
+  </table>
+
+  <h3>审计要求</h3>
+  <ul>
+    <li>所有 Agent Run 必须记录：输入、上下文摘要、工具调用、输出、执行人/触发源。</li>
+    <li>所有关键业务写入必须生成 DomainEvent。</li>
+    <li>所有反馈修改必须保留版本历史。</li>
+    <li>所有高风险操作必须支持回放与追责。</li>
+  </ul>
+</section>
+
+<section id="mvp">
+  <h2>九、MVP 技术落地路径</h2>
+  <p class="desc">阶段性更建议先跑通“目标 → 拆推评算 → 任务 → 反馈 → 看板”主链路。别一口吃成平台，平台通常是被小闭环喂大的，不是 PPT 许愿长大的。</p>
+
+  <table>
+    <thead><tr><th>阶段</th><th>周期</th><th>目标</th><th>关键交付</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td>M0</td><td>1-2 周</td><td>领域模型验证</td><td>数据字典、事件流、权限表</td><td>能解释 3 个真实业务场景</td></tr>
+      <tr><td>M1</td><td>3-4 周</td><td>老板驾驶舱 + 目标管理</td><td>Goal / Task / Feedback 基础闭环</td><td>销售或 PMC 单部门可用</td></tr>
+      <tr><td>M2</td><td>5-8 周</td><td>拆推评算引擎</td><td>Decision Case、Hypothesis、Evaluation、ROI</td><td>可输出正式决策报告</td></tr>
+      <tr><td>M3</td><td>9-12 周</td><td>Agent Runtime</td><td>Agent Run、Tool Call、Trace、Policy Guard</td><td>Agent 输出可审计、可回放</td></tr>
+      <tr><td>M4</td><td>12 周+</td><td>外部系统接入</td><td>ERP/MES/CRM/飞书/钉钉连接器</td><td>真实数据驱动看板与预测</td></tr>
+    </tbody>
+  </table>
+
+  <h3>推荐技术栈</h3>
+  <div class="grid grid-3">
+    <div class="card"><b>Frontend</b><p class="muted">React / Next.js / Arco Design / 深蓝三色 UI Token</p></div>
+    <div class="card"><b>Backend</b><p class="muted">NestJS 或 FastAPI / DDD 分层 / Command Query 分离</p></div>
+    <div class="card"><b>Workflow</b><p class="muted">Temporal / BullMQ / 工作流状态机</p></div>
+    <div class="card"><b>Data</b><p class="muted">PostgreSQL / Redis / ClickHouse / Vector DB</p></div>
+    <div class="card"><b>Agent</b><p class="muted">Agent Runtime / Tool Router / Policy Guard / Trace Logger</p></div>
+    <div class="card"><b>Rule</b><p class="muted">Prolog Rule Engine / Scoring Rules / SOP Rules</p></div>
+  </div>
+</section>
+
+<section id="risk">
+  <h2>十、风险、反例与最小验证动作</h2>
+  <p class="desc">这里是专门防止“看起来很强，落地一地鸡毛”的部分。文明的进步，偶尔也需要承认系统会翻车。</p>
+
+  <table>
+    <thead><tr><th>风险</th><th>可能反例</th><th>验证动作</th><th>修正策略</th></tr></thead>
+    <tbody>
+      <tr><td>用户不愿意反馈</td><td>强制反馈变成形式主义日报</td><td>选销售/PMC 试点 2 周，看反馈质量</td><td>反馈结构最小化，和任务/异常强绑定</td></tr>
+      <tr><td>数据源质量差</td><td>预测和评分建立在脏数据上</td><td>先用人工录入 + 表格导入验证</td><td>建立数据可信度评分</td></tr>
+      <tr><td>Agent 输出不可信</td><td>方案看起来合理但依据不足</td><td>所有输出要求证据、反例、置信度</td><td>引入规则引擎和人工审批</td></tr>
+      <tr><td>系统边界过大</td><td>想替代 ERP/MES/OA，最后都没做好</td><td>MVP 只做主链路闭环</td><td>外部系统只做接入，不做替代</td></tr>
+      <tr><td>管理层不参与</td><td>只要求员工反馈，管理层不进入系统</td><td>试点要求管理层同结构反馈</td><td>老板驾驶舱暴露管理层反馈率</td></tr>
+    </tbody>
+  </table>
+
+  <h3>阶段性判断</h3>
+  <div class="callout">
+    当前较强判断：XCDOS 的 V2.0 架构主路径应以 <b>Decision Context + Execution Context + Feedback Context + Agent Runtime</b> 四个核心上下文为主，不宜先做成大而全 ERP 替代品。
+  </div>
+
+  <h3>最小验证动作</h3>
+  <div class="warn">
+    先选择一个真实部门，例如销售或 PMC，用 2 周跑通：创建目标 → 拆解问题 → 生成 3 个方案 → 评估可行性 → 测算 ROI → 生成任务 → 每日反馈 → 老板驾驶舱查看异常。成立后再扩展 HR、生产、精益模块。
+  </div>
+</section>
+
+<div class="footer">XCDOS ARD V2.0 · 领域模型 + DDD 架构 + Agent Runtime + 数据 ER + Event Storming</div>
+</main>
+</div>
+</body>
+</html>

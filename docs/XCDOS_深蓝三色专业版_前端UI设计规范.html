@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 深蓝三色专业版｜前端 UI 设计规范</title>
+<style>
+:root{
+  --navy-900:#071A33; --navy-800:#0B2B52; --navy-700:#103B70; --navy-600:#15508F;
+  --bluegray-50:#F6F8FB; --bluegray-100:#EEF2F7; --bluegray-200:#DDE5EF; --bluegray-300:#C7D2E1; --bluegray-500:#66788A; --bluegray-700:#334155;
+  --cyan-500:#1BA6D9; --cyan-100:#E8F7FC;
+  --white:#FFFFFF; --text-main:#0F172A; --text-secondary:#475569; --text-tertiary:#8492A6; --border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06); --shadow-md:0 10px 28px rgba(7,26,51,.08); --shadow-lg:0 18px 44px rgba(7,26,51,.14);
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:18px;
+  --side-width:260px; --top-height:64px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;background:var(--bluegray-50);color:var(--text-main);line-height:1.65}
+.layout{display:grid;grid-template-columns:var(--side-width) 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;background:var(--navy-900);color:#fff;padding:24px 18px;overflow:auto}
+.brand{display:flex;gap:12px;align-items:center;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:18px}
+.brand-mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:800;box-shadow:0 10px 26px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.58)}
+.nav-title{color:rgba(255,255,255,.42);font-size:12px;margin:20px 8px 8px}
+.nav a{display:block;color:rgba(255,255,255,.72);text-decoration:none;padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{color:#fff;background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24)}
+main{padding:32px;max-width:1280px;width:100%}
+.hero{background:linear-gradient(135deg,var(--navy-900),var(--navy-700));color:#fff;border-radius:24px;padding:40px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;margin-bottom:24px}
+.hero:after{content:"";position:absolute;right:-100px;top:-100px;width:280px;height:280px;border-radius:50%;background:rgba(27,166,217,.18)}
+.eyebrow{display:inline-flex;height:30px;align-items:center;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:42px;line-height:1.18;letter-spacing:-.6px}.hero p{margin:14px 0 0;max-width:820px;color:rgba(255,255,255,.76);font-size:16px}
+section{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);padding:28px;margin:22px 0}
+h2{margin:0 0 8px;font-size:26px;color:var(--navy-900);letter-spacing:-.3px}h3{margin:20px 0 10px;font-size:18px;color:var(--navy-800)}
+.desc{color:var(--text-secondary);margin:0 0 20px}.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{border:1px solid var(--border);background:var(--white);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}.card b{color:var(--navy-900);display:block;margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.color-chip{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff}.swatch{height:92px;display:flex;align-items:flex-end;padding:14px;color:#fff;font-weight:700}.swatch.light{color:var(--text-main);border-bottom:1px solid var(--border)}.chip-body{padding:14px}
+code{background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;overflow:hidden;border-radius:14px;border:1px solid var(--border)}th,td{padding:14px 16px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:600}tr:last-child td{border-bottom:none}
+.type-demo{padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--bluegray-50)}
+.font-h1{font-size:32px;line-height:1.2;font-weight:750;color:var(--navy-900)}.font-h2{font-size:24px;line-height:1.3;font-weight:700;color:var(--navy-900)}.font-h3{font-size:18px;line-height:1.4;font-weight:650;color:var(--navy-800)}.font-body{font-size:14px;color:var(--text-secondary)}.font-caption{font-size:12px;color:var(--text-tertiary)}
+.demo-shell{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--bluegray-50)}.demo-header{height:56px;background:#fff;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;padding:0 18px;color:var(--text-secondary)}.demo-body{display:grid;grid-template-columns:220px 1fr;min-height:360px}.demo-side{background:var(--navy-900);color:rgba(255,255,255,.72);padding:16px}.demo-menu{height:36px;border-radius:8px;padding:8px 10px;margin-bottom:6px}.demo-menu.active{background:rgba(27,166,217,.16);color:#fff;border:1px solid rgba(27,166,217,.24)}.demo-content{padding:18px}
+.kpi{padding:18px;border:1px solid var(--border);border-radius:16px;background:#fff;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;right:-26px;bottom:-28px;width:96px;height:96px;border-radius:50%;background:var(--cyan-100)}.kpi-label{color:var(--text-tertiary);font-size:13px;position:relative;z-index:1}.kpi-value{font-size:28px;font-weight:760;color:var(--navy-900);margin-top:8px;position:relative;z-index:1}.kpi-sub{color:var(--text-tertiary);font-size:13px;margin-top:6px;position:relative;z-index:1}
+.btn{height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:8px;border:1px solid transparent;font-size:14px;font-weight:600;margin:4px 8px 4px 0}.btn-primary{background:var(--navy-800);color:#fff}.btn-secondary{background:#fff;color:var(--navy-800);border-color:var(--border)}.btn-ghost{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--border)}
+.pill{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:12px;color:var(--navy-800);background:var(--cyan-100);border:1px solid rgba(27,166,217,.24);margin:4px 4px 4px 0}.pill-neutral{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}
+.progress{height:8px;background:var(--bluegray-100);border-radius:999px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--navy-700),var(--cyan-500));border-radius:999px}
+.rule-list{padding-left:20px;color:var(--text-secondary)}.rule-list li{margin:8px 0}
+.token-block{background:var(--navy-900);color:#D7E6F7;border-radius:16px;padding:18px;overflow:auto;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;line-height:1.7;border:1px solid rgba(255,255,255,.08)}
+.do-dont{display:grid;grid-template-columns:1fr 1fr;gap:16px}.do,.dont{border-radius:16px;padding:18px;border:1px solid var(--border)}.do{background:linear-gradient(180deg,#fff,var(--cyan-100))}.dont{background:linear-gradient(180deg,#fff,var(--bluegray-100))}
+.footer{color:var(--text-tertiary);text-align:center;padding:18px 0 40px;font-size:13px}
+@media(max-width:980px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.grid-2,.grid-3,.grid-4,.demo-body,.do-dont{grid-template-columns:1fr}h1{font-size:32px}}
+@media print{body{background:#fff}aside{display:none}.layout{display:block}main{max-width:none;padding:0}section,.hero{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">XC</div><div><b>XCDOS UI</b><span>深蓝三色专业版规范</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">规范目录</div>
+    <a class="active" href="#principle">设计原则</a><a href="#color">颜色系统</a><a href="#type">字体规范</a><a href="#layout">布局规范</a><a href="#components">组件规范</a><a href="#data">数据展示</a><a href="#state">状态反馈</a><a href="#pages">页面模板</a><a href="#code">前端 Token</a><a href="#checklist">交付清单</a>
+  </nav>
+</aside>
+<main>
+<header class="hero">
+  <span class="eyebrow">XCDOS · Frontend UI Design Specification</span>
+  <h1>深蓝三色专业版<br/>前端 UI 设计规范</h1>
+  <p>本规范适用于芯诚企业决策与执行操作系统 XCDOS 的 Web 后台界面，覆盖老板驾驶舱、拆推评算中心、HR Agent、PMC Agent、Sales Agent、Lean Agent 等页面。</p>
+</header>
+
+<section id="principle">
+  <h2>一、设计原则</h2>
+  <p class="desc">本系统不是活动页，也不是炫技大屏。它是企业决策与执行后台，第一优先级是稳定、清晰、可信、可扩展。</p>
+  <div class="grid grid-4">
+    <div class="card"><b>专业可信</b><p class="muted">以深蓝建立企业级、管理级、决策级系统气质。</p></div>
+    <div class="card"><b>信息优先</b><p class="muted">数据、状态、任务优先于装饰。</p></div>
+    <div class="card"><b>层级清晰</b><p class="muted">通过字号、间距、卡片、分区建立阅读路径。</p></div>
+    <div class="card"><b>三色克制</b><p class="muted">全局仅使用深蓝、蓝灰、青蓝三类主视觉颜色。</p></div>
+  </div>
+  <h3>设计关键词</h3>
+  <span class="pill">企业级</span><span class="pill">深蓝</span><span class="pill">克制</span><span class="pill">高密度</span><span class="pill">数据驱动</span><span class="pill">Agent 协同</span>
+</section>
+
+<section id="color">
+  <h2>二、颜色系统</h2>
+  <p class="desc">颜色不超过三类主视觉体系：深蓝主色、蓝灰中性色、青蓝强调色。状态也尽量通过标签文案和层级表达，避免红橙绿满天飞。</p>
+  <h3>2.1 主色：深蓝 Navy</h3>
+  <div class="grid grid-4">
+    <div class="color-chip"><div class="swatch" style="background:#071A33">Navy 900</div><div class="chip-body"><b>#071A33</b><p class="muted">侧边栏、主标题、核心品牌底色</p></div></div>
+    <div class="color-chip"><div class="swatch" style="background:#0B2B52">Navy 800</div><div class="chip-body"><b>#0B2B52</b><p class="muted">主按钮、重点文字、一级强调</p></div></div>
+    <div class="color-chip"><div class="swatch" style="background:#103B70">Navy 700</div><div class="chip-body"><b>#103B70</b><p class="muted">图表渐变、进度条、模块标题</p></div></div>
+    <div class="color-chip"><div class="swatch" style="background:#15508F">Navy 600</div><div class="chip-body"><b>#15508F</b><p class="muted">次级按钮、图标、辅助强调</p></div></div>
+  </div>
+  <h3>2.2 中性色：蓝灰 Blue Gray</h3>
+  <div class="grid grid-4">
+    <div class="color-chip"><div class="swatch light" style="background:#F6F8FB">BlueGray 50</div><div class="chip-body"><b>#F6F8FB</b><p class="muted">页面背景</p></div></div>
+    <div class="color-chip"><div class="swatch light" style="background:#EEF2F7">BlueGray 100</div><div class="chip-body"><b>#EEF2F7</b><p class="muted">浅色区域、禁用底色</p></div></div>
+    <div class="color-chip"><div class="swatch light" style="background:#DDE5EF">BlueGray 200</div><div class="chip-body"><b>#DDE5EF</b><p class="muted">边框、分割线</p></div></div>
+    <div class="color-chip"><div class="swatch" style="background:#334155">BlueGray 700</div><div class="chip-body"><b>#334155</b><p class="muted">正文辅助文字</p></div></div>
+  </div>
+  <h3>2.3 强调色：青蓝 Cyan</h3>
+  <div class="grid grid-2">
+    <div class="color-chip"><div class="swatch" style="background:#1BA6D9">Cyan 500</div><div class="chip-body"><b>#1BA6D9</b><p class="muted">数据高亮、进度终点、激活边线</p></div></div>
+    <div class="color-chip"><div class="swatch light" style="background:#E8F7FC">Cyan 100</div><div class="chip-body"><b>#E8F7FC</b><p class="muted">标签背景、卡片装饰、轻提示</p></div></div>
+  </div>
+  <h3>2.4 使用规则</h3>
+  <table><thead><tr><th>场景</th><th>推荐颜色</th><th>禁止做法</th></tr></thead><tbody>
+    <tr><td>主导航背景</td><td>Navy 900</td><td>不要使用高饱和渐变大面积铺底</td></tr>
+    <tr><td>主按钮</td><td>Navy 800</td><td>不要每个按钮一种颜色</td></tr>
+    <tr><td>页面背景</td><td>BlueGray 50</td><td>不要纯白全屏，层级会塌</td></tr>
+    <tr><td>数据高亮</td><td>Cyan 500</td><td>不要用红橙绿乱标状态</td></tr>
+  </tbody></table>
+</section>
+
+<section id="type">
+  <h2>三、字体规范</h2>
+  <p class="desc">字体使用系统字体栈，保证 Mac、Windows、浏览器环境稳定。</p>
+  <div class="type-demo">
+    <div class="font-h1">页面主标题 / 32px / 750</div>
+    <div class="font-h2">模块标题 / 24px / 700</div>
+    <div class="font-h3">卡片标题 / 18px / 650</div>
+    <div class="font-body">正文内容 / 14px / 400：用于表格、说明、任务描述、业务文本。</div>
+    <div class="font-caption">辅助说明 / 12px / 400：用于更新时间、提示文案、注释信息。</div>
+  </div>
+  <table style="margin-top:16px"><thead><tr><th>层级</th><th>字号</th><th>行高</th><th>字重</th><th>用途</th></tr></thead><tbody>
+    <tr><td>H1</td><td>32-42px</td><td>1.18-1.25</td><td>750</td><td>首页、驾驶舱 Hero 标题</td></tr>
+    <tr><td>H2</td><td>24-26px</td><td>1.3</td><td>700</td><td>页面主模块标题</td></tr>
+    <tr><td>H3</td><td>18px</td><td>1.4</td><td>650</td><td>卡片标题、区域标题</td></tr>
+    <tr><td>Body</td><td>14px</td><td>1.55-1.65</td><td>400</td><td>正文、表格、任务内容</td></tr>
+    <tr><td>Caption</td><td>12-13px</td><td>1.4</td><td>400</td><td>备注、标签、辅助说明</td></tr>
+  </tbody></table>
+</section>
+
+<section id="layout">
+  <h2>四、布局规范</h2>
+  <p class="desc">采用典型企业后台布局：左侧导航 + 顶部操作栏 + 主内容区。重点是统一，不是每个页面重新发明一次管理系统。</p>
+  <div class="demo-shell">
+    <div class="demo-header"><span>顶部栏：面包屑 / 搜索 / 导出 / 用户信息</span><span>64px</span></div>
+    <div class="demo-body">
+      <div class="demo-side"><div class="demo-menu active">老板驾驶舱</div><div class="demo-menu">拆推评算中心</div><div class="demo-menu">目标管理</div><div class="demo-menu">过程追踪</div></div>
+      <div class="demo-content"><div class="grid grid-3"><div class="kpi"><div class="kpi-label">KPI 卡片</div><div class="kpi-value">96.2%</div><div class="kpi-sub">强制反馈率</div></div><div class="kpi"><div class="kpi-label">KPI 卡片</div><div class="kpi-value">82.5</div><div class="kpi-sub">方案可行性均分</div></div><div class="kpi"><div class="kpi-label">KPI 卡片</div><div class="kpi-value">91.8%</div><div class="kpi-sub">订单准交率</div></div></div><div class="card" style="margin-top:16px"><b>主内容卡片</b><p class="muted">用于承载表格、流程、图表、Agent 协同图。</p></div></div>
+    </div>
+  </div>
+  <h3>布局尺寸</h3>
+  <table><thead><tr><th>区域</th><th>尺寸</th><th>说明</th></tr></thead><tbody>
+    <tr><td>左侧导航</td><td>248px</td><td>固定宽度，深蓝背景</td></tr>
+    <tr><td>顶部栏</td><td>64px</td><td>固定高度，白底，轻边框</td></tr>
+    <tr><td>主内容 Padding</td><td>24px / 32px</td><td>后台页面建议 24px，规范文档可 32px</td></tr>
+    <tr><td>卡片间距</td><td>16px / 20px</td><td>卡片组内 16px，模块之间 20px+</td></tr>
+  </tbody></table>
+</section>
+
+<section id="components">
+  <h2>五、组件规范</h2>
+  <p class="desc">组件要服务 XCDOS 的核心业务：目标、问题、方案、任务、反馈、评分、预测、测算。</p>
+  <h3>5.1 按钮 Button</h3>
+  <span class="btn btn-primary">主按钮</span><span class="btn btn-secondary">次按钮</span><span class="btn btn-ghost">弱按钮</span>
+  <table><thead><tr><th>类型</th><th>用途</th><th>颜色</th></tr></thead><tbody>
+    <tr><td>Primary</td><td>发起拆推评算、生成报告、确认执行</td><td>Navy 800</td></tr>
+    <tr><td>Secondary</td><td>查看详情、切换模型、导出数据</td><td>白底 + 边框</td></tr>
+    <tr><td>Ghost</td><td>筛选、取消、轻操作</td><td>BlueGray 100</td></tr>
+  </tbody></table>
+  <h3>5.2 标签 Tag</h3>
+  <span class="pill">运行中</span><span class="pill">需老板确认</span><span class="pill pill-neutral">待评估</span><span class="pill pill-neutral">已归档</span>
+  <h3>5.3 卡片 Card</h3>
+  <div class="grid grid-3"><div class="kpi"><div class="kpi-label">本月营收</div><div class="kpi-value">¥328.6万</div><div class="kpi-sub">距离目标还差 ¥71.4万</div></div><div class="card"><b>普通信息卡片</b><p class="muted">适用于说明、提示、Agent 节点、流程节点。</p></div><div class="card"><b>流程卡片</b><p class="muted">适用于“拆、推、评、算”四阶段。</p><div class="progress"><div class="bar" style="width:72%"></div></div></div></div>
+</section>
+
+<section id="data">
+  <h2>六、数据展示规范</h2>
+  <p class="desc">数据展示不是堆数字，是让老板、管理层、员工快速判断：现在怎么样、哪里异常、下一步怎么办。</p>
+  <h3>6.1 KPI 卡片结构</h3>
+  <table><thead><tr><th>元素</th><th>规则</th><th>示例</th></tr></thead><tbody>
+    <tr><td>指标名称</td><td>13px，蓝灰辅助文字</td><td>本月营收</td></tr>
+    <tr><td>核心数值</td><td>28-30px，深蓝，高字重</td><td>¥328.6万</td></tr>
+    <tr><td>辅助说明</td><td>13px，蓝灰浅文字</td><td>距离目标还差 ¥71.4万</td></tr>
+  </tbody></table>
+  <h3>6.2 表格规范</h3>
+  <table><thead><tr><th>方案</th><th>资源要求</th><th>周期</th><th>风险</th><th>成功率</th><th>综合评分</th></tr></thead><tbody>
+    <tr><td>销售 SOP 标准化 + 每日强制反馈</td><td>低</td><td>2 周</td><td><span class="pill">低</span></td><td>82%</td><td><b style="color:var(--navy-800)">89</b></td></tr>
+    <tr><td>小红书/视频号获客内容矩阵</td><td>中</td><td>4 周</td><td><span class="pill pill-neutral">中</span></td><td>68%</td><td><b style="color:var(--navy-800)">78</b></td></tr>
+  </tbody></table>
+  <h3>6.3 图表规范</h3>
+  <ul class="rule-list">
+    <li>柱状图、折线图主色使用 <code>Navy 700 → Cyan 500</code> 渐变。</li>
+    <li>背景网格线使用 <code>BlueGray 100 / 200</code>。</li>
+    <li>不要使用超过 3 种图表颜色。</li>
+    <li>图表必须给出单位、时间范围、数据口径。</li>
+  </ul>
+</section>
+
+<section id="state">
+  <h2>七、状态与反馈规范</h2>
+  <p class="desc">XCDOS 的状态重点不是“好看”，而是帮助组织及时纠偏。</p>
+  <table><thead><tr><th>状态</th><th>展示方式</th><th>交互建议</th></tr></thead><tbody>
+    <tr><td>正常</td><td>青蓝标签 + 正常文案</td><td>可查看详情</td></tr>
+    <tr><td>待确认</td><td>蓝灰标签 + 待确认文案</td><td>提醒责任人确认</td></tr>
+    <tr><td>需老板确认</td><td>深蓝强调点 + 标签文案</td><td>进入老板驾驶舱顶部异常</td></tr>
+    <tr><td>已归档</td><td>蓝灰弱标签</td><td>默认折叠</td></tr>
+  </tbody></table>
+  <h3>反馈机制</h3>
+  <ul class="rule-list">
+    <li>所有反馈必须包含：今日目标、今日结果、当前卡点、下一步动作。</li>
+    <li>未反馈状态不建议只用红色警告，应进入“提醒 → 升级 → 追责”链路。</li>
+    <li>管理层和一线员工使用同一反馈结构，不搞双重标准。</li>
+  </ul>
+</section>
+
+<section id="pages">
+  <h2>八、页面模板规范</h2>
+  <p class="desc">以下页面是 XCDOS 的基础页面族，后续开发不得随意变体。</p>
+  <div class="grid grid-3">
+    <div class="card"><b>老板驾驶舱</b><p class="muted">经营总览、异常列表、Agent 协同图、重点决策入口。</p></div>
+    <div class="card"><b>拆推评算中心</b><p class="muted">问题输入、变量拆解、方案推演、可行性评分、ROI 测算。</p></div>
+    <div class="card"><b>目标管理</b><p class="muted">公司目标、部门目标、岗位目标、日任务拆解。</p></div>
+    <div class="card"><b>过程追踪</b><p class="muted">任务、节点、延期、异常、责任人、依赖关系。</p></div>
+    <div class="card"><b>强制反馈</b><p class="muted">日报、周报、月报、管理层汇报、异常升级。</p></div>
+    <div class="card"><b>Agent 模块页</b><p class="muted">HR、PMC、Sales、Production、Lean 各业务 Agent 工作台。</p></div>
+  </div>
+</section>
+
+<section id="code">
+  <h2>九、前端 Design Token</h2>
+  <p class="desc">研发可直接复制以下 Token 作为 CSS Variables，先统一底座，再谈审美。</p>
+  <pre class="token-block">:root {
+  --navy-900: #071A33;
+  --navy-800: #0B2B52;
+  --navy-700: #103B70;
+  --navy-600: #15508F;
+
+  --bluegray-50: #F6F8FB;
+  --bluegray-100: #EEF2F7;
+  --bluegray-200: #DDE5EF;
+  --bluegray-300: #C7D2E1;
+  --bluegray-500: #66788A;
+  --bluegray-700: #334155;
+
+  --cyan-500: #1BA6D9;
+  --cyan-100: #E8F7FC;
+
+  --text-main: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #8492A6;
+  --border: #DFE7F1;
+  --white: #FFFFFF;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  --shadow-sm: 0 4px 12px rgba(7, 26, 51, .06);
+  --shadow-md: 0 10px 28px rgba(7, 26, 51, .08);
+  --shadow-lg: 0 18px 44px rgba(7, 26, 51, .14);
+
+  --side-width: 248px;
+  --top-height: 64px;
+}</pre>
+</section>
+
+<section id="checklist">
+  <h2>十、交付检查清单</h2>
+  <p class="desc">每个前端页面交付前都按此检查，减少返工。</p>
+  <div class="do-dont">
+    <div class="do"><h3>应该做到</h3><ul class="rule-list"><li>全局颜色严格控制在深蓝、蓝灰、青蓝三类体系内。</li><li>页面背景使用 BlueGray 50，卡片使用白底。</li><li>主按钮统一 Navy 800。</li><li>数据卡片统一：指标名 + 核心数值 + 辅助说明。</li><li>所有页面保持左侧导航、顶部栏、内容区三段式布局。</li></ul></div>
+    <div class="dont"><h3>不要做</h3><ul class="rule-list"><li>不要引入红、橙、绿、紫等额外高饱和状态色。</li><li>不要使用大面积复杂渐变背景。</li><li>不要每个业务模块单独设计一套组件。</li><li>不要为了“科技感”牺牲可读性。</li><li>不要把报表页做成炫酷大屏，老板最终还是要看数。</li></ul></div>
+  </div>
+</section>
+
+<div class="footer">XCDOS 深蓝三色专业版 UI 设计规范 · 适用于 Web 管理后台、老板驾驶舱、Agent 工作台与数据看板</div>
+</main>
+</div>
+</body>
+</html>

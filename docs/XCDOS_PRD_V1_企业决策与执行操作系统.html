@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS PRD V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225; --navy-900:#071A33; --navy-800:#0B2B52; --navy-700:#103B70; --navy-600:#15508F;
+  --bluegray-50:#F6F8FB; --bluegray-100:#EEF2F7; --bluegray-200:#DDE5EF; --bluegray-300:#C7D2E1; --bluegray-500:#66788A; --bluegray-700:#334155;
+  --cyan-500:#1BA6D9; --cyan-100:#E8F7FC;
+  --white:#FFFFFF; --text-main:#0F172A; --text-secondary:#475569; --text-tertiary:#8492A6; --border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06); --shadow-md:0 10px 28px rgba(7,26,51,.08); --shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:44px;line-height:1.16;letter-spacing:-.8px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:28px;line-height:1.25;color:var(--navy-900);letter-spacing:-.4px}h3{margin:24px 0 12px;font-size:20px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:16px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}
+.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.badge{display:inline-flex;align-items:center;height:26px;padding:0 9px;border-radius:999px;background:var(--cyan-100);color:var(--navy-800);border:1px solid rgba(27,166,217,.24);font-size:12px;margin:3px}.badge.gray{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}th,td{padding:14px 16px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-size:12px}
+pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;padding:20px;overflow:auto;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;line-height:1.65;border:1px solid rgba(255,255,255,.08)}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.warn{border-left:5px solid var(--navy-800);background:var(--bluegray-100);padding:18px;border-radius:0 16px 16px 0;color:var(--text-secondary)}
+.flow{background:linear-gradient(180deg,#fff,var(--bluegray-50));border:1px solid var(--border);border-radius:18px;padding:20px;overflow:auto}
+.flow-row{display:flex;align-items:stretch;gap:10px;min-width:900px}
+.flow-step{flex:1;border:1px solid var(--bluegray-200);background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow-sm)}
+.flow-step b{display:block;color:var(--navy-900);font-size:15px}.flow-step p{margin:6px 0 0;color:var(--text-tertiary);font-size:13px}
+.arrow{display:grid;place-items:center;color:var(--cyan-500);font-weight:900;font-size:22px}
+.priority{font-weight:800;color:var(--navy-800)}
+.status{display:inline-flex;border-radius:999px;padding:2px 8px;background:var(--bluegray-100);border:1px solid var(--bluegray-200);font-size:12px;color:var(--text-secondary)}
+.status.must{background:var(--cyan-100);color:var(--navy-800);border-color:rgba(27,166,217,.25)}
+.screen{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#fff;box-shadow:var(--shadow-sm)}
+.screen-head{height:48px;background:var(--bluegray-50);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.screen-body{padding:16px}
+.kpi{border:1px solid var(--border);border-radius:14px;background:#fff;padding:16px;position:relative;overflow:hidden}
+.kpi:after{content:"";position:absolute;right:-24px;bottom:-26px;width:86px;height:86px;border-radius:50%;background:var(--cyan-100)}
+.kpi-label{font-size:13px;color:var(--text-tertiary);position:relative;z-index:1}.kpi-value{font-size:28px;font-weight:780;color:var(--navy-900);position:relative;z-index:1}.kpi-sub{font-size:12px;color:var(--text-tertiary);position:relative;z-index:1}
+.checklist{columns:2;column-gap:28px}.checklist li{break-inside:avoid;margin:8px 0;color:var(--text-secondary)}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.checklist{columns:1}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">PR</div><div><b>XCDOS PRD V1.0</b><span>产品需求文档</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#status">认知状态</a>
+    <a href="#overview">产品概述</a>
+    <a href="#users">用户与场景</a>
+    <a href="#scope">范围与版本</a>
+    <a href="#modules">功能模块</a>
+    <a href="#flows">核心流程</a>
+    <a href="#screens">页面需求</a>
+    <a href="#fields">字段与规则</a>
+    <a href="#permission">权限体系</a>
+    <a href="#metrics">指标体系</a>
+    <a href="#acceptance">验收标准</a>
+    <a href="#roadmap">排期规划</a>
+    <a href="#risk">风险验证</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Product Requirement Document · V1.0</span>
+  <h1>XCDOS 企业决策与执行操作系统<br/>PRD V1.0</h1>
+  <p>基于产品说明书与 ARD V2.0，面向研发、设计、测试、交付输出可执行产品需求。核心目标：跑通“目标/问题 → 拆推评算 → 决策方案 → 执行任务 → 强制反馈 → 数据看板”的 MVP 闭环。</p>
+  <div class="meta">
+    <span>产品定位：企业决策与执行操作系统</span>
+    <span>核心模型：拆-推-评-算</span>
+    <span>MVP：销售/PMC 试点</span>
+    <span>UI：深蓝三色专业版</span>
+  </div>
+</header>
+
+<section id="status">
+  <h2>A. 当前认知状态</h2>
+  <div class="grid grid-4">
+    <div class="card"><b>已知事实</b><p class="muted">产品核心由拆推评算、定标准追过程拿结果、强制反馈、实时数据构成。</p></div>
+    <div class="card"><b>当前推测</b><p class="muted">MVP 更适合先从销售或 PMC 单部门切入，而非全公司一次性铺开。</p></div>
+    <div class="card"><b>缺失信息</b><p class="muted">真实组织架构、岗位清单、当前数据源、反馈制度、老板审批规则尚未完全确认。</p></div>
+    <div class="card"><b>不能下定论原因</b><p class="muted">强制反馈机制是否被接受，取决于老板推动力度和管理层是否同标准执行。</p></div>
+  </div>
+  <h3>PRD 主假设池</h3>
+  <table>
+    <thead><tr><th>假设</th><th>证据强度</th><th>解释力</th><th>反例抗压</th><th>可验证性</th><th>行动价值</th><th>总分</th><th>段位</th></tr></thead>
+    <tbody>
+      <tr><td>H1：先做目标-任务-反馈-看板闭环，成功率最高</td><td>28</td><td>24</td><td>13</td><td>15</td><td>15</td><td><b>95</b></td><td>S</td></tr>
+      <tr><td>H2：先做完整 Agent Runtime，平台能力更强</td><td>22</td><td>22</td><td>10</td><td>10</td><td>13</td><td><b>77</b></td><td>A</td></tr>
+      <tr><td>H3：先做 HR Agent，老板最容易感知管理价值</td><td>20</td><td>19</td><td>9</td><td>12</td><td>12</td><td><b>72</b></td><td>A</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">当前优先验证路径：以销售或 PMC 为试点，先跑通主链路闭环，再扩展 Agent 和外部系统。别一上来就造企业级宇宙，宇宙通常不按期交付。</div>
+</section>
+
+<section id="overview">
+  <h2>一、产品概述</h2>
+  <p class="desc">XCDOS 是芯诚科技面向物联网、RFID/NFC 卡片、生产、销售、PMC 与组织管理场景的企业决策与执行操作系统。</p>
+  <div class="grid grid-3">
+    <div class="card"><b>产品目标</b><p class="muted">把企业目标、问题、方案、任务、反馈、结果统一到一条可追踪流水线。</p></div>
+    <div class="card"><b>核心价值</b><p class="muted">让老板看见真实过程，让管理层按标准追过程，让员工强制反馈。</p></div>
+    <div class="card"><b>产品边界</b><p class="muted">不替代 ERP/MES/CRM，先作为决策与执行中枢，逐步接入外部系统。</p></div>
+  </div>
+
+  <h3>一句话定位</h3>
+  <div class="callout">XCDOS = 拆推评算做正确的事 + 定标准追过程拿结果把事做正确 + 强制反馈实时数据持续纠偏。</div>
+</section>
+
+<section id="users">
+  <h2>二、目标用户与核心场景</h2>
+  <table>
+    <thead><tr><th>用户角色</th><th>核心诉求</th><th>典型场景</th><th>关键页面</th></tr></thead>
+    <tbody>
+      <tr><td>老板 / 董事长</td><td>看目标、看异常、看真实进度、做决策</td><td>每天打开驾驶舱，查看 P0/P1 异常和目标完成率</td><td>老板驾驶舱、决策报告</td></tr>
+      <tr><td>总经理 / 部门负责人</td><td>拆目标、追过程、协调资源</td><td>把月目标拆成部门任务，追踪执行卡点</td><td>目标管理、过程追踪</td></tr>
+      <tr><td>PMC 主管</td><td>跟踪订单、排产、物料、交付风险</td><td>发现订单延期风险，发起拆推评算和异常升级</td><td>PMC 工作台、异常看板</td></tr>
+      <tr><td>销售负责人</td><td>管理线索、报价、成交、回款</td><td>对销售增长方案做可行性评分和 ROI 测算</td><td>Sales 工作台、拆推评算中心</td></tr>
+      <tr><td>普通员工</td><td>知道今天做什么、怎么反馈、卡点找谁</td><td>每日提交目标、结果、卡点、下一步</td><td>我的任务、强制反馈</td></tr>
+      <tr><td>Agent / 系统</td><td>识别异常、生成建议、推动反馈</td><td>自动提醒未反馈人员，生成周报</td><td>Agent Run、Trace 审计</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="scope">
+  <h2>三、版本范围与优先级</h2>
+  <h3>3.1 MVP 范围</h3>
+  <table>
+    <thead><tr><th>模块</th><th>是否进入 MVP</th><th>优先级</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>老板驾驶舱</td><td>是</td><td class="priority">P0</td><td>展示目标、异常、反馈率、任务进度</td></tr>
+      <tr><td>目标管理</td><td>是</td><td class="priority">P0</td><td>创建公司/部门/个人目标并拆解</td></tr>
+      <tr><td>拆推评算中心</td><td>是</td><td class="priority">P0</td><td>目标/问题拆解、方案评估、ROI 测算</td></tr>
+      <tr><td>任务与过程追踪</td><td>是</td><td class="priority">P0</td><td>任务分配、状态更新、节点跟踪</td></tr>
+      <tr><td>强制反馈</td><td>是</td><td class="priority">P0</td><td>每日反馈、未反馈提醒、异常升级</td></tr>
+      <tr><td>基础 Agent</td><td>是</td><td class="priority">P1</td><td>Report Agent / Reminder Agent / Decision Assistant</td></tr>
+      <tr><td>HR Agent 完整版</td><td>否</td><td>P2</td><td>二期扩展人才画像、绩效成长</td></tr>
+      <tr><td>外部 ERP/MES/WMS 对接</td><td>否</td><td>P2</td><td>MVP 可先支持 Excel 导入</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 不做范围</h3>
+  <ul>
+    <li>不在 MVP 阶段替代 ERP、MES、WMS、CRM。</li>
+    <li>不允许 Agent 自动执行高风险业务动作。</li>
+    <li>不做复杂财务核算、人事处分、生产停线自动化。</li>
+    <li>不做花里胡哨大屏，老板要的是判断依据，不是看烟花。</li>
+  </ul>
+</section>
+
+<section id="modules">
+  <h2>四、功能模块需求</h2>
+
+  <h3>4.1 老板驾驶舱</h3>
+  <table>
+    <thead><tr><th>功能点</th><th>说明</th><th>优先级</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td>经营总览 KPI</td><td>展示目标完成率、反馈率、异常数、任务完成率</td><td>P0</td><td>能按日/周/月查看核心指标</td></tr>
+      <tr><td>重点异常列表</td><td>展示 P0/P1 异常，含责任人、影响、下一步</td><td>P0</td><td>异常可点击进入详情</td></tr>
+      <tr><td>拆推评算入口</td><td>从异常或目标直接发起决策流程</td><td>P0</td><td>点击可创建 Decision Case</td></tr>
+      <tr><td>部门反馈率排行</td><td>展示各部门反馈率和未反馈人员</td><td>P1</td><td>支持筛选部门和日期</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 目标管理</h3>
+  <table>
+    <thead><tr><th>功能点</th><th>说明</th><th>优先级</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td>创建目标</td><td>支持公司/部门/个人目标创建</td><td>P0</td><td>目标必须有负责人、指标、截止时间</td></tr>
+      <tr><td>目标拆解</td><td>父目标拆为子目标与任务</td><td>P0</td><td>支持树状结构查看</td></tr>
+      <tr><td>指标绑定</td><td>目标绑定可量化指标</td><td>P0</td><td>指标支持数值、百分比、金额、次数</td></tr>
+      <tr><td>目标进度</td><td>自动计算完成率</td><td>P1</td><td>任务结果变化后目标进度自动更新</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 拆推评算中心</h3>
+  <table>
+    <thead><tr><th>阶段</th><th>功能点</th><th>输入</th><th>输出</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td>拆</td><td>目标/问题拆解</td><td>目标、问题、异常</td><td>问题树、变量树、责任树</td><td>P0</td></tr>
+      <tr><td>推</td><td>方案推理预测</td><td>候选方案、历史数据、假设</td><td>最佳/正常/最差场景</td><td>P0</td></tr>
+      <tr><td>评</td><td>可行性评测</td><td>资源、时间、风险、依赖</td><td>综合评分、风险说明</td><td>P0</td></tr>
+      <tr><td>算</td><td>投入产出测算</td><td>成本、收益、周期</td><td>ROI、回本周期、现金流影响</td><td>P0</td></tr>
+      <tr><td>报告</td><td>决策报告生成</td><td>拆推评算结果</td><td>推荐方案、依据、反例、验证动作</td><td>P0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.4 任务与过程追踪</h3>
+  <table>
+    <thead><tr><th>功能点</th><th>说明</th><th>优先级</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td>任务创建</td><td>从目标或方案生成任务</td><td>P0</td><td>任务包含负责人、截止时间、标准、状态</td></tr>
+      <tr><td>状态流转</td><td>待开始、进行中、已完成、延期、阻塞</td><td>P0</td><td>状态变化记录日志</td></tr>
+      <tr><td>过程节点</td><td>任务可拆为多个检查点</td><td>P1</td><td>检查点可单独反馈</td></tr>
+      <tr><td>异常升级</td><td>延期/阻塞自动生成异常</td><td>P0</td><td>P0/P1 异常进入驾驶舱</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.5 强制反馈</h3>
+  <table>
+    <thead><tr><th>功能点</th><th>说明</th><th>优先级</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td>每日反馈</td><td>员工和管理层统一填写</td><td>P0</td><td>必须包含目标、结果、卡点、下一步</td></tr>
+      <tr><td>未反馈提醒</td><td>到点未提交自动提醒</td><td>P0</td><td>支持站内提醒，预留飞书/钉钉</td></tr>
+      <tr><td>反馈质量检查</td><td>识别空泛反馈</td><td>P1</td><td>低质量反馈提示重写</td></tr>
+      <tr><td>反馈统计</td><td>部门/个人反馈率</td><td>P0</td><td>可按日/周/月查看</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="flows">
+  <h2>五、核心业务流程</h2>
+
+  <h3>5.1 目标到执行闭环</h3>
+  <div class="flow"><div class="flow-row">
+    <div class="flow-step"><b>1. 创建目标</b><p>老板/负责人创建公司或部门目标。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>2. 拆解目标</b><p>拆为子目标、任务、指标和责任人。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>3. 生成任务</b><p>绑定标准、截止时间和负责人。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>4. 强制反馈</b><p>每日提交目标、结果、卡点、下一步。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>5. 看板更新</b><p>驾驶舱实时展示进度与异常。</p></div>
+  </div></div>
+
+  <h3>5.2 问题到决策闭环</h3>
+  <div class="flow"><div class="flow-row">
+    <div class="flow-step"><b>1. 发现问题</b><p>人工录入或系统从异常中生成。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>2. 拆</b><p>拆解原因、变量、责任边界。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>3. 推</b><p>推演多个方案的未来结果。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>4. 评</b><p>评估资源、风险、成功率。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>5. 算</b><p>测算投入产出与回本周期。</p></div>
+    <div class="arrow">→</div>
+    <div class="flow-step"><b>6. 决策</b><p>老板/负责人审批方案。</p></div>
+  </div></div>
+</section>
+
+<section id="screens">
+  <h2>六、页面需求</h2>
+
+  <h3>6.1 页面清单</h3>
+  <table>
+    <thead><tr><th>页面</th><th>路径建议</th><th>主要用户</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td>老板驾驶舱</td><td>/dashboard/boss</td><td>老板、总经理</td><td>P0</td></tr>
+      <tr><td>目标管理</td><td>/goals</td><td>管理层</td><td>P0</td></tr>
+      <tr><td>拆推评算中心</td><td>/decision-cases</td><td>老板、管理层</td><td>P0</td></tr>
+      <tr><td>任务中心</td><td>/tasks</td><td>全员</td><td>P0</td></tr>
+      <tr><td>强制反馈</td><td>/feedback</td><td>全员</td><td>P0</td></tr>
+      <tr><td>异常中心</td><td>/exceptions</td><td>管理层</td><td>P0</td></tr>
+      <tr><td>Agent 运行记录</td><td>/agent-runs</td><td>管理员</td><td>P1</td></tr>
+      <tr><td>系统设置</td><td>/settings</td><td>管理员</td><td>P1</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 老板驾驶舱页面结构</h3>
+  <div class="screen">
+    <div class="screen-head"><b>老板驾驶舱</b><span class="badge">P0</span></div>
+    <div class="screen-body">
+      <div class="grid grid-4">
+        <div class="kpi"><div class="kpi-label">目标完成率</div><div class="kpi-value">78%</div><div class="kpi-sub">本月目标进度</div></div>
+        <div class="kpi"><div class="kpi-label">强制反馈率</div><div class="kpi-value">96%</div><div class="kpi-sub">今日反馈完成</div></div>
+        <div class="kpi"><div class="kpi-label">重点异常</div><div class="kpi-value">3</div><div class="kpi-sub">P0/P1 待处理</div></div>
+        <div class="kpi"><div class="kpi-label">任务完成率</div><div class="kpi-value">82%</div><div class="kpi-sub">本周任务</div></div>
+      </div>
+      <p class="muted" style="margin-top:14px">下方区域：重点异常列表、部门排行、拆推评算入口、今日待审批方案。</p>
+    </div>
+  </div>
+
+  <h3>6.3 拆推评算中心页面结构</h3>
+  <table>
+    <thead><tr><th>区域</th><th>内容</th><th>交互</th></tr></thead>
+    <tbody>
+      <tr><td>问题输入区</td><td>目标/问题/异常描述、来源、严重程度</td><td>支持手动输入、从目标/异常引用</td></tr>
+      <tr><td>拆解区</td><td>问题树、目标树、变量列表</td><td>支持编辑节点、添加反例</td></tr>
+      <tr><td>推演区</td><td>方案列表、预测场景</td><td>支持生成/编辑方案</td></tr>
+      <tr><td>评估区</td><td>资源、时间、风险、依赖、成功率评分</td><td>支持人工修正评分</td></tr>
+      <tr><td>测算区</td><td>成本、收益、ROI、回本周期</td><td>支持输入参数重新测算</td></tr>
+      <tr><td>报告区</td><td>推荐方案、依据、风险、验证动作</td><td>支持导出、提交审批</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="fields">
+  <h2>七、关键字段与业务规则</h2>
+
+  <h3>7.1 Goal 目标字段</h3>
+  <table>
+    <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>goal_id</td><td>string</td><td>是</td><td>目标唯一 ID</td></tr>
+      <tr><td>goal_name</td><td>string</td><td>是</td><td>目标名称</td></tr>
+      <tr><td>owner_id</td><td>string</td><td>是</td><td>负责人</td></tr>
+      <tr><td>metric_type</td><td>enum</td><td>是</td><td>金额/数量/百分比/次数/布尔</td></tr>
+      <tr><td>target_value</td><td>number</td><td>是</td><td>目标值</td></tr>
+      <tr><td>deadline</td><td>datetime</td><td>是</td><td>截止时间</td></tr>
+      <tr><td>status</td><td>enum</td><td>是</td><td>未开始/进行中/完成/延期/取消</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 Feedback 反馈字段</h3>
+  <table>
+    <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>today_goal</td><td>text</td><td>是</td><td>不能少于 10 字</td></tr>
+      <tr><td>result</td><td>text</td><td>是</td><td>必须描述完成结果</td></tr>
+      <tr><td>blocker</td><td>text</td><td>否</td><td>无卡点可填“无”</td></tr>
+      <tr><td>next_action</td><td>text</td><td>是</td><td>必须有下一步动作</td></tr>
+      <tr><td>submitted_at</td><td>datetime</td><td>是</td><td>自动生成</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 核心业务规则</h3>
+  <ul>
+    <li>目标必须绑定负责人、指标、目标值、截止时间。</li>
+    <li>任务必须绑定负责人和截止时间。</li>
+    <li>反馈必须包含今日目标、今日结果、当前卡点、下一步动作。</li>
+    <li>超过截止时间未反馈，系统自动生成 <code>FeedbackMissed</code> 事件。</li>
+    <li>P0/P1 异常必须进入老板驾驶舱。</li>
+    <li>Agent 输出的方案必须包含依据、反例、置信度、验证动作。</li>
+  </ul>
+</section>
+
+<section id="permission">
+  <h2>八、权限体系</h2>
+  <table>
+    <thead><tr><th>角色</th><th>可查看</th><th>可操作</th><th>限制</th></tr></thead>
+    <tbody>
+      <tr><td>老板</td><td>全局目标、任务、反馈、异常、报表</td><td>审批方案、创建目标、升级异常</td><td>高风险动作二次确认</td></tr>
+      <tr><td>总经理</td><td>全公司经营与部门数据</td><td>分配目标、审核方案、处理异常</td><td>不可修改审计记录</td></tr>
+      <tr><td>部门负责人</td><td>本部门目标、任务、反馈、异常</td><td>创建任务、审核反馈、发起拆推评算</td><td>不可越权查看敏感部门</td></tr>
+      <tr><td>员工</td><td>个人任务、个人反馈、相关通知</td><td>提交反馈、更新任务状态</td><td>不可删除已提交反馈</td></tr>
+      <tr><td>系统管理员</td><td>系统配置、权限、日志</td><td>配置组织、角色、字段、通知</td><td>不可代替业务审批</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="metrics">
+  <h2>九、产品指标体系</h2>
+  <table>
+    <thead><tr><th>指标</th><th>定义</th><th>MVP 目标</th><th>数据来源</th></tr></thead>
+    <tbody>
+      <tr><td>反馈完成率</td><td>已提交反馈人数 / 应提交人数</td><td>≥ 95%</td><td>Feedback</td></tr>
+      <tr><td>反馈及时率</td><td>按时提交反馈数 / 应提交反馈数</td><td>≥ 90%</td><td>Feedback</td></tr>
+      <tr><td>任务完成率</td><td>已完成任务 / 总任务</td><td>≥ 85%</td><td>Task</td></tr>
+      <tr><td>异常处理时长</td><td>异常创建到关闭的平均时间</td><td>下降 30%</td><td>Exception</td></tr>
+      <tr><td>决策报告生成数</td><td>拆推评算生成报告数量</td><td>每周 ≥ 5 份</td><td>DecisionCase</td></tr>
+      <tr><td>方案执行转化率</td><td>被审批执行方案 / 总方案</td><td>≥ 40%</td><td>Plan</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="acceptance">
+  <h2>十、验收标准</h2>
+  <h3>10.1 功能验收</h3>
+  <ul class="checklist">
+    <li>可创建公司/部门/个人目标。</li>
+    <li>目标可拆解为子目标和任务。</li>
+    <li>可从目标或异常发起拆推评算。</li>
+    <li>系统可生成至少 3 个候选方案。</li>
+    <li>方案可进行可行性评分。</li>
+    <li>方案可进行 ROI 测算。</li>
+    <li>可生成决策报告。</li>
+    <li>任务可分配负责人和截止时间。</li>
+    <li>员工可提交每日反馈。</li>
+    <li>未反馈可自动提醒。</li>
+    <li>P0/P1 异常进入老板驾驶舱。</li>
+    <li>老板可查看目标、任务、反馈、异常总览。</li>
+  </ul>
+
+  <h3>10.2 质量验收</h3>
+  <table>
+    <thead><tr><th>类别</th><th>标准</th></tr></thead>
+    <tbody>
+      <tr><td>性能</td><td>核心页面首屏加载 ≤ 2.5s；列表查询 ≤ 1s</td></tr>
+      <tr><td>可用性</td><td>普通员工提交反馈路径不超过 3 步</td></tr>
+      <tr><td>安全</td><td>不同角色只能访问授权数据</td></tr>
+      <tr><td>审计</td><td>关键写操作必须记录操作人、时间、变更前后内容</td></tr>
+      <tr><td>兼容</td><td>支持 Chrome / Edge 最新两个主版本</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="roadmap">
+  <h2>十一、MVP 排期规划</h2>
+  <table>
+    <thead><tr><th>阶段</th><th>周期</th><th>目标</th><th>交付物</th></tr></thead>
+    <tbody>
+      <tr><td>阶段 0：需求冻结</td><td>第 1 周</td><td>确认试点部门与字段</td><td>PRD、字段表、权限表、原型</td></tr>
+      <tr><td>阶段 1：基础闭环</td><td>第 2-3 周</td><td>目标、任务、反馈闭环</td><td>目标管理、任务中心、强制反馈</td></tr>
+      <tr><td>阶段 2：驾驶舱</td><td>第 4 周</td><td>老板可看实时数据</td><td>老板驾驶舱、异常列表、反馈率看板</td></tr>
+      <tr><td>阶段 3：拆推评算</td><td>第 5-7 周</td><td>决策流程可用</td><td>拆解、推演、评估、测算、报告</td></tr>
+      <tr><td>阶段 4：试点运行</td><td>第 8 周</td><td>销售/PMC 试点</td><td>试点复盘报告、问题清单、二期规划</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="risk">
+  <h2>十二、风险与验证计划</h2>
+  <table>
+    <thead><tr><th>风险</th><th>表现</th><th>验证方式</th><th>应对策略</th></tr></thead>
+    <tbody>
+      <tr><td>反馈形式主义</td><td>员工填空话套话</td><td>抽样检查反馈质量</td><td>增加反馈质量评分和重写提示</td></tr>
+      <tr><td>管理层不执行</td><td>只要求员工反馈</td><td>看管理层反馈率</td><td>老板驾驶舱公开管理层反馈率</td></tr>
+      <tr><td>拆推评算太复杂</td><td>用户不会用</td><td>观察首次使用完成率</td><td>提供向导式流程和模板</td></tr>
+      <tr><td>数据不准</td><td>看板和现实不一致</td><td>人工抽检 20 条数据</td><td>建立数据来源和可信度标识</td></tr>
+      <tr><td>范围失控</td><td>不断加 ERP/MES 功能</td><td>版本需求评审</td><td>MVP 坚持只做主链路</td></tr>
+    </tbody>
+  </table>
+
+  <h3>阶段性判断</h3>
+  <div class="callout">当前阶段不建议把 XCDOS 做成大而全系统，而应先做“管理闭环最小可用系统”：目标、任务、反馈、异常、驾驶舱、拆推评算。成立后再加完整 Agent Runtime 和外部系统连接器。</div>
+</section>
+
+<div class="footer">XCDOS PRD V1.0 · 企业决策与执行操作系统 · 深蓝三色专业版</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS TDD V1.0｜企业决策与执行操作系统技术设计文档</title>
+<style>
+:root{
+  --navy-950:#041225; --navy-900:#071A33; --navy-800:#0B2B52; --navy-700:#103B70; --navy-600:#15508F;
+  --bluegray-50:#F6F8FB; --bluegray-100:#EEF2F7; --bluegray-200:#DDE5EF; --bluegray-300:#C7D2E1; --bluegray-500:#66788A; --bluegray-700:#334155;
+  --cyan-500:#1BA6D9; --cyan-100:#E8F7FC;
+  --white:#FFFFFF; --text-main:#0F172A; --text-secondary:#475569; --text-tertiary:#8492A6; --border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06); --shadow-md:0 10px 28px rgba(7,26,51,.08); --shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:44px;line-height:1.16;letter-spacing:-.8px}.hero p{max-width:920px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:28px;line-height:1.25;color:var(--navy-900);letter-spacing:-.4px}h3{margin:24px 0 12px;font-size:20px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:16px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}
+.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+.badge{display:inline-flex;align-items:center;height:26px;padding:0 9px;border-radius:999px;background:var(--cyan-100);color:var(--navy-800);border:1px solid rgba(27,166,217,.24);font-size:12px;margin:3px}.badge.gray{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}th,td{padding:14px 16px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--bluegray-100);color:var(--navy-800);padding:2px 6px;border-radius:6px;font-size:12px}
+pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;padding:20px;overflow:auto;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13px;line-height:1.65;border:1px solid rgba(255,255,255,.08)}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.warn{border-left:5px solid var(--navy-800);background:var(--bluegray-100);padding:18px;border-radius:0 16px 16px 0;color:var(--text-secondary)}
+.diagram{background:linear-gradient(180deg,#fff,var(--bluegray-50));border:1px solid var(--border);border-radius:18px;padding:20px;overflow:auto}
+.layer{border:1px solid var(--bluegray-200);background:#fff;border-radius:14px;padding:16px;margin:10px 0;box-shadow:var(--shadow-sm)}
+.layer-title{font-weight:800;color:var(--navy-900);display:flex;justify-content:space-between;gap:12px;align-items:center}
+.layer-items{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.node{padding:8px 10px;border-radius:10px;background:var(--bluegray-100);color:var(--text-secondary);border:1px solid var(--bluegray-200);font-size:13px}
+.node.strong{background:var(--cyan-100);color:var(--navy-800);border-color:rgba(27,166,217,.24);font-weight:700}
+.arrow{text-align:center;color:var(--cyan-500);font-weight:900;font-size:22px;line-height:1;margin:6px}
+.checklist{columns:2;column-gap:28px}.checklist li{break-inside:avoid;margin:8px 0;color:var(--text-secondary)}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.checklist{columns:1}h1{font-size:34px}}
+@media print{body{background:#fff}.layout{display:block}aside{display:none}main{max-width:none;padding:0}.hero,section{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">TD</div><div><b>XCDOS TDD V1.0</b><span>技术设计文档</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#status">认知状态</a>
+    <a href="#overview">技术目标</a>
+    <a href="#stack">技术栈</a>
+    <a href="#architecture">总体架构</a>
+    <a href="#frontend">前端设计</a>
+    <a href="#backend">后端设计</a>
+    <a href="#database">数据库设计</a>
+    <a href="#api">API 设计</a>
+    <a href="#agent">Agent Runtime</a>
+    <a href="#workflow">工作流设计</a>
+    <a href="#security">权限安全</a>
+    <a href="#deploy">部署运维</a>
+    <a href="#test">测试方案</a>
+    <a href="#plan">开发计划</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Technical Design Document · V1.0</span>
+  <h1>XCDOS 企业决策与执行操作系统<br/>TDD V1.0</h1>
+  <p>基于 PRD V1.0 与 ARD V2.0，输出可研发落地的技术设计方案，覆盖前端、后端、数据库、API、Agent Runtime、工作流、权限、安全、部署、测试与开发计划。</p>
+  <div class="meta">
+    <span>架构范式：DDD + CQRS Lite</span>
+    <span>前端：React / Next.js</span>
+    <span>后端：NestJS / PostgreSQL</span>
+    <span>Agent：Runtime + Tool Router + Trace</span>
+  </div>
+</header>
+
+<section id="status">
+  <h2>A. 当前认知状态</h2>
+  <div class="grid grid-4">
+    <div class="card"><b>已知事实</b><p class="muted">MVP 需要跑通目标、拆推评算、任务、反馈、看板主链路。</p></div>
+    <div class="card"><b>当前推测</b><p class="muted">采用模块化单体优先，后续再拆微服务，阶段性更稳。</p></div>
+    <div class="card"><b>缺失信息</b><p class="muted">企业实际组织层级、外部系统接口、部署环境、账号体系尚待确认。</p></div>
+    <div class="card"><b>不能下定论原因</b><p class="muted">Agent 自动执行边界、数据质量、试点部门流程仍需验证。</p></div>
+  </div>
+  <h3>技术路线假设池</h3>
+  <table>
+    <thead><tr><th>假设</th><th>证据强度</th><th>解释力</th><th>反例抗压</th><th>可验证性</th><th>行动价值</th><th>总分</th><th>段位</th></tr></thead>
+    <tbody>
+      <tr><td>H1：MVP 采用模块化单体 + DDD 分层</td><td>28</td><td>24</td><td>14</td><td>15</td><td>15</td><td><b>96</b></td><td>S</td></tr>
+      <tr><td>H2：一开始采用微服务架构</td><td>18</td><td>20</td><td>8</td><td>9</td><td>10</td><td><b>65</b></td><td>B</td></tr>
+      <tr><td>H3：先做纯前端低代码原型 + 表格后端</td><td>20</td><td>17</td><td>8</td><td>12</td><td>10</td><td><b>67</b></td><td>B</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">当前优先技术路径：模块化单体、领域分包、PostgreSQL 主库、Redis 缓存/队列、Agent Runtime 独立模块。别一上来微服务，团队还没长大就先学会分家，通常很惨。</div>
+</section>
+
+<section id="overview">
+  <h2>一、技术目标与非目标</h2>
+  <div class="grid grid-3">
+    <div class="card"><b>目标 1：主链路闭环</b><p class="muted">目标 → 问题 → 决策方案 → 任务 → 反馈 → 看板。</p></div>
+    <div class="card"><b>目标 2：Agent 可审计</b><p class="muted">所有 Agent 输出、工具调用、上下文摘要必须可追踪。</p></div>
+    <div class="card"><b>目标 3：可扩展</b><p class="muted">支持后续接入 HR、PMC、Sales、Lean、ERP/MES/CRM。</p></div>
+  </div>
+  <h3>非目标</h3>
+  <ul>
+    <li>MVP 不做完整微服务拆分。</li>
+    <li>MVP 不替代 ERP / MES / WMS / CRM。</li>
+    <li>MVP 不允许 Agent 自动执行高风险写操作。</li>
+    <li>MVP 不做复杂 BI 平台，只做核心驾驶舱。</li>
+  </ul>
+</section>
+
+<section id="stack">
+  <h2>二、技术栈选型</h2>
+  <table>
+    <thead><tr><th>层级</th><th>技术选型</th><th>理由</th><th>替代方案</th></tr></thead>
+    <tbody>
+      <tr><td>前端</td><td>React + Next.js + TypeScript</td><td>生态成熟，适合后台系统和 SSR/CSR 混合</td><td>Vite + React</td></tr>
+      <tr><td>UI 组件</td><td>Arco Design + 自定义 Design Token</td><td>企业后台组件完整，契合字节风格</td><td>Ant Design</td></tr>
+      <tr><td>后端</td><td>NestJS + TypeScript</td><td>模块化强，适合 DDD 分层和团队协作</td><td>FastAPI</td></tr>
+      <tr><td>数据库</td><td>PostgreSQL</td><td>事务可靠，JSONB 灵活，适合业务系统</td><td>MySQL</td></tr>
+      <tr><td>缓存/队列</td><td>Redis + BullMQ</td><td>处理提醒、Agent 异步任务、轻工作流</td><td>RabbitMQ / Kafka</td></tr>
+      <tr><td>分析库</td><td>ClickHouse（二期）</td><td>后续做大量事件分析</td><td>PostgreSQL 物化视图</td></tr>
+      <tr><td>向量库</td><td>pgvector（二期）</td><td>减少系统复杂度，先内聚在 PostgreSQL</td><td>Qdrant / Milvus</td></tr>
+      <tr><td>Agent</td><td>OpenAI/Claude API + Tool Router</td><td>先接云模型验证价值</td><td>本地大模型</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="architecture">
+  <h2>三、总体技术架构</h2>
+  <div class="diagram">
+    <div class="layer"><div class="layer-title">Client Layer</div><div class="layer-items"><span class="node strong">Web Admin</span><span class="node">Mobile H5</span><span class="node">Boss Dashboard</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">BFF / API Layer</div><div class="layer-items"><span class="node strong">Next.js API Client</span><span class="node">Auth Guard</span><span class="node">DTO Validation</span><span class="node">Rate Limit</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Application Layer</div><div class="layer-items"><span class="node">Goal UseCase</span><span class="node">Decision UseCase</span><span class="node">Task UseCase</span><span class="node">Feedback UseCase</span><span class="node">Dashboard Query</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Domain Layer</div><div class="layer-items"><span class="node strong">Goal Aggregate</span><span class="node strong">DecisionCase Aggregate</span><span class="node">Task Aggregate</span><span class="node">Feedback Aggregate</span><span class="node">AgentRun Aggregate</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Infrastructure Layer</div><div class="layer-items"><span class="node">PostgreSQL</span><span class="node">Redis</span><span class="node">BullMQ</span><span class="node">LLM Provider</span><span class="node">Object Storage</span><span class="node">Audit Log</span></div></div>
+  </div>
+</section>
+
+<section id="frontend">
+  <h2>四、前端技术设计</h2>
+  <h3>4.1 目录结构</h3>
+  <pre class="code">src/
+  app/
+    dashboard/boss/
+    goals/
+    decision-cases/
+    tasks/
+    feedback/
+    exceptions/
+    agent-runs/
+    settings/
+  components/
+    layout/
+    data-card/
+    decision-flow/
+    feedback-form/
+    tables/
+  design-tokens/
+    colors.ts
+    spacing.ts
+    typography.ts
+  services/
+    api-client.ts
+    auth.ts
+  stores/
+    user-store.ts
+    ui-store.ts
+  types/
+    goal.ts
+    decision.ts
+    task.ts
+    feedback.ts</pre>
+
+  <h3>4.2 页面路由</h3>
+  <table>
+    <thead><tr><th>页面</th><th>路由</th><th>组件</th><th>权限</th></tr></thead>
+    <tbody>
+      <tr><td>老板驾驶舱</td><td>/dashboard/boss</td><td>BossDashboardPage</td><td>boss, admin</td></tr>
+      <tr><td>目标管理</td><td>/goals</td><td>GoalListPage / GoalDetailPage</td><td>manager+</td></tr>
+      <tr><td>拆推评算</td><td>/decision-cases</td><td>DecisionCasePage</td><td>manager+</td></tr>
+      <tr><td>任务中心</td><td>/tasks</td><td>TaskListPage</td><td>all</td></tr>
+      <tr><td>强制反馈</td><td>/feedback</td><td>FeedbackPage</td><td>all</td></tr>
+      <tr><td>Agent 运行</td><td>/agent-runs</td><td>AgentRunTracePage</td><td>admin</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 状态管理</h3>
+  <ul>
+    <li>服务端状态：React Query / TanStack Query。</li>
+    <li>全局 UI 状态：Zustand。</li>
+    <li>表单：React Hook Form + Zod 校验。</li>
+    <li>表格：Arco Table + 自定义列配置。</li>
+  </ul>
+</section>
+
+<section id="backend">
+  <h2>五、后端技术设计</h2>
+  <h3>5.1 模块结构</h3>
+  <pre class="code">src/
+  modules/
+    auth/
+    organization/
+    goal/
+    decision/
+    task/
+    feedback/
+    exception/
+    dashboard/
+    agent-runtime/
+    audit/
+  shared/
+    database/
+    event-bus/
+    guards/
+    decorators/
+    dto/
+    utils/</pre>
+
+  <h3>5.2 DDD 分层</h3>
+  <table>
+    <thead><tr><th>层</th><th>职责</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td>Controller</td><td>处理 HTTP 请求、参数校验、权限入口</td><td>GoalController</td></tr>
+      <tr><td>Application Service</td><td>编排用例，不写复杂业务规则</td><td>CreateGoalUseCase</td></tr>
+      <tr><td>Domain</td><td>聚合、实体、值对象、领域服务</td><td>DecisionCaseAggregate</td></tr>
+      <tr><td>Repository</td><td>数据读写抽象</td><td>GoalRepository</td></tr>
+      <tr><td>Infrastructure</td><td>数据库、队列、LLM、外部系统</td><td>PostgresGoalRepository</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 核心模块职责</h3>
+  <table>
+    <thead><tr><th>模块</th><th>职责</th><th>关键服务</th></tr></thead>
+    <tbody>
+      <tr><td>goal</td><td>目标创建、拆解、进度更新</td><td>GoalService, GoalProgressService</td></tr>
+      <tr><td>decision</td><td>拆推评算、报告生成</td><td>DecisionCaseService, EvaluationService</td></tr>
+      <tr><td>task</td><td>任务创建、状态流转、延期判断</td><td>TaskService, TaskStateMachine</td></tr>
+      <tr><td>feedback</td><td>每日反馈、未反馈检测、质量检查</td><td>FeedbackService, FeedbackQualityService</td></tr>
+      <tr><td>dashboard</td><td>聚合查询、驾驶舱数据</td><td>DashboardQueryService</td></tr>
+      <tr><td>agent-runtime</td><td>Agent 调度、工具调用、Trace</td><td>AgentRunService, ToolRouter</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="database">
+  <h2>六、数据库设计</h2>
+  <p class="desc">MVP 使用 PostgreSQL。字段设计优先保证主链路闭环和审计能力，别先搞成“万能字段 JSON 一把梭”，那是数据库版鸵鸟。</p>
+
+  <h3>6.1 核心表</h3>
+  <pre class="code">organizations(id, name, parent_id, type, created_at, updated_at)
+users(id, org_id, role_id, name, email, phone, status, created_at)
+roles(id, name, level, permission_set)
+
+goals(id, parent_id, owner_id, name, description, metric_type, target_value, current_value, deadline, status)
+problems(id, goal_id, source_type, severity, description, status, created_by)
+decision_cases(id, problem_id, title, stage, confidence, status, created_by)
+hypotheses(id, case_id, content, evidence_score, confidence, counter_example, status)
+evaluations(id, case_id, resource_score, time_score, risk_score, feasibility_score, comment)
+roi_simulations(id, case_id, cost, revenue, roi, payback_days, assumptions)
+plans(id, case_id, owner_id, title, description, status, approved_by)
+
+standards(id, role_id, name, check_rule, version, status)
+tasks(id, plan_id, goal_id, owner_id, standard_id, title, description, due_time, status)
+feedbacks(id, task_id, user_id, today_goal, result, blocker, next_action, quality_score, submitted_at)
+exceptions(id, task_id, goal_id, severity, title, description, owner_id, status)
+results(id, task_id, metric_value, quality_score, verified_by)
+
+agent_runs(id, agent_type, trigger_type, case_id, status, input_summary, output_summary, trace_id)
+tool_calls(id, run_id, tool_name, input_hash, output_hash, status, duration_ms)
+domain_events(id, aggregate_type, aggregate_id, event_type, payload, created_at)
+audit_logs(id, actor_id, action, resource_type, resource_id, before_value, after_value, created_at)</pre>
+
+  <h3>6.2 索引建议</h3>
+  <table>
+    <thead><tr><th>表</th><th>索引</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td>goals</td><td>(owner_id, status), (deadline)</td><td>目标列表、到期目标</td></tr>
+      <tr><td>tasks</td><td>(owner_id, status), (due_time), (goal_id)</td><td>我的任务、延期检测</td></tr>
+      <tr><td>feedbacks</td><td>(user_id, submitted_at), (task_id)</td><td>反馈统计、任务反馈</td></tr>
+      <tr><td>exceptions</td><td>(severity, status), (owner_id)</td><td>老板驾驶舱异常</td></tr>
+      <tr><td>agent_runs</td><td>(agent_type, status), (trace_id)</td><td>Agent 运行记录</td></tr>
+      <tr><td>domain_events</td><td>(event_type, created_at), (aggregate_type, aggregate_id)</td><td>事件查询、审计回放</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="api">
+  <h2>七、API 设计</h2>
+  <h3>7.1 REST API</h3>
+  <pre class="code">POST   /api/auth/login
+GET    /api/me
+
+GET    /api/dashboard/boss
+
+POST   /api/goals
+GET    /api/goals
+GET    /api/goals/:id
+POST   /api/goals/:id/breakdown
+PATCH  /api/goals/:id/status
+
+POST   /api/problems
+POST   /api/problems/:id/decompose
+
+POST   /api/decision-cases
+GET    /api/decision-cases/:id
+POST   /api/decision-cases/:id/hypotheses
+POST   /api/decision-cases/:id/forecast
+POST   /api/decision-cases/:id/evaluate
+POST   /api/decision-cases/:id/simulate-roi
+POST   /api/decision-cases/:id/report
+
+POST   /api/tasks
+GET    /api/tasks
+PATCH  /api/tasks/:id/status
+POST   /api/tasks/:id/feedback
+
+GET    /api/exceptions
+PATCH  /api/exceptions/:id/status
+
+GET    /api/agent-runs
+GET    /api/agent-runs/:id/trace</pre>
+
+  <h3>7.2 DTO 示例</h3>
+  <pre class="code">CreateGoalDTO {
+  name: string;
+  description?: string;
+  ownerId: string;
+  metricType: "amount" | "count" | "percent" | "boolean";
+  targetValue: number;
+  deadline: string;
+  parentId?: string;
+}
+
+SubmitFeedbackDTO {
+  taskId: string;
+  todayGoal: string;
+  result: string;
+  blocker?: string;
+  nextAction: string;
+}</pre>
+
+  <h3>7.3 统一响应格式</h3>
+  <pre class="code">{
+  "success": true,
+  "data": {},
+  "error": null,
+  "traceId": "req_xxx"
+}</pre>
+</section>
+
+<section id="agent">
+  <h2>八、Agent Runtime 技术设计</h2>
+  <p class="desc">Agent Runtime 是系统的“硅基执行层”，但它必须被制度约束。没约束的 Agent 就像拿到管理员权限的实习生，场面很难看。</p>
+
+  <div class="diagram">
+    <div class="layer"><div class="layer-title">Trigger</div><div class="layer-items"><span class="node strong">用户发起</span><span class="node">系统事件</span><span class="node">定时任务</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Agent Runtime</div><div class="layer-items"><span class="node strong">Intent Parser</span><span class="node">Context Builder</span><span class="node">Policy Guard</span><span class="node">Tool Router</span><span class="node">Trace Logger</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Tools / Skills</div><div class="layer-items"><span class="node">DecomposeTool</span><span class="node">ForecastTool</span><span class="node">EvaluateTool</span><span class="node">ROITool</span><span class="node">ReportTool</span><span class="node">ReminderTool</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Output</div><div class="layer-items"><span class="node">Decision Report</span><span class="node">Task Suggestion</span><span class="node">Feedback Reminder</span><span class="node">Audit Trace</span></div></div>
+  </div>
+
+  <h3>8.1 AgentRun 状态机</h3>
+  <pre class="code">PENDING
+  → CONTEXT_BUILDING
+  → PLANNING
+  → TOOL_CALLING
+  → VERIFYING
+  → COMPLETED
+
+异常状态：
+FAILED
+CANCELLED
+NEED_HUMAN_CONFIRMATION</pre>
+
+  <h3>8.2 工具调用权限</h3>
+  <table>
+    <thead><tr><th>工具</th><th>能力</th><th>权限等级</th><th>是否需要人工确认</th></tr></thead>
+    <tbody>
+      <tr><td>DecomposeTool</td><td>拆解目标/问题</td><td>L1</td><td>否</td></tr>
+      <tr><td>ForecastTool</td><td>推理预测</td><td>L1</td><td>否</td></tr>
+      <tr><td>EvaluateTool</td><td>方案评分</td><td>L2</td><td>否</td></tr>
+      <tr><td>ROITool</td><td>投入产出测算</td><td>L2</td><td>否</td></tr>
+      <tr><td>CreateTaskTool</td><td>创建任务</td><td>L3</td><td>按配置</td></tr>
+      <tr><td>ExternalWriteTool</td><td>写外部系统</td><td>L4</td><td>是</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="workflow">
+  <h2>九、工作流与异步任务设计</h2>
+  <h3>9.1 BullMQ 队列</h3>
+  <table>
+    <thead><tr><th>队列</th><th>任务</th><th>触发方式</th></tr></thead>
+    <tbody>
+      <tr><td>feedback-reminder</td><td>未反馈提醒</td><td>定时任务</td></tr>
+      <tr><td>agent-run</td><td>Agent 异步执行</td><td>用户/事件触发</td></tr>
+      <tr><td>dashboard-refresh</td><td>看板数据刷新</td><td>事件触发/定时</td></tr>
+      <tr><td>exception-detection</td><td>延期与阻塞检测</td><td>定时任务</td></tr>
+      <tr><td>report-generation</td><td>日报/周报生成</td><td>定时任务</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9.2 领域事件</h3>
+  <pre class="code">GoalCreated
+GoalBreakdownCreated
+ProblemDecomposed
+DecisionCaseEvaluated
+ROISimulated
+PlanApproved
+TaskAssigned
+TaskOverdue
+FeedbackSubmitted
+FeedbackMissed
+ExceptionEscalated
+AgentRunCompleted</pre>
+</section>
+
+<section id="security">
+  <h2>十、权限、安全与审计</h2>
+  <h3>10.1 RBAC 权限模型</h3>
+  <table>
+    <thead><tr><th>角色</th><th>权限范围</th><th>限制</th></tr></thead>
+    <tbody>
+      <tr><td>boss</td><td>全局读、审批、异常处理</td><td>高风险二次确认</td></tr>
+      <tr><td>admin</td><td>系统配置、用户、角色、日志</td><td>不代替业务审批</td></tr>
+      <tr><td>manager</td><td>部门目标、任务、反馈、异常</td><td>不可越权部门</td></tr>
+      <tr><td>employee</td><td>个人任务、反馈、通知</td><td>不可删除反馈</td></tr>
+      <tr><td>agent</td><td>按授权工具调用</td><td>L4/L5 需要人工确认</td></tr>
+    </tbody>
+  </table>
+
+  <h3>10.2 审计日志</h3>
+  <ul>
+    <li>所有写操作记录 actor_id、action、resource_type、resource_id。</li>
+    <li>关键字段变更记录 before_value 与 after_value。</li>
+    <li>Agent 输出记录 input_summary、context_summary、tool_calls、output_summary。</li>
+    <li>反馈提交后不可物理删除，只能作废并保留历史。</li>
+  </ul>
+</section>
+
+<section id="deploy">
+  <h2>十一、部署与运维设计</h2>
+  <h3>11.1 MVP 部署架构</h3>
+  <div class="diagram">
+    <div class="layer"><div class="layer-title">Nginx / HTTPS</div><div class="layer-items"><span class="node">SSL</span><span class="node">静态资源</span><span class="node">反向代理</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Application</div><div class="layer-items"><span class="node strong">Next.js Web</span><span class="node strong">NestJS API</span><span class="node">BullMQ Worker</span></div></div>
+    <div class="arrow">↓</div>
+    <div class="layer"><div class="layer-title">Data</div><div class="layer-items"><span class="node">PostgreSQL</span><span class="node">Redis</span><span class="node">Object Storage</span></div></div>
+  </div>
+
+  <h3>11.2 环境</h3>
+  <table>
+    <thead><tr><th>环境</th><th>用途</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>dev</td><td>研发自测</td><td>本地 Docker Compose</td></tr>
+      <tr><td>test</td><td>测试验收</td><td>独立测试数据库</td></tr>
+      <tr><td>staging</td><td>上线前演示</td><td>准生产配置</td></tr>
+      <tr><td>prod</td><td>生产运行</td><td>开启备份、监控、审计</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="test">
+  <h2>十二、测试方案</h2>
+  <h3>12.1 测试类型</h3>
+  <table>
+    <thead><tr><th>类型</th><th>工具建议</th><th>覆盖范围</th></tr></thead>
+    <tbody>
+      <tr><td>单元测试</td><td>Jest</td><td>领域规则、UseCase、工具函数</td></tr>
+      <tr><td>接口测试</td><td>Supertest / Postman</td><td>REST API、权限、DTO 校验</td></tr>
+      <tr><td>前端测试</td><td>Playwright</td><td>核心流程 E2E</td></tr>
+      <tr><td>Agent 测试</td><td>Golden Cases</td><td>拆推评算输出质量</td></tr>
+      <tr><td>安全测试</td><td>RBAC Case</td><td>越权访问、审计日志</td></tr>
+    </tbody>
+  </table>
+
+  <h3>12.2 MVP 必测用例</h3>
+  <ul class="checklist">
+    <li>老板创建公司目标。</li>
+    <li>部门负责人拆解目标。</li>
+    <li>从目标创建任务。</li>
+    <li>员工提交每日反馈。</li>
+    <li>员工未反馈触发提醒。</li>
+    <li>任务延期生成异常。</li>
+    <li>P0 异常进入老板驾驶舱。</li>
+    <li>发起拆推评算生成方案。</li>
+    <li>方案完成可行性评分。</li>
+    <li>方案完成 ROI 测算。</li>
+    <li>Agent Run 生成 Trace。</li>
+    <li>员工不能查看其他部门敏感数据。</li>
+  </ul>
+</section>
+
+<section id="plan">
+  <h2>十三、开发计划与任务拆解</h2>
+  <table>
+    <thead><tr><th>阶段</th><th>周期</th><th>后端任务</th><th>前端任务</th><th>验收</th></tr></thead>
+    <tbody>
+      <tr><td>Sprint 0</td><td>1 周</td><td>项目初始化、数据库迁移、RBAC 基础</td><td>UI Token、布局框架、登录页</td><td>基础工程可运行</td></tr>
+      <tr><td>Sprint 1</td><td>2 周</td><td>Goal / Task / Feedback API</td><td>目标管理、任务中心、反馈表单</td><td>主链路基础闭环</td></tr>
+      <tr><td>Sprint 2</td><td>2 周</td><td>Exception / Dashboard Query</td><td>老板驾驶舱、异常中心</td><td>可看反馈率与异常</td></tr>
+      <tr><td>Sprint 3</td><td>2 周</td><td>DecisionCase / Evaluation / ROI</td><td>拆推评算中心</td><td>可生成决策报告</td></tr>
+      <tr><td>Sprint 4</td><td>2 周</td><td>Agent Runtime / Tool Router / Trace</td><td>Agent Run 记录页</td><td>Agent 输出可审计</td></tr>
+      <tr><td>Sprint 5</td><td>1 周</td><td>优化、测试、部署</td><td>体验修复、响应式、演示数据</td><td>试点上线</td></tr>
+    </tbody>
+  </table>
+
+  <h3>阶段性判断</h3>
+  <div class="callout">当前 TDD 建议先以 8-10 周完成 MVP：主链路闭环 + 驾驶舱 + 拆推评算 + 基础 Agent Trace。外部系统对接和完整 HR/PMC Agent 放到二期，不然项目会像每个伟大系统一样，死在“顺便也做一下”。</div>
+</section>
+
+<div class="footer">XCDOS TDD V1.0 · 技术设计文档 · 深蓝三色专业版</div>
+</main>
+</div>
+</body>
+</html>
