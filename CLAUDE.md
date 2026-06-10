@@ -26,6 +26,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 总体技术方案 V1.2 | `Prolog AgentTeam 智能交互工厂 - 总体技术方案（V1.2）.md` | 七层架构设计、模块划分、技术栈选型 |
 | 数据库设计 V1.2 | `Prolog AgentTeam 智能交互工厂 - 数据库详细设计文档（DB Design V1.2）.md` | 全量表结构、索引设计、ER 关系 |
 | 部署架构 V1.2 | `Prolog AgentTeam 智能交互工厂 - 部署架构与资源规划文档（V1.2）.md` | 部署拓扑、集群规划、资源水位 |
+| 测试用例 V1.2 | `Prolog AgentTeam 智能交互工厂 - 测试用例文档（V1.2）.md` | 13 模块 75+ 条测试用例，覆盖功能/隔离/性能/边缘 |
 
 ## 产品研发规范
 
