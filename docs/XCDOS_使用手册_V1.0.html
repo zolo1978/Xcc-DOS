@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 使用手册 V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225;--navy-900:#071A33;--navy-800:#0B2B52;--navy-700:#103B70;--navy-600:#15508F;
+  --bluegray-50:#F6F8FB;--bluegray-100:#EEF2F7;--bluegray-200:#DDE5EF;--bluegray-300:#C7D2E1;--bluegray-500:#66788A;--bluegray-700:#334155;
+  --cyan-500:#1BA6D9;--cyan-100:#E8F7FC;
+  --white:#FFFFFF;--text-main:#0F172A;--text-secondary:#475569;--text-tertiary:#8492A6;--border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06);--shadow-md:0 10px 28px rgba(7,26,51,.08);--shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:40px;line-height:1.16;letter-spacing:-.6px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:26px;color:var(--navy-900)}h3{margin:24px 0 12px;font-size:19px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:15px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.grid{display:grid;gap:16px}.grid-3{grid-template-columns:repeat(3,1fr)}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)}.card b{display:block;color:var(--navy-900);margin-bottom:6px}.muted{color:var(--text-tertiary);font-size:13px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0}th,td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.tip{border-left:5px solid #38A169;background:#F0FFF4;padding:18px;border-radius:0 16px 16px 0;color:#1A5A3A;margin:12px 0}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}h1{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">📖</div><div><b>XCDOS 使用手册</b><span>User Guide V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">按角色</div>
+    <a class="active" href="#boss">老板/高管</a>
+    <a href="#manager">管理者</a>
+    <a href="#employee">员工</a>
+    <a href="#admin">系统管理员</a>
+    <a href="#faq">常见问题</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">User Guide · V1.0</span>
+  <h1>XCDOS 使用手册<br/>V1.0</h1>
+  <p>按角色分册：老板驾驶舱、管理者拆推评算、员工任务与反馈、管理员系统配置。帮助每位用户快速上手，发挥 XCDOS 最大价值。</p>
+  <div class="meta">
+    <span>5 个角色</span>
+    <span>核心模型：拆-推-评-算</span>
+    <span>MVP 试点：销售/PMC</span>
+  </div>
+</header>
+
+<section id="boss">
+  <h2>一、老板 / 高管操作指南</h2>
+  <p class="desc">你怎么做：每天打开驾驶舱，看 4 个核心指标，异常立即下钻。不需要手动创建任何东西。</p>
+
+  <h3>1.1 看懂驾驶舱</h3>
+  <div class="grid grid-3">
+    <div class="card"><b>目标完成率</b><p class="muted">全公司目标的完成百分比。绿色=正常，黄色=滞后，红色=严重滞后。</p></div>
+    <div class="card"><b>任务执行率</b><p class="muted">已分配任务的完成比例。低于 60% 意味着大部分事情没人做。</p></div>
+    <div class="card"><b>反馈及时率</b><p class="muted">员工按时提交每日反馈的比例。低于 60% 意味着没人汇报进度。</p></div>
+  </div>
+
+  <h3>1.2 处理异常</h3>
+  <ol>
+    <li>驾驶舱红色高亮的条目是最需要你关注的问题</li>
+    <li>点击异常条目 → 跳转异常详情，查看关联的目标、处理人、当前状态</li>
+    <li>如需干预：在异常详情中 @相关负责人，或直接分配处理人</li>
+  </ol>
+
+  <h3>1.3 下钻查看</h3>
+  <p>点击任意 KPI 卡片可下钻到具体数据：点击"目标完成率"→ 查看按部门的目标完成情况；点击"异常数"→ 查看当前所有未解决异常。</p>
+</section>
+
+<section id="manager">
+  <h2>二、管理者操作指南</h2>
+  <p class="desc">你是系统的主要使用者。你的日常：创建目标 → 拆解问题 → 推演决策 → 分配任务。</p>
+
+  <h3>2.1 创建目标</h3>
+  <ol>
+    <li>进入 <b>/goals</b> → 点击"新建目标"</li>
+    <li>填写：名称（如"Q3 销售额提升 20%"）、指标类型（选择 amount）、目标值（如 2000000）、期限</li>
+    <li>指定负责人 — 谁为这个目标负责</li>
+    <li>提交 → 目标进入草稿状态，可激活开始执行</li>
+  </ol>
+
+  <h3>2.2 目标拆解</h3>
+  <ol>
+    <li>在目标详情页点击"拆解子目标"</li>
+    <li>为每个子部门/子方向创建子目标</li>
+    <li>子目标自动关联父目标，形成目标树</li>
+  </ol>
+
+  <h3>2.3 使用拆推评算中心</h3>
+  <p>这是 XCDOS 的核心。当你发现目标无法达成或出现问题时使用。</p>
+  <h4>拆解阶段</h4>
+  <ol><li>从目标关联一个问题（如"销售额下滑 15%"）</li><li>列出可能的假设（如"竞品降价"、"销售团队流失"、"市场萎缩"）</li><li>为每个假设打分：证据强度 0-100、置信度 0-100</li></ol>
+  <h4>推演阶段</h4>
+  <ol><li>选择你倾向的假设方向</li><li>系统（或 Agent）生成推演方案</li></ol>
+  <h4>评估阶段</h4>
+  <ol><li>对方案进行 4 维评分：资源（需要多少人钱）、时间（多久见效）、风险（失败概率）、可行性（能做吗）</li></ol>
+  <h4>试算阶段</h4>
+  <ol><li>输入预估成本和预期收入</li><li>系统自动计算 ROI 和回收期</li></ol>
+  <h4>报告阶段</h4>
+  <ol><li>点击"生成报告"→ 自动汇总全流程 → 生成可分享的决策报告</li></ol>
+
+  <h3>2.4 分配任务</h3>
+  <ol>
+    <li>决策方案通过后 → 创建执行方案 → 拆分为具体任务</li>
+    <li>每个任务指定负责人和截止时间</li>
+    <li>负责人会收到通知，开始执行</li>
+  </ol>
+
+  <div class="tip"><b>最佳实践</b>：不要跳过拆解直接做决策。拆解得越细，决策越靠谱。每个假设都要找反例——"什么情况下这个假设是错的？"</div>
+</section>
+
+<section id="employee">
+  <h2>三、员工操作指南</h2>
+  <p class="desc">你的核心动作只有两个：执行任务 + 每日反馈。</p>
+
+  <h3>3.1 查看和更新任务</h3>
+  <ol>
+    <li>进入 <b>/tasks</b> 查看分配给你的任务列表</li>
+    <li>点击"开始执行" → 任务状态变为"进行中"</li>
+    <li>完成任务后点击"标记完成"</li>
+  </ol>
+
+  <h3>3.2 提交每日反馈</h3>
+  <ol>
+    <li>进入 <b>/feedback</b> → 选择关联的任务</li>
+    <li>填写 4 个字段：
+      <ul>
+        <li><b>今日目标</b>：你今天计划完成什么</li>
+        <li><b>今日结果</b>：你实际完成了什么</li>
+        <li><b>卡点</b>：什么阻碍了你（没有就填"无"）</li>
+        <li><b>下一步</b>：明天计划做什么</li>
+      </ul>
+    </li>
+    <li>提交</li>
+  </ol>
+  <div class="callout">每天 18:00 前提交反馈。未提交会收到系统提醒。反馈内容越具体越好——老板和 AI 都在看。</div>
+
+  <h3>3.3 被分配异常时</h3>
+  <ol>
+    <li>收到异常通知 → 进入异常详情</li>
+    <li>确认问题 → 开始处理 → 更新状态为"处理中"</li>
+    <li>解决后标记"已解决"</li>
+  </ol>
+</section>
+
+<section id="admin">
+  <h2>四、系统管理员操作指南</h2>
+  <h3>4.1 管理用户与组织</h3>
+  <ul><li>创建/编辑/禁用用户账号</li><li>管理组织架构树</li><li>分配用户角色（boss/admin/manager/employee）</li></ul>
+  <h3>4.2 监控 Agent Run</h3>
+  <ul><li>进入 /agent-runs 查看所有 Agent 执行记录</li><li>点击某条记录查看完整追踪（输入/输出/工具调用/阶段耗时）</li></ul>
+  <h3>4.3 审计日志</h3>
+  <ul><li>查看用户操作记录：谁、在什么时候、做了什么操作</li><li>可按人/资源类型/操作类型筛选</li></ul>
+</section>
+
+<section id="faq">
+  <h2>五、常见问题</h2>
+  <table>
+    <tr><th style="width:160px">问题</th><th>答案</th></tr>
+    <tr><td>忘记提交反馈怎么办？</td><td>次日可补交，但会标记为"延迟提交"影响及时率。建议设置每日 17:00 闹钟。</td></tr>
+    <tr><td>任务可以分配给多人吗？</td><td>当前 MVP 一个任务只有一个负责人。如需多人协作，请将大任务拆分为多个子任务。</td></tr>
+    <tr><td>决策报告可以分享给谁？</td><td>报告默认对同组织 manager+ 角色可见。可通过导出功能分享链接。</td></tr>
+    <tr><td>Agent 辅助生成的方案靠谱吗？</td><td>Agent 方案作为参考和建议，不是最终决策。所有 Agent 输出都标注了置信度，建议人工审核后采纳。</td></tr>
+    <tr><td>驾驶舱数据多久更新一次？</td><td>每 5 分钟刷新一次。关键事件（反馈提交、任务完成）触发实时更新。</td></tr>
+  </table>
+</section>
+
+<div class="footer">XCDOS 使用手册 V1.0 · 柔电科技 · 2026</div>
+</main>
+</div>
+</body>
+</html>
