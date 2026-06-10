@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>XCDOS 回滚与降级预案 V1.0｜企业决策与执行操作系统</title>
+<style>
+:root{
+  --navy-950:#041225;--navy-900:#071A33;--navy-800:#0B2B52;--navy-700:#103B70;--navy-600:#15508F;
+  --bluegray-50:#F6F8FB;--bluegray-100:#EEF2F7;--bluegray-200:#DDE5EF;--bluegray-300:#C7D2E1;--bluegray-500:#66788A;--bluegray-700:#334155;
+  --cyan-500:#1BA6D9;--cyan-100:#E8F7FC;--red-500:#E53E3E;--orange-500:#ED8936;--yellow-100:#FFF8E1;
+  --white:#FFFFFF;--text-main:#0F172A;--text-secondary:#475569;--text-tertiary:#8492A6;--border:#DFE7F1;
+  --shadow-sm:0 4px 12px rgba(7,26,51,.06);--shadow-md:0 10px 28px rgba(7,26,51,.08);--shadow-lg:0 18px 44px rgba(7,26,51,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bluegray-50);color:var(--text-main);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;line-height:1.66}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow:auto;background:var(--navy-950);color:#fff;padding:24px 18px}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--navy-600),var(--cyan-500));display:grid;place-items:center;font-weight:900;box-shadow:0 12px 28px rgba(27,166,217,.22)}
+.brand b{display:block;font-size:17px}.brand span{font-size:12px;color:rgba(255,255,255,.56)}
+.nav-title{margin:22px 8px 8px;color:rgba(255,255,255,.42);font-size:12px}
+.nav a{display:block;text-decoration:none;color:rgba(255,255,255,.72);padding:10px 12px;border-radius:9px;font-size:14px;margin-bottom:4px}
+.nav a:hover,.nav a.active{background:rgba(27,166,217,.14);border:1px solid rgba(27,166,217,.24);color:#fff}
+main{max-width:1360px;width:100%;padding:32px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy-950),var(--navy-700));color:#fff;border-radius:26px;padding:44px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;right:-120px;top:-110px;width:320px;height:320px;border-radius:50%;background:rgba(27,166,217,.16)}
+.eyebrow{display:inline-flex;align-items:center;height:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);padding:0 12px;border-radius:999px;font-size:13px;color:rgba(255,255,255,.78);margin-bottom:18px}
+h1{margin:0;font-size:40px;line-height:1.16;letter-spacing:-.6px}.hero p{max-width:900px;color:rgba(255,255,255,.75);margin:14px 0 0}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.meta span{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;font-size:13px;color:rgba(255,255,255,.78)}
+section{background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow-md);padding:30px;margin:24px 0}
+h2{margin:0 0 10px;font-size:26px;color:var(--navy-900)}h3{margin:24px 0 12px;font-size:19px;color:var(--navy-800)}h4{margin:16px 0 8px;font-size:15px;color:var(--navy-700)}
+.desc{margin:0 0 20px;color:var(--text-secondary)}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;margin:2px}
+.badge.p0{background:#FFF0F0;color:#C53030;border:1px solid rgba(229,62,62,.3)}.badge.p1{background:var(--yellow-100);color:#975A16;border:1px solid rgba(237,137,54,.3)}.badge.p2{background:var(--bluegray-100);color:var(--text-secondary);border-color:var(--bluegray-200)}
+table{width:100%;border-collapse:collapse;font-size:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0}th,td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--bluegray-50);color:var(--text-tertiary);font-weight:650}tr:last-child td{border-bottom:none}
+.callout{border-left:5px solid var(--cyan-500);background:var(--cyan-100);padding:18px;border-radius:0 16px 16px 0;color:var(--navy-800)}
+.warn{border-left:5px solid var(--navy-800);background:var(--bluegray-100);padding:18px;border-radius:0 16px 16px 0;color:var(--text-secondary)}
+.footer{text-align:center;color:var(--text-tertiary);font-size:13px;padding:20px 0 46px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}aside{display:none}main{padding:18px}h1{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="brand"><div class="brand-mark">RR</div><div><b>XCDOS 回滚预案</b><span>Rollback V1.0</span></div></div>
+  <nav class="nav">
+    <div class="nav-title">目录</div>
+    <a class="active" href="#grading">故障分级</a>
+    <a href="#degradation">降级策略</a>
+    <a href="#rollback">回滚操作</a>
+    <a href="#switches">功能开关</a>
+    <a href="#communication">对外口径</a>
+    <a href="#recovery">恢复验证</a>
+  </nav>
+</aside>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Rollback & Degradation Plan · V1.0</span>
+  <h1>XCDOS 回滚与降级预案<br/>V1.0</h1>
+  <p>定义故障分级标准、降级策略配置、手动回滚操作步骤、对外沟通口径与恢复验证标准。可执行、可演练、独立成文。</p>
+  <div class="meta">
+    <span>P0: 业务完全中断</span>
+    <span>P1: 核心功能受损</span>
+    <span>P2: 非核心功能异常</span>
+    <span>演练频率：每季度一次</span>
+  </div>
+</header>
+
+<section id="grading">
+  <h2>一、故障分级标准</h2>
+  <table>
+    <thead><tr><th>等级</th><th>定义</th><th>响应时效</th><th>告警接收人</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge p0">P0</span></td><td>业务完全中断，所有用户不可用</td><td>5 分钟内响应，30 分钟内恢复</td><td>CTO + 技术负责人 + 值班 SRE</td><td>数据库宕机、API 全站 500、登录全量失败</td></tr>
+      <tr><td><span class="badge p1">P1</span></td><td>核心功能受损，>30% 用户受影响</td><td>15 分钟内响应，2 小时内恢复</td><td>技术负责人 + 值班 SRE</td><td>驾驶舱 KPI 不更新、反馈提交失败、决策报告生成超时</td></tr>
+      <tr><td><span class="badge p2">P2</span></td><td>非核心功能异常，< 30% 用户受影响，有绕过方案</td><td>1 小时内响应，下一工作日修复</td><td>开发负责人</td><td>Agent 辅助功能不可用、历史数据导出失败、非关键页面报错</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="degradation">
+  <h2>二、降级策略配置</h2>
+  <h3>2.1 性能降级</h3>
+  <table>
+    <tr><th>场景</th><th>触发条件</th><th>降级措施</th><th>恢复条件</th></tr>
+    <tr><td>API 响应 P95 > 3s</td><td>持续 5 分钟</td><td>关闭 Agent 辅助功能，驾驶舱 KPI 缓存 TTL 延长至 15min</td><td>P95 < 1s 持续 10 分钟</td></tr>
+    <tr><td>数据库连接池耗尽</td><td>活跃连接 > 80%</td><td>只读接口返回缓存数据，暂停写操作排队</td><td>连接 < 50%</td></tr>
+    <tr><td>Redis 内存 > 80%</td><td>持续 5 分钟</td><td>非关键缓存逐出，缩短部分缓存 TTL</td><td>内存 < 60%</td></tr>
+  </table>
+
+  <h3>2.2 功能降级</h3>
+  <table>
+    <tr><th>功能</th><th>降级开关</th><th>降级后行为</th><th>用户提示</th></tr>
+    <tr><td>Agent 辅助拆解/评估</td><td><code>FEATURE_AGENT_ASSIST</code></td><td>隐藏 Agent 按钮，仅支持人工拆解</td><td>"AI 辅助功能维护中，请手动操作"</td></tr>
+    <tr><td>Agent 反馈质量评分</td><td><code>FEATURE_FB_QUALITY</code></td><td>反馈提交后跳过 AI 评分</td><td>无感知（静默）</td></tr>
+    <tr><td>决策报告导出</td><td><code>FEATURE_REPORT_EXPORT</code></td><td>报告仅支持在线查看，不支持下载</td><td>"导出功能暂不可用"</td></tr>
+    <tr><td>实时通知推送</td><td><code>FEATURE_PUSH_NOTIFY</code></td><td>通知仅写入站内信，不推 IM/邮件</td><td>无感知</td></tr>
+    <tr><td>全文搜索</td><td><code>FEATURE_FULLTEXT_SEARCH</code></td><td>降级为基础 LIKE 查询</td><td>"搜索功能性能下降"</td></tr>
+  </table>
+  <div class="callout" style="margin-top:16px">功能开关通过环境变量 / 配置中心控制，无需重启服务。开关变更 30 秒内生效。</div>
+</section>
+
+<section id="rollback">
+  <h2>三、回滚操作步骤</h2>
+  <h3>3.1 应用代码回滚</h3>
+  <table>
+    <tr><th style="width:40px">步骤</th><th>操作</th><th>执行人</th><th>预计耗时</th></tr>
+    <tr><td>1</td><td>确认回滚目标版本号（上一个稳定 tag）</td><td>值班 SRE</td><td>2 min</td></tr>
+    <tr><td>2</td><td>通知团队：回滚原因、目标版本、预计影响时间</td><td>技术负责人</td><td>3 min</td></tr>
+    <tr><td>3</td><td>灰度环境先回滚验证：<code>kubectl set image deployment/xcdos xcdos={prev_tag}</code></td><td>SRE</td><td>5 min</td></tr>
+    <tr><td>4</td><td>验证灰度环境功能正常（登录/驾驶舱/反馈提交）</td><td>SRE + 测试</td><td>5 min</td></tr>
+    <tr><td>5</td><td>生产环境滚动回滚（逐个 Pod 替换）</td><td>SRE</td><td>10 min</td></tr>
+    <tr><td>6</td><td>回滚后验证：核心接口 200、KPI 数据正常</td><td>SRE</td><td>5 min</td></tr>
+    <tr><td colspan="2"><b>总计</b></td><td></td><td><b>~30 min</b></td></tr>
+  </table>
+
+  <h3>3.2 数据库回滚</h3>
+  <table>
+    <tr><th style="width:160px">场景</th><th>回滚方式</th><th>风险</th></tr>
+    <tr><td>DDL 变更（加字段）</td><td>执行反向 ALTER TABLE DROP COLUMN</td><td>数据丢失：DROP COLUMN 前备份当前表</td></tr>
+    <tr><td>DML 误操作（批量 UPDATE/DELETE）</td><td>从最近全量备份 + WAL 日志恢复至误操作前时间点</td><td>恢复期间服务不可用 ~15min</td></tr>
+    <tr><td>数据迁移脚本错误</td><td>从迁移前快照恢复</td><td>迁移后新写入数据丢失（先锁写再恢复）</td></tr>
+  </table>
+  <div class="warn">数据库回滚前<b>必须</b>先锁写（SET session_replication_role = 'replica'），防止回滚期间新数据写入。</div>
+</section>
+
+<section id="switches">
+  <h2>四、功能开关清单</h2>
+  <table>
+    <tr><th>开关名</th><th>默认值</th><th>影响范围</th><th>切换方式</th></tr>
+    <tr><td><code>FEATURE_AGENT_ASSIST</code></td><td>ON</td><td>Agent 辅助拆解/评估按钮</td><td>配置中心 / 环境变量</td></tr>
+    <tr><td><code>FEATURE_FB_QUALITY</code></td><td>ON</td><td>反馈 AI 评分</td><td>配置中心</td></tr>
+    <tr><td><code>FEATURE_REPORT_EXPORT</code></td><td>ON</td><td>决策报告导出</td><td>配置中心</td></tr>
+    <tr><td><code>FEATURE_PUSH_NOTIFY</code></td><td>ON</td><td>IM/邮件推送</td><td>配置中心</td></tr>
+    <tr><td><code>RATE_LIMIT_GLOBAL</code></td><td>ON</td><td>全局限流</td><td>环境变量</td></tr>
+    <tr><td><code>MAINTENANCE_MODE</code></td><td>OFF</td><td>全站维护页</td><td>配置中心</td></tr>
+  </table>
+</section>
+
+<section id="communication">
+  <h2>五、故障对外口径</h2>
+  <table>
+    <tr><th style="width:120px">故障类型</th><th style="width:180px">用户提示语</th><th>客服话术</th></tr>
+    <tr><td>服务完全不可用 (P0)</td><td>"系统正在维护升级中，预计 30 分钟内恢复。给您带来不便深表歉意。"</td><td>"我们检测到系统异常，技术团队正在紧急修复，预计 30 分钟内恢复。请稍后重试。"</td></tr>
+    <tr><td>部分功能不可用 (P1)</td><td>"部分功能暂不可用，您可继续使用其他功能。"</td><td>"部分功能正在进行优化维护，您可先使用其他功能。预计 2 小时内恢复。"</td></tr>
+    <tr><td>AI 辅助不可用</td><td>"AI 辅助功能维护中，请手动操作。"</td><td>"AI 辅助功能正在升级优化，暂时需要您手动完成。不影响其他功能使用。"</td></tr>
+    <tr><td>数据延迟</td><td>"数据更新稍有延迟，请稍后刷新。"</td><td>"数据同步存在短暂延迟，刷新页面即可。我们正在优化同步速度。"</td></tr>
+  </table>
+</section>
+
+<section id="recovery">
+  <h2>六、恢复验证标准</h2>
+  <table>
+    <tr><th style="width:60px">步骤</th><th>验证项</th><th>验证方式</th><th>通过标准</th></tr>
+    <tr><td>1</td><td>服务健康检查</td><td>GET /api/health</td><td>200 OK</td></tr>
+    <tr><td>2</td><td>数据库连接</td><td>GET /api/goals?pageSize=1</td><td>200，含数据</td></tr>
+    <tr><td>3</td><td>Redis 缓存</td><td>GET /api/dashboard/boss（连续 2 次）</td><td>第 2 次命中缓存（响应 < 100ms）</td></tr>
+    <tr><td>4</td><td>登录认证</td><td>POST /api/auth/login</td><td>200，返回 Token</td></tr>
+    <tr><td>5</td><td>写操作</td><td>创建测试目标 → 立即删除</td><td>201 + 200</td></tr>
+    <tr><td>6</td><td>Agent Run</td><td>触发一次 Agent 辅助拆解</td><td>AgentRun completed</td></tr>
+    <tr><td>7</td><td>定时任务</td><td>检查 BullMQ 面板</td><td>队列无堆积</td></tr>
+  </table>
+</section>
+
+<div class="footer">XCDOS 回滚与降级预案 V1.0 · 柔电科技 · 2026 · 每季度演练一次</div>
+</main>
+</div>
+</body>
+</html>
