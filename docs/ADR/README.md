@@ -11,6 +11,8 @@
 | [ADR-0003](./ADR-0003-password-argon2id.md) | 密码方案统一为 Argon2id | Accepted | 2026-06-11 | P0-07 |
 | [ADR-0004](./ADR-0004-multi-tenant-schema-per-tenant.md) | 多租户隔离采用 schema-per-tenant | Accepted | 2026-06-11 | P0-08 / P1-14 / P1-15 |
 | [ADR-0005](./ADR-0005-workflow-bullmq-outbox.md) | 工作流执行 BullMQ + Transactional Outbox | Provisional | 2026-06-11 | P0-06 / P1-05 |
+| [ADR-0006](./ADR-0006-use-existing-not-rewrite.md) | 能用现成就不要自己造（产品层+工具层） | Accepted | 2026-06-11 | 战略原则 |
+| [ADR-0007](./ADR-0007-prolog-hybrid-langflow.md) | Prolog 混合方案：底座自建 + Langflow 嵌入 | Accepted | 2026-06-12 | Z-1 调研裁决 |
 
 ## 状态约定
 
