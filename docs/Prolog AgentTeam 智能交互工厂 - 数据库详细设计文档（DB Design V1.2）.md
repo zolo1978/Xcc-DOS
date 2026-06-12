@@ -91,7 +91,7 @@
 |id|bigint|\-|是|否|雪花ID|租户唯一主键ID|
 |tenant\_name|varchar|64|否|否|\-|租户名称|
 |tenant\_code|varchar|32|否|否|\-|租户唯一编码，全局唯一|
-|isolate\_type|smallint|\-|否|否|1|隔离模式：1\-行级共享，2\-物理独立库|
+|isolate\_type|smallint|\-|否|否|3|隔离模式（对齐 ADR\-0004 与 API 二.B 字典）：1\-共享\+RLS（Tier\-C）/ 2\-物理独立库（Tier\-A）/ 3\-schema\-per\-tenant（Tier\-B 默认）|
 |status|smallint|\-|否|否|1|租户状态：0\-禁用，1\-正常|
 |expire\_time|timestamptz|\-|否|是|null|租户过期时间，null为永久有效|
 |contact\_person|varchar|32|否|是|null|租户联系人|
@@ -136,7 +136,7 @@
 |rule\_content|text|\-|否|否|\-|Prolog规则源码内容|
 |rule\_type|smallint|\-|否|否|1|规则类型：1\-流程规则，2\-校验规则，3\-路由规则|
 |parent\_id|bigint|\-|否|否|0|父规则ID，0为顶级规则|
-|status|smallint|\-|否|否|0|规则状态：0\-未生效，1\-已生效，2\-灰度中|
+|status|smallint|\-|否|否|0|规则状态（对齐 API 二.B 字典）：0\-draft 草稿，1\-active 已生效，2\-gray 灰度中，3\-inactive 停用|
 |version|int|\-|否|否|1|规则版本号，用于热更新、回滚|
 |is\_auto\_gen|smallint|\-|否|否|0|是否自动生成：0\-人工创建，1\-系统自进化生成|
 |gray\_rate|int|\-|否|否|100|灰度放量比例，0\-100|
