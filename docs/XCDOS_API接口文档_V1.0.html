@@ -206,7 +206,14 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
   <div class="endpoint">
     <div class="endpoint-head"><span class="method patch">PATCH</span><span class="path">/api/goals/:id/status</span></div>
     <div class="endpoint-body">
-      <p class="desc">更新目标状态。Body: <code>{ status: "active" | "completed" | "cancelled" }</code>。权限：目标 owner 或 manager+。</p>
+      <p class="desc">更新目标状态。Body: <code>{ status: "active" | "completed" | "cancelled" }</code>。请求头 <code>If-Match: &lt;version&gt;</code>（乐观锁，版本不匹配返回 409 VERSION_CONFLICT）。权限：目标 owner 或 manager+。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method delete">DELETE</span><span class="path">/api/goals/:id</span></div>
+    <div class="endpoint-body">
+      <p class="desc">软删除目标（写 deleted_at，不物理删除）。前置校验：目标下存在未完成任务（todo / in_progress）时返回 409 GOAL_HAS_ACTIVE_TASKS。权限：目标 owner 或 manager+。<b>Response 204。</b></p>
     </div>
   </div>
 </section>
@@ -395,6 +402,11 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
   <div class="endpoint">
     <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/agent-runs</span></div>
     <div class="endpoint-body"><p class="desc">Agent 运行记录列表。Query: <code>?agentType=&status=&page=&pageSize=</code>。权限：admin。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/agent-runs/:id/cancel</span></div>
+    <div class="endpoint-body"><p class="desc">取消运行中的 Agent Run：status running → cancelled，幂等（已终态返回 200 原状态）。中断后已产生的工具调用记录保留，审计不回滚。权限：发起人或 admin。</p></div>
   </div>
 
   <div class="endpoint">

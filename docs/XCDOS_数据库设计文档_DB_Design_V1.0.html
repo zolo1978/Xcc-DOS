@@ -150,6 +150,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>current_value</td><td>DECIMAL(18,4)</td><td></td><td></td><td>0</td><td>当前值</td></tr>
     <tr><td>start_date / deadline</td><td>DATE</td><td></td><td>✓</td><td>-</td><td>起止日期</td></tr>
     <tr><td>status</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'draft'</td><td>draft / active / completed / cancelled</td></tr>
+    <tr><td>version</td><td>INTEGER</td><td>-</td><td>✓</td><td>0</td><td>乐观锁版本号，更新条件含 id+version 并原子 +1（P1-08）</td></tr>
     <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td></td><td>✓</td><td>NOW()</td><td>创建/更新时间</td></tr>
     <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td></td><td></td><td>NULL</td><td>软删除时间；正常数据恒为 NULL</td></tr>
   </table>
@@ -282,6 +283,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>description</td><td>TEXT</td><td>任务描述</td></tr>
     <tr><td>due_time</td><td>TIMESTAMPTZ</td><td>截止时间</td></tr>
     <tr><td>status</td><td>VARCHAR(20)</td><td>todo / in_progress / done / delayed / cancelled</td></tr>
+    <tr><td>version</td><td>INTEGER</td><td>乐观锁版本号，默认 0；并发更新冲突返回 409（P1-08）</td></tr>
     <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>创建/更新时间，必填默认 NOW()</td></tr>
     <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>软删除时间，nullable 默认 NULL</td></tr>
   </table>
