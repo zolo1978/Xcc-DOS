@@ -253,23 +253,48 @@ code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--blue
 </section>
 
 <section id="crossref">
-  <h2>八、需求-设计-测试交叉引用矩阵</h2>
-  <p class="desc">确保每个功能需求有对应的技术设计、API 端点、数据库表和测试用例。</p>
+  <h2>八、需求-设计-测试交叉引用矩阵（RTM 25/25）</h2>
+  <p class="desc">全量 25 功能 + 非功能需求，API 端点均为 API 文档真实路径（已剔除幻影端点）。CI 须校验：每行 API 端点存在于 OpenAPI operationId、测试 ID 存在于测试用例文档（P0-05）。</p>
   <table>
-    <thead><tr><th>功能编号</th><th>功能名称</th><th>PRD 章节</th><th>TDD 章节</th><th>API 端点</th><th>DB 表</th><th>测试用例</th></tr></thead>
+    <thead><tr><th>功能编号</th><th>功能名称</th><th>API 端点（真实）</th><th>DB 表</th><th>测试用例</th><th>状态</th></tr></thead>
     <tbody>
-      <tr><td>F-05</td><td>目标创建</td><td>4.2.1</td><td>5.3</td><td>POST /goals</td><td>goals</td><td>TC-GOAL-001</td></tr>
-      <tr><td>F-06</td><td>目标拆解</td><td>4.2.2</td><td>5.3</td><td>POST /goals/{id}/children</td><td>goals</td><td>TC-GOAL-002</td></tr>
-      <tr><td>F-09</td><td>问题录入</td><td>4.3.1</td><td>5.3</td><td>POST /problems</td><td>problems</td><td>TC-DEC-001</td></tr>
-      <tr><td>F-10</td><td>假设登记</td><td>4.3.2</td><td>5.3</td><td>POST /hypotheses</td><td>hypotheses</td><td>TC-DEC-002</td></tr>
-      <tr><td>F-12</td><td>多维评估</td><td>4.3.3</td><td>5.3</td><td>POST /evaluations</td><td>evaluations</td><td>TC-DEC-003</td></tr>
-      <tr><td>F-13</td><td>ROI 试算</td><td>4.3.4</td><td>5.3</td><td>POST /roi-simulations</td><td>roi_simulations</td><td>TC-DEC-004</td></tr>
-      <tr><td>F-15</td><td>任务创建</td><td>4.4.1</td><td>5.3</td><td>POST /tasks</td><td>tasks</td><td>TC-TASK-001</td></tr>
-      <tr><td>F-16</td><td>任务状态流转</td><td>4.4.2</td><td>5.3</td><td>PATCH /tasks/{id}/status</td><td>tasks</td><td>TC-TASK-002</td></tr>
-      <tr><td>F-19</td><td>每日反馈</td><td>4.5.1</td><td>5.3</td><td>POST /feedbacks</td><td>feedbacks</td><td>TC-FB-001</td></tr>
-      <tr><td>F-20</td><td>未反馈提醒</td><td>4.5.2</td><td>9.1</td><td>BullMQ: feedback-reminder</td><td>feedbacks</td><td>TC-FB-002</td></tr>
-      <tr><td>F-01</td><td>KPI 卡片</td><td>4.1.1</td><td>5.3</td><td>GET /dashboard/kpis</td><td>goals, tasks, feedbacks</td><td>TC-DASH-001</td></tr>
-      <tr><td>F-02</td><td>异常预警</td><td>4.1.2</td><td>5.3</td><td>GET /dashboard/exceptions</td><td>exceptions</td><td>TC-DASH-002</td></tr>
+      <tr><td>F-01</td><td>KPI 卡片</td><td>GET /api/dashboard/boss</td><td>goals,tasks,feedbacks</td><td>TC-DASH-001</td><td>已设计</td></tr>
+      <tr><td>F-02</td><td>异常预警面板</td><td>GET /api/exceptions?severity=</td><td>exceptions</td><td>TC-DASH-002</td><td>已设计</td></tr>
+      <tr><td>F-03</td><td>目标进度概览</td><td>GET /api/dashboard/boss</td><td>goals</td><td>TC-DASH-003</td><td>已设计</td></tr>
+      <tr><td>F-04</td><td>决策案例快捷入口</td><td>GET /api/decision-cases</td><td>decision_cases</td><td>TC-DASH-004</td><td>已设计</td></tr>
+      <tr><td>F-05</td><td>目标创建</td><td>POST /api/goals</td><td>goals</td><td>TC-GOAL-001</td><td>已设计</td></tr>
+      <tr><td>F-06</td><td>目标拆解（父子）</td><td>POST /api/goals/:id/breakdown</td><td>goals</td><td>TC-GOAL-002</td><td>已设计</td></tr>
+      <tr><td>F-07</td><td>目标进度追踪</td><td>GET /api/goals/:id</td><td>goals</td><td>TC-GOAL-003</td><td>已设计</td></tr>
+      <tr><td>F-08</td><td>目标列表筛选搜索</td><td>GET /api/goals?status=&goalId=</td><td>goals</td><td>TC-GOAL-004</td><td>已设计</td></tr>
+      <tr><td>F-09</td><td>问题录入关联目标</td><td>POST /api/problems</td><td>problems</td><td>TC-DEC-001</td><td>已设计</td></tr>
+      <tr><td>F-10</td><td>假设登记证据打分</td><td>POST /api/decision-cases/:id/hypotheses</td><td>hypotheses</td><td>TC-DEC-002</td><td>已设计</td></tr>
+      <tr><td>F-11</td><td>方案推演</td><td>POST /api/decision-cases/:id/forecast</td><td>forecasts</td><td>TC-DEC-005</td><td>已设计</td></tr>
+      <tr><td>F-12</td><td>多维评估</td><td>POST /api/decision-cases/:id/evaluate</td><td>evaluations</td><td>TC-DEC-003</td><td>已设计</td></tr>
+      <tr><td>F-13</td><td>ROI 试算</td><td>POST /api/decision-cases/:id/simulate-roi</td><td>roi_simulations</td><td>TC-DEC-004</td><td>已设计</td></tr>
+      <tr><td>F-14</td><td>决策报告生成</td><td>POST /api/decision-cases/:id/report</td><td>decision_cases,forecasts</td><td>TC-DEC-006</td><td>已设计</td></tr>
+      <tr><td>F-15</td><td>任务创建分配</td><td>POST /api/tasks（planId 须 approved）</td><td>tasks,plans</td><td>TC-TASK-001</td><td>已设计</td></tr>
+      <tr><td>F-16</td><td>任务状态流转</td><td>PATCH /api/tasks/:id/status</td><td>tasks</td><td>TC-TASK-002</td><td>已设计</td></tr>
+      <tr><td>F-17</td><td>任务列表筛选</td><td>GET /api/tasks?ownerId=&status=</td><td>tasks</td><td>TC-TASK-003</td><td>已设计</td></tr>
+      <tr><td>F-18</td><td>任务执行标准关联</td><td>POST /api/tasks（standardId）</td><td>tasks,standards</td><td>TC-TASK-004</td><td>已设计</td></tr>
+      <tr><td>F-19</td><td>每日反馈提交</td><td>POST /api/tasks/:id/feedback</td><td>feedbacks</td><td>TC-FB-001</td><td>已设计</td></tr>
+      <tr><td>F-20</td><td>未反馈检测提醒</td><td>BullMQ: feedback-reminder（Outbox 触发）</td><td>feedbacks,outbox_events</td><td>TC-FB-002</td><td>已设计</td></tr>
+      <tr><td>F-21</td><td>反馈质量评分</td><td>POST /api/tasks/:id/feedback（异步 Agent 回写 quality_score）</td><td>feedbacks,agent_runs</td><td>TC-FB-003</td><td>已设计</td></tr>
+      <tr><td>F-22</td><td>反馈历史查看（修订链）</td><td>GET /api/tasks/:id/feedback；POST /api/feedbacks/:id/revisions</td><td>feedbacks</td><td>TC-FB-004</td><td>已设计</td></tr>
+      <tr><td>F-23</td><td>Agent 辅助拆解</td><td>POST /api/goals/:id/breakdown（agent）；POST /api/problems/:id/decompose</td><td>agent_runs</td><td>TC-AGENT-001</td><td>已设计</td></tr>
+      <tr><td>F-24</td><td>Agent 辅助评估</td><td>POST /api/decision-cases/:id/evaluate（agent）</td><td>agent_runs,evaluations</td><td>TC-AGENT-002</td><td>已设计</td></tr>
+      <tr><td>F-25</td><td>Agent Run 追踪审计</td><td>GET /api/agent-runs/:id/trace；POST /api/agent-runs/:id/cancel</td><td>agent_runs</td><td>TC-AGENT-003</td><td>已设计</td></tr>
+    </tbody>
+  </table>
+  <h3>8.1 非功能需求追踪</h3>
+  <table>
+    <thead><tr><th>编号</th><th>非功能需求</th><th>设计载体</th><th>测试用例</th></tr></thead>
+    <tbody>
+      <tr><td>NFR-01</td><td>反馈不可篡改 + 同日唯一</td><td>feedbacks.revision/superseded_by + 部分唯一索引（P0-04）</td><td>TC-EXC-004</td></tr>
+      <tr><td>NFR-02</td><td>目标/任务并发乐观锁</td><td>goals/tasks.version + If-Match 409（P1-08）</td><td>TC-EXC-002</td></tr>
+      <tr><td>NFR-03</td><td>软删除过滤</td><td>deleted_at IS NULL（P0-01）</td><td>TC-EXC-005</td></tr>
+      <tr><td>NFR-04</td><td>事件可靠投递 + DLQ</td><td>outbox_events + outbox_consumed + DLQ（ADR-0005）</td><td>TC-EXC-003</td></tr>
+      <tr><td>NFR-05</td><td>密码安全</td><td>Argon2id（ADR-0003）</td><td>TC-SEC-001</td></tr>
+      <tr><td>NFR-06</td><td>Plan 审批主链路闭环</td><td>plans 状态机 + 职责分离（P0-02）</td><td>TC-DEC-007</td></tr>
     </tbody>
   </table>
 </section>

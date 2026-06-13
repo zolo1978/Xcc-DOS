@@ -1,5 +1,18 @@
 # XCDOS + Prolog AgentTeam 运维手册 V1.0
 
+> **适用范围声明（P0-10）**：本手册当前命令与镜像示例仅覆盖 **XCDOS**（NestJS / PostgreSQL / BullMQ / Prisma / Next.js）。**Prolog**（Spring Boot / PostgreSQL / Quartz / Vue3 + Langflow 容器）专属运维 SOP 见下方「Prolog 差异速查」，完整拆分版随 V1.2 发布。
+
+## Prolog 差异速查（待部署验证，不含具体阈值）
+
+| 维度 | XCDOS | Prolog 差异 |
+|------|-------|------|
+| 健康检查 | Next.js `/api/health` | Spring Actuator `/actuator/health` `/actuator/info` |
+| 进程指标 | Node event-loop lag | JVM heap / GC 暂停 / 线程池（Actuator + Micrometer） |
+| 定时任务 | BullMQ 队列深度 | Quartz misfire 计数 / trigger 状态 |
+| LLM 编排 | — | Langflow 容器存活 / flow 调用延迟 / API 网关回源 |
+| 日志路径 | pm2 / docker logs | logback 文件 + 滚动归档 |
+| 部署单元 | Node 镜像 | JVM 镜像（堆内存与容器 limit 对齐 -XX:MaxRAMPercentage） |
+
 ## 一、文档说明
 
 | 属性 | 内容 |
@@ -192,7 +205,7 @@ kubectl exec -it deployment/xcdos-server -n xcdos -- \
 **排查**：
 1. 检查 BullMQ 事件队列是否堆积
 2. 手动触发达看板缓存刷新：`POST /api/admin/cache/invalidate dashboard`
-3. 检查 Redis 缓存状态：`redis-cli KEYS dashboard:*`
+3. 检查 Redis 缓存状态：`redis-cli --scan --pattern 'dashboard:*'`（生产禁用 KEYS，阻塞主线程；用 SCAN，P2-12）
 
 #### 故障 3：Agent Run 全部失败
 

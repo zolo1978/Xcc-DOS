@@ -9,7 +9,7 @@
 |文档名称|Prolog AgentTeam 智能交互工厂 数据库详细设计文档|
 |文档版本|V1\.2|
 |对应迭代|V1\.2 全能力投产迭代|
-|前置依赖文档|《PRD V1\.2》《需求基线 V1\.2》《总体技术设计文档 TDD V1\.2》|
+|前置依赖文档|《需求清单与需求基线 V1\.2》（V1\.2 唯一需求源，P0\-11）《总体技术设计文档 TDD V1\.2》|
 |适用场景|数据库建表、开发编码、DBA评审、数据迁移、运维归档、合规审计|
 |设计状态|基线锁定、正式投产版|
 
@@ -19,7 +19,7 @@
 
 ### 1\.3 设计约束与规范
 
-- **数据库选型**：生产环境优先 MySQL 8\.0 / PostgreSQL 14\+，InnoDB 存储引擎，UTF8MB4 字符集，支持所有emoji及特殊字符存储
+- **数据库选型**：PostgreSQL 14\+（V1\.2 唯一主库，见 ADR\-0001；MySQL 兼容列入 V2 路线图），UTF\-8 编码原生支持全部 emoji 及特殊字符
 
 - **通用字段规范**：所有业务表强制携带 tenant\_id、create\_time、update\_time、delete\_flag 四大通用字段，用于租户隔离、数据溯源、逻辑删除
 
@@ -49,7 +49,7 @@
 
 ### 2\.2 多租户数据隔离方案
 
-兼容双隔离模式，一键切换，适配不同合规与运营场景
+隔离模式与迁移规则以 ADR\-0004 为准（Tier\-A 物理独立库 / Tier\-B schema\-per\-tenant 默认 / Tier\-C 共享\+RLS；Tier 间迁移必须走影子库\+双写\+校验工作流，禁止直接改配置切换）
 
 - **共享库行级隔离（默认）**：所有租户共用一套数据库实例，通过 tenant\_id 字段做行级隔离，低成本、易运维，适配中小规模SaaS场景
 
@@ -76,9 +76,9 @@
 |字段名|数据类型|是否必填|默认值|字段说明|
 |---|---|---|---|---|
 |tenant\_id|bigint|是|0|租户ID，0代表系统超级管理员，所有业务数据隔离唯一标识|
-|create\_time|datetime|是|CURRENT\_TIMESTAMP|数据创建时间，自动生成|
-|update\_time|datetime|是|CURRENT\_TIMESTAMP ON UPDATE CURRENT\_TIMESTAMP|数据更新时间，自动更新|
-|delete\_flag|tinyint|是|0|逻辑删除标识：0\-正常，1\-已删除|
+|create\_time|timestamptz|是|CURRENT\_TIMESTAMP|数据创建时间，自动生成|
+|update\_time|timestamptz|是|CURRENT\_TIMESTAMP（更新由 PG 触发器 trg\_set\_update\_time 维护）|数据更新时间，自动更新|
+|delete\_flag|smallint|是|0|逻辑删除标识：0\-正常，1\-已删除|
 
 ## 四、核心数据表详细设计
 
@@ -91,16 +91,16 @@
 |id|bigint|\-|是|否|雪花ID|租户唯一主键ID|
 |tenant\_name|varchar|64|否|否|\-|租户名称|
 |tenant\_code|varchar|32|否|否|\-|租户唯一编码，全局唯一|
-|isolate\_type|tinyint|\-|否|否|1|隔离模式：1\-行级共享，2\-物理独立库|
-|status|tinyint|\-|否|否|1|租户状态：0\-禁用，1\-正常|
-|expire\_time|datetime|\-|否|是|null|租户过期时间，null为永久有效|
+|isolate\_type|smallint|\-|否|否|3|隔离模式（对齐 ADR\-0004 与 API 二.B 字典）：1\-共享\+RLS（Tier\-C）/ 2\-物理独立库（Tier\-A）/ 3\-schema\-per\-tenant（Tier\-B 默认）|
+|status|smallint|\-|否|否|1|租户状态：0\-禁用，1\-正常|
+|expire\_time|timestamptz|\-|否|是|null|租户过期时间，null为永久有效|
 |contact\_person|varchar|32|否|是|null|租户联系人|
 |contact\_phone|varchar|16|否|是|null|联系人电话，脱敏存储|
 |remark|varchar|256|否|是|null|租户备注信息|
 |tenant\_id|bigint|\-|否|否|0|通用租户字段，系统级数据|
-|create\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
-|update\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP ON UPDATE CURRENT\_TIMESTAMP|更新时间|
-|delete\_flag|tinyint|\-|否|否|0|逻辑删除标识|
+|create\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
+|update\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP（更新由 PG 触发器 trg\_set\_update\_time 维护）|更新时间|
+|delete\_flag|smallint|\-|否|否|0|逻辑删除标识|
 
 **索引设计**：唯一索引\(tenant\_code\)、普通索引\(status、expire\_time\)
 
@@ -112,15 +112,15 @@
 |---|---|---|---|---|---|---|
 |id|bigint|\-|是|否|雪花ID|用户主键ID|
 |username|varchar|32|否|否|\-|登录账号，租户内唯一|
-|password|varchar|128|否|否|\-|加密密码，MD5\+盐值加密，不存储明文|
+|password|varchar|128|否|否|\-|Argon2id 标准编码哈希（m=64MB,t=3,p=4，见 ADR\-0003），不存储明文；禁止 MD5|
 |nickname|varchar|32|否|否|\-|用户昵称|
-|role\_level|tinyint|\-|否|否|1|角色等级：1\-只读，2\-运营，3\-管理员|
-|status|tinyint|\-|否|否|1|账号状态：0\-禁用，1\-正常|
-|last\_login\_time|datetime|\-|否|是|null|最后登录时间|
+|role\_level|smallint|\-|否|否|1|角色等级：1\-只读，2\-运营，3\-管理员|
+|status|smallint|\-|否|否|1|账号状态：0\-禁用，1\-正常|
+|last\_login\_time|timestamptz|\-|否|是|null|最后登录时间|
 |tenant\_id|bigint|\-|否|否|0|所属租户ID，0为超级管理员|
-|create\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
-|update\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP ON UPDATE CURRENT\_TIMESTAMP|更新时间|
-|delete\_flag|tinyint|\-|否|否|0|逻辑删除标识|
+|create\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
+|update\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP（更新由 PG 触发器 trg\_set\_update\_time 维护）|更新时间|
+|delete\_flag|smallint|\-|否|否|0|逻辑删除标识|
 
 **索引设计**：联合唯一索引\(tenant\_id、username\)、普通索引\(status、role\_level\)
 
@@ -134,17 +134,17 @@
 |rule\_name|varchar|64|否|否|\-|规则名称，业务语义化命名|
 |rule\_code|varchar|64|否|否|\-|规则唯一编码，全局唯一|
 |rule\_content|text|\-|否|否|\-|Prolog规则源码内容|
-|rule\_type|tinyint|\-|否|否|1|规则类型：1\-流程规则，2\-校验规则，3\-路由规则|
+|rule\_type|smallint|\-|否|否|1|规则类型：1\-流程规则，2\-校验规则，3\-路由规则|
 |parent\_id|bigint|\-|否|否|0|父规则ID，0为顶级规则|
-|status|tinyint|\-|否|否|0|规则状态：0\-未生效，1\-已生效，2\-灰度中|
+|status|smallint|\-|否|否|0|规则状态（对齐 API 二.B 字典）：0\-draft 草稿，1\-active 已生效，2\-gray 灰度中，3\-inactive 停用|
 |version|int|\-|否|否|1|规则版本号，用于热更新、回滚|
-|is\_auto\_gen|tinyint|\-|否|否|0|是否自动生成：0\-人工创建，1\-系统自进化生成|
+|is\_auto\_gen|smallint|\-|否|否|0|是否自动生成：0\-人工创建，1\-系统自进化生成|
 |gray\_rate|int|\-|否|否|100|灰度放量比例，0\-100|
 |remark|varchar|512|否|是|null|规则业务说明|
 |tenant\_id|bigint|\-|否|否|0|所属租户ID|
-|create\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
-|update\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP ON UPDATE CURRENT\_TIMESTAMP|更新时间|
-|delete\_flag|tinyint|\-|否|否|0|逻辑删除标识|
+|create\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
+|update\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP（更新由 PG 触发器 trg\_set\_update\_time 维护）|更新时间|
+|delete\_flag|smallint|\-|否|否|0|逻辑删除标识|
 
 **索引设计**：联合唯一索引\(tenant\_id、rule\_code\)、联合索引\(status、rule\_type、version\)、普通索引\(parent\_id\)
 
@@ -161,8 +161,8 @@
 |change\_desc|varchar|512|否|是|null|版本变更说明|
 |create\_user|bigint|\-|否|否|0|创建人ID，0为系统自动生成|
 |tenant\_id|bigint|\-|否|否|0|所属租户ID|
-|create\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|快照生成时间|
-|delete\_flag|tinyint|\-|否|否|0|逻辑删除标识|
+|create\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|快照生成时间|
+|delete\_flag|smallint|\-|否|否|0|逻辑删除标识|
 
 **索引设计**：联合索引\(tenant\_id、rule\_id、version\)、普通索引\(create\_time\)
 
@@ -176,11 +176,11 @@
 |origin\_word|varchar|64|否|否|\-|原始标准词|
 |synonym\_word|varchar|64|否|否|\-|同义词、用户口语化输入|
 |priority|int|\-|否|否|50|匹配优先级，数值越大优先级越高|
-|status|tinyint|\-|否|否|1|状态：0\-禁用，1\-正常|
+|status|smallint|\-|否|否|1|状态：0\-禁用，1\-正常|
 |tenant\_id|bigint|\-|否|否|0|所属租户ID|
-|create\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
-|update\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP ON UPDATE CURRENT\_TIMESTAMP|更新时间|
-|delete\_flag|tinyint|\-|否|否|0|逻辑删除标识|
+|create\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|创建时间|
+|update\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP（更新由 PG 触发器 trg\_set\_update\_time 维护）|更新时间|
+|delete\_flag|smallint|\-|否|否|0|逻辑删除标识|
 
 **索引设计**：联合唯一索引\(tenant\_id、origin\_word、synonym\_word\)、普通索引\(status、priority\)
 
@@ -195,12 +195,12 @@
 |user\_ip|varchar|32|否|否|\-|用户登录IP|
 |current\_state|varchar|64|否|否|init|当前会话状态，对应状态机节点|
 |context\_data|text|\-|否|是|null|会话上下文数据，JSON格式存储|
-|last\_active\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|最后活跃时间，用于超时判断|
-|expire\_time|datetime|\-|否|否|\-|会话过期时间，默认30分钟有效期|
-|session\_status|tinyint|\-|否|否|1|会话状态：1\-正常，2\-超时，3\-主动退出|
+|last\_active\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|最后活跃时间，用于超时判断|
+|expire\_time|timestamptz|\-|否|否|\-|会话过期时间，默认30分钟有效期|
+|session\_status|smallint|\-|否|否|1|会话状态：1\-正常，2\-超时，3\-主动退出|
 |tenant\_id|bigint|\-|否|否|0|所属租户ID|
-|create\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|会话创建时间|
-|delete\_flag|tinyint|\-|否|否|0|逻辑删除标识|
+|create\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|会话创建时间|
+|delete\_flag|smallint|\-|否|否|0|逻辑删除标识|
 
 **索引设计**：唯一索引\(session\_id\)、联合索引\(tenant\_id、session\_status、expire\_time\)、普通索引\(last\_active\_time\)
 
@@ -213,19 +213,19 @@
 |id|bigint|\-|是|否|雪花ID|日志主键ID|
 |session\_id|varchar|64|否|否|\-|关联会话唯一ID，关联user\_session表|
 |request\_uuid|varchar|64|否|否|\-|全局唯一请求ID，用于全链路追踪|
-|request\_type|tinyint|\-|否|否|1|请求类型：1\-对话交互，2\-规则校验，3\-路由调度，4\-后台操作|
+|request\_type|smallint|\-|否|否|1|请求类型：1\-对话交互，2\-规则校验，3\-路由调度，4\-后台操作|
 |request\_content|text|\-|否|否|\-|用户原始请求内容、入参数据，JSON格式存储|
 |response\_content|text|\-|否|是|null|系统响应结果数据，JSON格式存储|
 |rule\_id|bigint|\-|否|是|null|本次请求命中的核心规则ID，无则为null|
-|request\_status|tinyint|\-|否|否|1|请求状态：1\-成功，2\-失败，3\-超时，4\-拦截|
+|request\_status|smallint|\-|否|否|1|请求状态：1\-成功，2\-失败，3\-超时，4\-拦截|
 |cost\_time|int|\-|否|否|0|请求耗时，单位：毫秒|
 |request\_ip|varchar|32|否|否|\-|客户端请求IP地址|
 |error\_msg|varchar|512|否|是|null|请求失败异常信息，成功则为空|
-|is\_sample|tinyint|\-|否|否|0|是否为自进化样本：0\-否，1\-是，用于模型训练|
+|is\_sample|smallint|\-|否|否|0|是否为自进化样本：0\-否，1\-是，用于模型训练|
 |tenant\_id|bigint|\-|否|否|0|所属租户ID，数据隔离核心字段|
-|create\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP|日志创建时间|
-|update\_time|datetime|\-|否|否|CURRENT\_TIMESTAMP ON UPDATE CURRENT\_TIMESTAMP|日志更新时间|
-|delete\_flag|tinyint|\-|否|否|0|逻辑删除标识：0\-正常，1\-已删除|
+|create\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP|日志创建时间|
+|update\_time|timestamptz|\-|否|否|CURRENT\_TIMESTAMP（更新由 PG 触发器 trg\_set\_update\_time 维护）|日志更新时间|
+|delete\_flag|smallint|\-|否|否|0|逻辑删除标识：0\-正常，1\-已删除|
 
 **索引设计**：唯一索引\(request\_uuid\)、联合索引\(tenant\_id、create\_time、request\_status\)、普通索引\(session\_id、rule\_id、is\_sample、cost\_time\)
 
@@ -235,7 +235,7 @@
 
 ### 5\.1 验收通用说明
 
-- **验收环境**：兼容公网集群、内网单机、边缘离线三种部署模式，数据库环境为MySQL 8\.0 / PostgreSQL 14\+
+- **验收环境**：兼容公网集群、内网单机、边缘离线三种部署模式，数据库环境为 PostgreSQL 14\+（ADR\-0001）
 
 - **验收标准**：所有用例执行结果符合数据库设计规范、业务逻辑、数据约束，无数据错乱、无跨租户泄露、无数据丢失、无合规风险
 
@@ -275,7 +275,7 @@
 |UC010|通用字段完整性验收|1、随机查询租户、用户、规则、会话等所有业务表新增数据；2、校验tenant\_id、create\_time、update\_time、delete\_flag四个通用字段|1、所有业务表均完整携带四大通用字段，无缺失；2、创建时间、更新时间自动生成、自动更新；3、默认租户ID、删除标识符合设计规范；4、字段注释清晰、命名为小写蛇形||
 |UC011|隐私数据脱敏存储验收|1、新增租户填写真实联系电话；2、直接查询数据库原表数据；3、校验数据存储及展示效果|1、数据库中手机号无明文留存，已完成脱敏存储；2、前端展示脱敏格式，无隐私泄露风险；3、脱敏不影响数据查询、关联业务功能||
 |UC012|逻辑删除规则验收|1、删除任意规则、同义词、会话数据；2、查询数据库物理数据；3、校验业务查询、数据恢复功能|1、数据未物理删除，delete\_flag更新为1；2、业务前端无法查询已删除数据；3、支持手动恢复删除数据，恢复后正常展示；4、所有删除操作均为逻辑删除，符合规范||
-|UC013|数据库编码与特殊字符验收|1、新增包含emoji、特殊符号、生僻字的规则名称、备注信息；2、保存数据后查询校验完整性|1、数据正常存储，无乱码、无截断、无丢失；2、UTF8MB4字符集生效，完全兼容特殊字符与emoji；3、查询、展示、修改功能正常||
+|UC013|数据库编码与特殊字符验收|1、新增包含emoji、特殊符号、生僻字的规则名称、备注信息；2、保存数据后查询校验完整性|1、数据正常存储，无乱码、无截断、无丢失；2、UTF\-8 编码（PostgreSQL 原生）完全兼容特殊字符与emoji；3、查询、展示、修改功能正常||
 
 ### 5\.5 数据生命周期验收用例
 

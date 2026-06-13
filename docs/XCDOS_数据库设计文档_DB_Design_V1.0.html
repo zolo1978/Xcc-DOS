@@ -89,7 +89,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>分库分表</td><td>MVP 不做（模块化单体）</td><td>二期按租户/时间分片</td></tr>
   </table>
 
-  <div class="callout" style="margin-top:16px">MVP 采用单库多 Schema（public），不做物理分库。连接池设 20-50。所有表统一 4 个审计字段：<code>id</code> (UUID 主键), <code>created_at</code>, <code>updated_at</code>, <code>deleted_at</code> (软删除)。</div>
+  <div class="callout" style="margin-top:16px">MVP 采用单库多 Schema（public），不做物理分库。连接池设 20-50。所有表统一 4 个审计字段：<code>id</code> (UUID 主键), <code>created_at</code> (必填默认 NOW()), <code>updated_at</code> (必填默认 NOW())，<code>deleted_at</code> (nullable 默认 NULL，删除时写入时间戳；正常数据恒为 NULL，默认查询条件 <code>deleted_at IS NULL</code>)。</div>
 </section>
 
 <section id="schemas">
@@ -105,7 +105,8 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>parent_id</td><td>UUID</td><td>-</td><td></td><td>NULL</td><td>父组织 ID，NULL = 根节点</td></tr>
     <tr><td>type</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'department'</td><td>类型：company / department / team</td></tr>
     <tr><td>status</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'active'</td><td>active / inactive</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>-</td><td>✓</td><td>NOW()</td><td>审计时间戳</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>-</td><td>✓</td><td>NOW()</td><td>创建/更新时间</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>-</td><td></td><td>NULL</td><td>软删除时间；正常数据恒为 NULL</td></tr>
   </table>
 
   <h4>users — 用户</h4>
@@ -117,9 +118,10 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>name</td><td>VARCHAR</td><td>50</td><td>✓</td><td>-</td><td>姓名</td></tr>
     <tr><td>email</td><td>VARCHAR</td><td>100</td><td>✓</td><td>-</td><td>邮箱（唯一）</td></tr>
     <tr><td>phone</td><td>VARCHAR</td><td>20</td><td></td><td>NULL</td><td>手机号</td></tr>
-    <tr><td>password_hash</td><td>VARCHAR</td><td>255</td><td>✓</td><td>-</td><td>bcrypt 哈希</td></tr>
+    <tr><td>password_hash</td><td>VARCHAR</td><td>255</td><td>✓</td><td>-</td><td>Argon2id 标准编码哈希（ADR-0003）</td></tr>
     <tr><td>status</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'active'</td><td>active / inactive / locked</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>-</td><td>✓</td><td>NOW()</td><td>审计时间戳</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>-</td><td>✓</td><td>NOW()</td><td>创建/更新时间</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>-</td><td></td><td>NULL</td><td>软删除时间；正常数据恒为 NULL</td></tr>
   </table>
 
   <h4>roles — 角色</h4>
@@ -148,7 +150,9 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>current_value</td><td>DECIMAL(18,4)</td><td></td><td></td><td>0</td><td>当前值</td></tr>
     <tr><td>start_date / deadline</td><td>DATE</td><td></td><td>✓</td><td>-</td><td>起止日期</td></tr>
     <tr><td>status</td><td>VARCHAR</td><td>20</td><td>✓</td><td>'draft'</td><td>draft / active / completed / cancelled</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td></td><td>✓</td><td>NOW()</td><td>审计时间戳</td></tr>
+    <tr><td>version</td><td>INTEGER</td><td>-</td><td>✓</td><td>0</td><td>乐观锁版本号，更新条件含 id+version 并原子 +1（P1-08）</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td></td><td>✓</td><td>NOW()</td><td>创建/更新时间</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td></td><td></td><td>NULL</td><td>软删除时间；正常数据恒为 NULL</td></tr>
   </table>
 
   <h4>problems — 问题</h4>
@@ -162,7 +166,8 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>description</td><td>TEXT</td><td>问题描述</td></tr>
     <tr><td>status</td><td>VARCHAR(20)</td><td>open / analyzing / resolved / closed</td></tr>
     <tr><td>created_by</td><td>UUID</td><td>FK → users.id</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>创建/更新时间，必填默认 NOW()</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>软删除时间，nullable 默认 NULL</td></tr>
   </table>
 
   <h4>decision_cases — 决策案例</h4>
@@ -175,7 +180,8 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>confidence</td><td>DECIMAL(5,2)</td><td>综合置信度 0-100</td></tr>
     <tr><td>status</td><td>VARCHAR(20)</td><td>draft / in_progress / resolved / approved / rejected</td></tr>
     <tr><td>created_by</td><td>UUID</td><td>FK → users.id</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>创建/更新时间，必填默认 NOW()</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>软删除时间，nullable 默认 NULL</td></tr>
   </table>
 
   <h4>hypotheses — 假设</h4>
@@ -190,6 +196,23 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>status</td><td>VARCHAR(20)</td><td>proposed / validated / rejected</td></tr>
     <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
   </table>
+
+  <h4>forecasts — 推演（P0-03）</h4>
+  <table>
+    <tr><th style="width:160px">字段</th><th style="width:100px">类型</th><th>注释</th></tr>
+    <tr><td>id</td><td>UUID</td><td>主键</td></tr>
+    <tr><td>case_id</td><td>UUID</td><td>FK → decision_cases.id</td></tr>
+    <tr><td>version</td><td>INT</td><td>推演版本号，同案例内递增；重跑推演生成新版本，不覆盖</td></tr>
+    <tr><td>input_hypothesis_ids</td><td>UUID[]</td><td>输入假设集（快照，FK 引用 hypotheses）</td></tr>
+    <tr><td>scenarios</td><td>JSONB</td><td>推演情景数组：[{ name, probability, outcome, impact, assumptions }]；Schema 版本随 model_source 记录</td></tr>
+    <tr><td>model_source</td><td>VARCHAR(50)</td><td>推演来源：agent:&lt;model-id&gt; / manual（人工修订）</td></tr>
+    <tr><td>confidence</td><td>DECIMAL(5,2)</td><td>整体置信度 0-100</td></tr>
+    <tr><td>revised_by</td><td>UUID</td><td>nullable，FK → users.id；人工修订人</td></tr>
+    <tr><td>agent_run_id</td><td>UUID</td><td>nullable，FK → agent_runs.id；AI 生成时回链审计</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>软删除时间，nullable 默认 NULL</td></tr>
+  </table>
+  <div class="callout">推演结果不可静默改写：每次重跑或人工修订生成新 <code>version</code> 行；决策报告（report 阶段）必须引用明确的 forecast version，保证"推"阶段可复查可审计（P0-03）。唯一索引 <code>uq_forecast_case_ver (case_id, version)</code>。</div>
 
   <h4>evaluations — 评估</h4>
   <table>
@@ -225,9 +248,13 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>owner_id</td><td>UUID</td><td>FK → users.id</td></tr>
     <tr><td>title</td><td>VARCHAR(200)</td><td>方案标题</td></tr>
     <tr><td>description</td><td>TEXT</td><td>方案描述</td></tr>
-    <tr><td>status</td><td>VARCHAR(20)</td><td>draft / submitted / approved / executing / completed</td></tr>
+    <tr><td>status</td><td>VARCHAR(20)</td><td>draft / submitted / approved / rejected / executing / completed（状态机见 API 文档六.B）</td></tr>
+    <tr><td>submitted_at</td><td>TIMESTAMPTZ</td><td>nullable，提交审批时间</td></tr>
     <tr><td>approved_by</td><td>UUID</td><td>FK → users.id，审批人</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+    <tr><td>approved_at</td><td>TIMESTAMPTZ</td><td>nullable，审批通过时间</td></tr>
+    <tr><td>rejected_reason</td><td>TEXT</td><td>nullable，驳回原因（rejected 时必填）</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>创建/更新时间，必填默认 NOW()</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>软删除时间，nullable 默认 NULL</td></tr>
   </table>
 
   <h3>2.3 执行与反馈域</h3>
@@ -256,7 +283,9 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>description</td><td>TEXT</td><td>任务描述</td></tr>
     <tr><td>due_time</td><td>TIMESTAMPTZ</td><td>截止时间</td></tr>
     <tr><td>status</td><td>VARCHAR(20)</td><td>todo / in_progress / done / delayed / cancelled</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+    <tr><td>version</td><td>INTEGER</td><td>乐观锁版本号，默认 0；并发更新冲突返回 409（P1-08）</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>创建/更新时间，必填默认 NOW()</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>软删除时间，nullable 默认 NULL</td></tr>
   </table>
 
   <h4>feedbacks — 反馈</h4>
@@ -270,9 +299,13 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>blocker</td><td>TEXT</td><td>卡点 / 阻塞</td></tr>
     <tr><td>next_action</td><td>TEXT</td><td>下一步行动</td></tr>
     <tr><td>quality_score</td><td>DECIMAL(5,2)</td><td>质量评分 0-100（AI 辅助）</td></tr>
+    <tr><td>business_date</td><td>DATE</td><td>业务日期（按提交人时区归一），同日唯一性判定键</td></tr>
+    <tr><td>revision</td><td>INT</td><td>修订号，首次提交 = 1；修改不覆盖原文，生成新行 revision+1</td></tr>
+    <tr><td>superseded_by</td><td>UUID</td><td>nullable；被新修订替代时指向新行 id，当前生效行恒为 NULL</td></tr>
     <tr><td>submitted_at</td><td>TIMESTAMPTZ</td><td>提交时间</td></tr>
     <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
   </table>
+  <div class="callout">反馈不可篡改规则（P0-04）：已提交反馈禁止 UPDATE 正文字段；修改走"新增 revision 行 + 原行 superseded_by 指向新行"。唯一约束 <code>uq_fb_current (task_id, user_id, business_date) WHERE superseded_by IS NULL</code> 保证同日仅一条生效反馈（并发双写由该约束兜底，P1-06）。</div>
 
   <h4>exceptions — 异常</h4>
   <table>
@@ -285,7 +318,8 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <tr><td>description</td><td>TEXT</td><td>异常描述</td></tr>
     <tr><td>owner_id</td><td>UUID</td><td>FK → users.id，处理人</td></tr>
     <tr><td>status</td><td>VARCHAR(20)</td><td>open / acknowledged / resolving / resolved</td></tr>
-    <tr><td>created_at / updated_at / deleted_at</td><td>TIMESTAMPTZ</td><td>审计时间戳</td></tr>
+    <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>创建/更新时间，必填默认 NOW()</td></tr>
+    <tr><td>deleted_at</td><td>TIMESTAMPTZ</td><td>软删除时间，nullable 默认 NULL</td></tr>
   </table>
 
   <h4>results — 执行结果</h4>
@@ -375,6 +409,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
       <tr><td>tasks</td><td>idx_tasks_goal</td><td>(goal_id)</td><td>B-Tree</td><td>按目标查任务</td></tr>
       <tr><td>tasks</td><td>idx_tasks_plan</td><td>(plan_id)</td><td>B-Tree</td><td>按方案查任务</td></tr>
       <tr><td>feedbacks</td><td>idx_fb_user_date</td><td>(user_id, submitted_at DESC)</td><td>B-Tree</td><td>用户反馈时间线</td></tr>
+      <tr><td>feedbacks</td><td>uq_fb_current</td><td>(task_id, user_id, business_date) WHERE superseded_by IS NULL</td><td>Partial Unique</td><td>同日生效反馈唯一（P0-04/P1-06）</td></tr>
       <tr><td>feedbacks</td><td>idx_fb_task</td><td>(task_id)</td><td>B-Tree</td><td>按任务查反馈</td></tr>
       <tr><td>exceptions</td><td>idx_exc_severity_status</td><td>(severity, status)</td><td>B-Tree</td><td>驾驶舱异常面板</td></tr>
       <tr><td>exceptions</td><td>idx_exc_owner</td><td>(owner_id)</td><td>B-Tree</td><td>我的异常</td></tr>
@@ -465,7 +500,7 @@ feedback_quality → 反馈质量 Agent</pre>
       <tr><td>users</td><td>phone</td><td>存储加密 + 日志脱敏</td><td>日志中显示为 138****1234</td></tr>
       <tr><td>users</td><td>password_hash</td><td>bcrypt (cost=12)</td><td>永不输出到日志/API 响应</td></tr>
       <tr><td>feedbacks</td><td>today_goal / result / blocker</td><td>访问控制</td><td>仅直属上级 + 本人可见</td></tr>
-      <tr><td>all</td><td>deleted_at</td><td>逻辑删除</td><td>查询默认过滤 deleted_at IS NOT NULL</td></tr>
+      <tr><td>all</td><td>deleted_at</td><td>逻辑删除</td><td>查询默认过滤 deleted_at IS NULL（仅返回未删除数据）</td></tr>
     </tbody>
   </table>
 

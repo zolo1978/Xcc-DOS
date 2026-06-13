@@ -206,7 +206,14 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
   <div class="endpoint">
     <div class="endpoint-head"><span class="method patch">PATCH</span><span class="path">/api/goals/:id/status</span></div>
     <div class="endpoint-body">
-      <p class="desc">更新目标状态。Body: <code>{ status: "active" | "completed" | "cancelled" }</code>。权限：目标 owner 或 manager+。</p>
+      <p class="desc">更新目标状态。Body: <code>{ status: "active" | "completed" | "cancelled" }</code>。请求头 <code>If-Match: &lt;version&gt;</code>（乐观锁，版本不匹配返回 409 VERSION_CONFLICT）。权限：目标 owner 或 manager+。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method delete">DELETE</span><span class="path">/api/goals/:id</span></div>
+    <div class="endpoint-body">
+      <p class="desc">软删除目标（写 deleted_at，不物理删除）。前置校验：目标下存在未完成任务（todo / in_progress）时返回 409 GOAL_HAS_ACTIVE_TASKS。权限：目标 owner 或 manager+。<b>Response 204。</b></p>
     </div>
   </div>
 </section>
@@ -257,7 +264,12 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
 
   <div class="endpoint">
     <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/forecast</span></div>
-    <div class="endpoint-body"><p class="desc">推演阶段。基于假设生成推演方案。Body: <code>{ selectedHypothesisIds: [...] }</code>。案例 stage → hypothesize。</p></div>
+    <div class="endpoint-body"><p class="desc">推演阶段。基于假设生成推演并持久化到 forecasts 表（P0-03）。Body: <code>{ selectedHypothesisIds: [...] }</code>。<b>Response 201:</b> <code>{ id, caseId, version, scenarios: [{ name, probability, outcome, impact, assumptions }], confidence, modelSource, agentRunId }</code>。重复调用生成新 version，不覆盖历史。案例 stage → hypothesize。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/decision-cases/:id/forecasts</span></div>
+    <div class="endpoint-body"><p class="desc">推演版本列表（含人工修订记录）。Query: <code>?version=</code> 取指定版本。决策报告引用的 forecast version 由此接口可追溯（P0-03 审计闭环）。</p></div>
   </div>
 
   <div class="endpoint">
@@ -276,7 +288,35 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
 
   <div class="endpoint">
     <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/report</span></div>
-    <div class="endpoint-body"><p class="desc">生成决策报告。自动汇总拆推评算全流程数据。案例 stage → report，status → resolved。</p></div>
+    <div class="endpoint-body"><p class="desc">生成决策报告。自动汇总拆推评算全流程数据。案例 stage → report。注意：报告生成不改变 status；案例 status → resolved 的前置条件 = 该案例下至少一个 Plan 处于 approved 状态（P0-02 主链路闭环）。</p></div>
+  </div>
+
+  <h3>六.B 方案（Plan）管理与审批</h3>
+  <p class="desc">状态机：<code>draft → submitted → approved | rejected</code>；approved 后随任务执行进入 <code>executing → completed</code>。rejected 可修改后重新 submit。只有 approved 的 Plan 允许被 POST /api/tasks 引用（planId 前置校验）。</p>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/decision-cases/:id/plans</span></div>
+    <div class="endpoint-body"><p class="desc">基于决策案例创建执行方案（status = draft）。Body: <code>{ title, description }</code>。权限：案例 owner 或 manager+。<b>Response 201:</b> <code>{ id, caseId, status: "draft" }</code></p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/plans/:id</span></div>
+    <div class="endpoint-body"><p class="desc">方案详情，含状态、审批人、审批时间、驳回原因、关联任务数。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/plans/:id/submit</span></div>
+    <div class="endpoint-body"><p class="desc">提交审批：draft | rejected → submitted。仅方案 owner。写入 submitted_at；非法状态返回 409 INVALID_PLAN_STATE。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/plans/:id/approve</span></div>
+    <div class="endpoint-body"><p class="desc">审批通过：submitted → approved。权限：manager+ 且不得为方案 owner 本人（职责分离）。写入 approved_by / approved_at，记审计事件 PlanApproved。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/plans/:id/reject</span></div>
+    <div class="endpoint-body"><p class="desc">驳回：submitted → rejected。Body: <code>{ reason }</code>（必填）。权限同 approve。记审计事件 PlanRejected。</p></div>
   </div>
 </section>
 
@@ -288,7 +328,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
     <div class="endpoint-body">
       <table>
         <tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr>
-        <tr><td>planId</td><td>UUID</td><td>✓</td><td>关联执行方案</td></tr>
+        <tr><td>planId</td><td>UUID</td><td>✓</td><td>关联执行方案；服务端校验 Plan.status 必须为 approved，否则 422 PLAN_NOT_APPROVED（P0-02）</td></tr>
         <tr><td>goalId</td><td>UUID</td><td></td><td>关联目标</td></tr>
         <tr><td>ownerId</td><td>UUID</td><td>✓</td><td>负责人</td></tr>
         <tr><td>title</td><td>string</td><td>✓</td><td>任务标题</td></tr>
@@ -319,7 +359,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
   <div class="endpoint">
     <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/tasks/:id/feedback</span></div>
     <div class="endpoint-body">
-      <p class="desc">提交任务反馈。同一任务同一天重复提交时更新已有反馈。</p>
+      <p class="desc">提交任务反馈。同一任务同日（business_date）已有生效反馈时返回 409 DUPLICATE_FEEDBACK，不覆盖原文；修改须走修订接口（见下）。请求须携带 <code>Idempotency-Key</code> 头防重试重复。</p>
       <table>
         <tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr>
         <tr><td>todayGoal</td><td>string</td><td>✓</td><td>今日目标</td></tr>
@@ -327,8 +367,17 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
         <tr><td>blocker</td><td>string</td><td>✓</td><td>卡点 / 阻塞</td></tr>
         <tr><td>nextAction</td><td>string</td><td>✓</td><td>下一步行动</td></tr>
       </table>
-      <p><b>Response 201:</b> <code>{ id, taskId, qualityScore, submittedAt }</code></p>
+      <p><b>Response 201:</b> <code>{ id, taskId, revision: 1, qualityScore, submittedAt }</code></p>
       <p>qualityScore 由 Agent 异步评估（0-100），初始为 null。</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/feedbacks/:id/revisions</span></div>
+    <div class="endpoint-body">
+      <p class="desc">对已提交反馈创建修订（P0-04：不可篡改，原文保留）。生成新行 revision+1，原行 superseded_by 指向新行。仅反馈提交人本人可修订；当日 23:59 后锁定不可修订。Body 同提交接口四字段。</p>
+      <p><b>Response 201:</b> <code>{ id, revision, supersedes, submittedAt }</code></p>
+      <p><b>Errors:</b> 403 非本人；409 已被更新修订替代；423 已锁定。</p>
     </div>
   </div>
 </section>
@@ -353,6 +402,11 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
   <div class="endpoint">
     <div class="endpoint-head"><span class="method get">GET</span><span class="path">/api/agent-runs</span></div>
     <div class="endpoint-body"><p class="desc">Agent 运行记录列表。Query: <code>?agentType=&status=&page=&pageSize=</code>。权限：admin。</p></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-head"><span class="method post">POST</span><span class="path">/api/agent-runs/:id/cancel</span></div>
+    <div class="endpoint-body"><p class="desc">取消运行中的 Agent Run：status running → cancelled，幂等（已终态返回 200 原状态）。中断后已产生的工具调用记录保留，审计不回滚。权限：发起人或 admin。</p></div>
   </div>
 
   <div class="endpoint">
@@ -394,7 +448,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
       <tr><td><code>DECISION_CASE_NOT_FOUND</code></td><td>404</td><td>决策案例不存在</td></tr>
       <tr><td><code>VALIDATION_ERROR</code></td><td>422</td><td>请求参数校验失败</td></tr>
       <tr><td><code>STATE_TRANSITION_INVALID</code></td><td>422</td><td>状态流转不合法（如跳过拆解直接评估）</td></tr>
-      <tr><td><code>DUPLICATE_FEEDBACK</code></td><td>409</td><td>同一任务同日重复提交（已自动更新为最新）</td></tr>
+      <tr><td><code>DUPLICATE_FEEDBACK</code></td><td>409</td><td>同一任务同日已有生效反馈；不自动覆盖，修改请调用 POST /api/feedbacks/:id/revisions</td></tr>
       <tr><td><code>RATE_LIMIT_EXCEEDED</code></td><td>429</td><td>请求频率超限</td></tr>
       <tr><td><code>AGENT_RUN_FAILED</code></td><td>500</td><td>Agent 执行失败</td></tr>
       <tr><td><code>INTERNAL_ERROR</code></td><td>500</td><td>服务器内部错误</td></tr>
