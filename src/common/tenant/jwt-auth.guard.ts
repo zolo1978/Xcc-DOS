@@ -12,6 +12,8 @@ import { TENANT_CLAIM_KEY } from './tenant.constants';
 type JwtPayload = {
   sub?: string;
   tenant?: string;
+  role?: string;
+  tokenType?: string;
 };
 
 @Injectable()
@@ -47,6 +49,10 @@ export class JwtAuthGuard implements CanActivate {
     const tenantId = payload[TENANT_CLAIM_KEY];
     if (!tenantId) {
       throw new UnauthorizedException('MISSING_TENANT_CLAIM');
+    }
+
+    if (payload.tokenType && payload.tokenType !== 'access') {
+      throw new UnauthorizedException('INVALID_JWT');
     }
 
     const headerTenantId = request.header('X-Tenant-Id');
