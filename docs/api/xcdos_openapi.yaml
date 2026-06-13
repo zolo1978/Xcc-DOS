@@ -1,0 +1,303 @@
+openapi: 3.1.0
+info:
+  title: XCDOS API
+  version: 1.0.0
+  description: >
+    企业决策与执行操作系统 API。事实源（Gate 1）。
+    契约对齐 ADR-0001~0005 + 评审 P0-01/02/03/04/06。
+servers:
+  - url: /api
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    IfMatch:
+      name: If-Match
+      in: header
+      required: false
+      description: 乐观锁版本（P1-08），不匹配返回 409
+      schema: { type: integer }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: 写接口幂等键（ADR-0005）
+      schema: { type: string }
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+    Plan:
+      type: object
+      required: [id, caseId, status]
+      properties:
+        id: { type: string, format: uuid }
+        caseId: { type: string, format: uuid }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [draft, submitted, approved, rejected, executing, completed] }
+        submittedAt: { type: [string, "null"], format: date-time }
+        approvedBy: { type: [string, "null"], format: uuid }
+        approvedAt: { type: [string, "null"], format: date-time }
+        rejectedReason: { type: [string, "null"] }
+        version: { type: integer }
+    Forecast:
+      type: object
+      required: [id, caseId, version, scenarios]
+      properties:
+        id: { type: string, format: uuid }
+        caseId: { type: string, format: uuid }
+        version: { type: integer }
+        scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              probability: { type: number }
+              outcome: { type: string }
+              impact: { type: string }
+              assumptions: { type: string }
+        confidence: { type: number }
+        modelSource: { type: string }
+        agentRunId: { type: [string, "null"], format: uuid }
+    Feedback:
+      type: object
+      required: [id, taskId, revision]
+      properties:
+        id: { type: string, format: uuid }
+        taskId: { type: string, format: uuid }
+        revision: { type: integer }
+        supersededBy: { type: [string, "null"], format: uuid }
+        qualityScore: { type: [number, "null"] }
+        submittedAt: { type: string, format: date-time }
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: token 签发 }
+        '401': { description: 认证失败, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /me:
+    get:
+      operationId: getMe
+      responses: { '200': { description: 当前用户 } }
+  /dashboard/boss:
+    get:
+      operationId: getBossDashboard
+      responses: { '200': { description: 老板驾驶舱聚合 } }
+  /goals:
+    post:
+      operationId: createGoal
+      responses: { '201': { description: 已创建 } }
+    get:
+      operationId: listGoals
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: goalId, in: query, schema: { type: string } }
+      responses: { '200': { description: 列表 } }
+  /goals/{id}:
+    get:
+      operationId: getGoal
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 详情 }, '404': { description: 不存在 } }
+    delete:
+      operationId: deleteGoal
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '204': { description: 已软删除 }
+        '409': { description: GOAL_HAS_ACTIVE_TASKS, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /goals/{id}/breakdown:
+    post:
+      operationId: breakdownGoal
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 拆解结果 } }
+  /goals/{id}/status:
+    patch:
+      operationId: updateGoalStatus
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '200': { description: 已更新 }
+        '409': { description: VERSION_CONFLICT, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /problems:
+    post: { operationId: createProblem, responses: { '201': { description: 已创建 } } }
+  /problems/{id}/decompose:
+    post:
+      operationId: decomposeProblem
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Agent 拆解 } }
+  /decision-cases:
+    get: { operationId: listDecisionCases, responses: { '200': { description: 列表 } } }
+  /decision-cases/{id}:
+    get:
+      operationId: getDecisionCase
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 详情 } }
+  /decision-cases/{id}/hypotheses:
+    post:
+      operationId: addHypothesis
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: 已登记 } }
+  /decision-cases/{id}/forecast:
+    post:
+      operationId: createForecast
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '201': { description: 推演已持久化, content: { application/json: { schema: { $ref: '#/components/schemas/Forecast' } } } }
+  /decision-cases/{id}/forecasts:
+    get:
+      operationId: listForecasts
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: version, in: query, schema: { type: integer } }
+      responses: { '200': { description: 推演版本列表 } }
+  /decision-cases/{id}/evaluate:
+    post:
+      operationId: evaluateCase
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: 已评估 } }
+  /decision-cases/{id}/simulate-roi:
+    post:
+      operationId: simulateRoi
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: ROI 结果 } }
+  /decision-cases/{id}/report:
+    post:
+      operationId: generateReport
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: 报告已生成 }
+        '409': { description: NO_APPROVED_PLAN（resolved 前置缺失）, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /decision-cases/{id}/plans:
+    post:
+      operationId: createPlan
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: 方案草稿, content: { application/json: { schema: { $ref: '#/components/schemas/Plan' } } } } }
+  /plans/{id}:
+    get:
+      operationId: getPlan
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 详情, content: { application/json: { schema: { $ref: '#/components/schemas/Plan' } } } } }
+  /plans/{id}/submit:
+    post:
+      operationId: submitPlan
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: 已提交 }
+        '409': { description: INVALID_PLAN_STATE, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /plans/{id}/approve:
+    post:
+      operationId: approvePlan
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: 已批准 }
+        '403': { description: 审批人不得为方案 owner, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /plans/{id}/reject:
+    post:
+      operationId: rejectPlan
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [reason], properties: { reason: { type: string } } } } }
+      responses: { '200': { description: 已驳回 } }
+  /tasks:
+    post:
+      operationId: createTask
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planId, ownerId, title, dueTime]
+              properties:
+                planId: { type: string, format: uuid, description: 须 approved（P0-02） }
+                goalId: { type: string, format: uuid }
+                ownerId: { type: string, format: uuid }
+                title: { type: string }
+                description: { type: string }
+                dueTime: { type: string, format: date-time }
+                standardId: { type: string, format: uuid }
+      responses:
+        '201': { description: 已创建 }
+        '422': { description: PLAN_NOT_APPROVED, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    get:
+      operationId: listTasks
+      parameters:
+        - { name: ownerId, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+      responses: { '200': { description: 列表 } }
+  /tasks/{id}/status:
+    patch:
+      operationId: updateTaskStatus
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '200': { description: 已更新 }
+        '409': { description: VERSION_CONFLICT, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /tasks/{id}/feedback:
+    post:
+      operationId: submitFeedback
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201': { description: 首次反馈, content: { application/json: { schema: { $ref: '#/components/schemas/Feedback' } } } }
+        '409': { description: DUPLICATE_FEEDBACK（同日已有生效，改用 revisions）, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    get:
+      operationId: getTaskFeedback
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 反馈（含修订链） } }
+  /feedbacks/{id}/revisions:
+    post:
+      operationId: reviseFeedback
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        '201': { description: 新修订, content: { application/json: { schema: { $ref: '#/components/schemas/Feedback' } } } }
+        '403': { description: 非本人 }
+        '409': { description: 已被更新修订替代 }
+        '423': { description: 已锁定 }
+  /exceptions:
+    get:
+      operationId: listExceptions
+      parameters:
+        - { name: severity, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+      responses: { '200': { description: 列表 } }
+  /exceptions/{id}/status:
+    patch:
+      operationId: updateExceptionStatus
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 已更新 } }
+  /agent-runs:
+    get: { operationId: listAgentRuns, responses: { '200': { description: 列表 } } }
+  /agent-runs/{id}/cancel:
+    post:
+      operationId: cancelAgentRun
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 已取消（幂等） } }
+  /agent-runs/{id}/trace:
+    get:
+      operationId: getAgentRunTrace
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: 完整追踪 } }
