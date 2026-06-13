@@ -1,0 +1,8 @@
+# 校验配置：关风格规则，保结构正确性（Gate 1 机器可验基线）
+rules:
+  operation-summary: off        # 摘要非正确性项
+  operation-4xx-response: off   # 非强制
+  info-license: off             # 内部文档非开源包
+  operation-operationId-unique: error
+  no-ambiguous-paths: error
+  struct: error
