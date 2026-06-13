@@ -1,5 +1,17 @@
 # XCDOS + Prolog AgentTeam 监控指标与告警规则 V1.0
 
+> **适用范围声明（P0-10）**：本文指标（pg_stat_* / BullMQ）当前仅覆盖 **XCDOS**。**Prolog** 侧最小必备指标见下表（待部署验证，阈值压测后定）。
+
+## Prolog 监控差异速查（待验证）
+
+| 类别 | Prolog 指标 | 来源 |
+|------|------|------|
+| JVM | heap used/max、GC pause、线程数 | Micrometer + Actuator `/actuator/prometheus` |
+| 定时任务 | Quartz misfire 数、trigger 失败 | Quartz JMX / 自定义 metric |
+| HTTP | 请求 P95/P99、5xx 率 | Micrometer http.server.requests |
+| Langflow | 容器存活、flow 调用延迟/失败率 | 容器探针 + 网关侧统计 |
+| DB | 复用 pg_stat_*（与 XCDOS 同库工具链） | PostgreSQL exporter |
+
 ## 一、文档说明
 
 | 属性 | 内容 |

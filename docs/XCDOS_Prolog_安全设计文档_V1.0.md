@@ -1,5 +1,17 @@
 # XCDOS + Prolog AgentTeam 安全设计文档 V1.0
 
+> **适用范围声明（P0-10）**：本文实现示例以 XCDOS（NestJS / Prisma / PostgreSQL）为前提。**Prolog**（Spring Boot / Vue3）安全差异见下表。**双系统密码方案统一 Argon2id（ADR-0003），禁止 MD5/bcrypt 混用。**
+
+## Prolog 安全差异速查（待验证）
+
+| 维度 | XCDOS | Prolog 差异 |
+|------|-------|------|
+| 认证框架 | NestJS Guard + JWT（panva/jose） | Spring Security + JWT filter |
+| 密码 | Argon2id（argon2 npm） | Argon2id（de.mkammerer:argon2-jvm，参数同 ADR-0003） |
+| 租户隔离 | nestjs-cls + Prisma multiSchema | Hibernate CurrentTenantIdentifierResolver |
+| 依赖扫描 | npm audit / Snyk | OWASP Dependency-Check / Trivy（JVM jar） |
+| 注入防护 | Prisma 参数化 | MyBatis/JPA 参数化 + Prolog 规则脚本沙箱校验 |
+
 ## 一、文档说明
 
 | 属性 | 内容 |
