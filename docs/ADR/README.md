@@ -14,6 +14,9 @@
 | [ADR-0006](./ADR-0006-use-existing-not-rewrite.md) | 能用现成就不要自己造（产品层+工具层） | Accepted | 2026-06-11 | 战略原则 |
 | [ADR-0007](./ADR-0007-prolog-hybrid-langflow.md) | Prolog 混合方案：底座自建 + Langflow 嵌入 | Accepted | 2026-06-12 | Z-1 调研裁决 |
 | [ADR-0008](./ADR-0008-llm-gateway-sub2api.md) | LLM 网关层采用 sub2api（独立部署） | Accepted | 2026-06-14 | P1-13 / P1-14 实现层 |
+| [ADR-0009](./ADR-0009-agent-runtime-mcp.md) | Agent Runtime: MCP 协议 + BullMQ 状态机 | Accepted | 2026-06-14 | Block E / Agent 编排 |
+| [ADR-0010](./ADR-0010-vector-pgvector-bge-m3.md) | 向量库: pgvector + BGE-M3 本地（schema-per-tenant） | Accepted | 2026-06-14 | Block F / F-017 F-018 |
+| [ADR-0011](./ADR-0011-observability-otel.md) | 可观测性: OTel + Jaeger + Prometheus + Langfuse | Accepted | 2026-06-14 | Block H / P1-13 |
 
 ## 状态约定
 
