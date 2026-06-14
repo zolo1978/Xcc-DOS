@@ -1,12 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
-
-type JwtPayload = {
-  sub?: string;
-  tenant?: string;
-  role?: string;
-  tokenType?: string;
-};
+import { JwtPayload } from './jwt-payload';
 
 @Injectable()
 export class TenantContext {

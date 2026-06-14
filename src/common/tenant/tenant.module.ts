@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthTokenStoreService } from './auth-token-store.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { TenantContext } from './tenant-context.service';
 
@@ -10,7 +11,7 @@ import { TenantContext } from './tenant-context.service';
       secret: process.env.JWT_SECRET || 'change-me',
     }),
   ],
-  providers: [JwtAuthGuard, TenantContext],
-  exports: [JwtAuthGuard, TenantContext, JwtModule],
+  providers: [AuthTokenStoreService, JwtAuthGuard, TenantContext],
+  exports: [AuthTokenStoreService, JwtAuthGuard, TenantContext, JwtModule],
 })
 export class TenantModule {}

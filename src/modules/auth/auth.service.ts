@@ -1,7 +1,10 @@
 import { UnauthorizedException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
+import { randomUUID } from 'node:crypto';
 import { errorBody } from '../../common/http/api-error';
+import { AuthTokenStoreService, SessionRecord } from '../../common/tenant/auth-token-store.service';
+import { JwtPayload } from '../../common/tenant/jwt-payload';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -15,21 +18,15 @@ type AuthUserRecord = {
   role: { name: string } | null;
 };
 
-type JwtPayload = {
-  sub: string;
-  tenant: string;
-  role: string;
-  tokenType: 'access' | 'refresh';
-};
-
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly authTokenStore: AuthTokenStoreService,
   ) {}
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, userAgent?: string) {
     const user = await this.findUserByEmail(dto.email);
     if (!user) {
       throw this.invalidCredentials();
@@ -40,7 +37,7 @@ export class AuthService {
       throw this.invalidCredentials();
     }
 
-    return this.issueTokenPair(user);
+    return this.issueTokenPair(user, userAgent);
   }
 
   async refresh(dto: RefreshTokenDto) {
@@ -56,6 +53,14 @@ export class AuthService {
       throw this.invalidCredentials();
     }
 
+    if (await this.authTokenStore.isTokenBlacklisted(payload.jti)) {
+      throw this.invalidCredentials();
+    }
+
+    if (!payload.sub) {
+      throw this.invalidCredentials();
+    }
+
     const user = await this.findUserById(payload.sub);
     if (!user) {
       throw this.invalidCredentials();
@@ -64,6 +69,18 @@ export class AuthService {
     return {
       accessToken: await this.signAccessToken(user),
     };
+  }
+
+  async logout(payload: JwtPayload): Promise<void> {
+    await this.authTokenStore.blacklistAccessToken(payload);
+  }
+
+  async listSessions(userId: string): Promise<SessionRecord[]> {
+    return this.authTokenStore.listSessions(userId);
+  }
+
+  async revokeSession(userId: string, jti: string): Promise<void> {
+    await this.authTokenStore.blacklistRefreshToken(userId, jti);
   }
 
   private async findUserByEmail(email: string): Promise<AuthUserRecord | null> {
@@ -102,23 +119,35 @@ export class AuthService {
     return user;
   }
 
-  private async issueTokenPair(user: AuthUserRecord) {
+  private async issueTokenPair(user: AuthUserRecord, userAgent?: string) {
+    const accessToken = await this.signAccessToken(user);
+    const refreshTokenPayload = this.toPayload(user, 'refresh');
+    const refreshToken = await this.signToken(
+      refreshTokenPayload,
+      process.env.JWT_REFRESH_TTL || '7d',
+    );
+
+    await this.authTokenStore.storeSession(
+      user.id,
+      {
+        jti: refreshTokenPayload.jti!,
+        issuedAt: new Date().toISOString(),
+        userAgent: userAgent ?? null,
+      },
+      this.parseDurationToSeconds(process.env.JWT_REFRESH_TTL || '7d'),
+    );
+
     return {
-      accessToken: await this.signAccessToken(user),
-      refreshToken: await this.signRefreshToken(user),
+      accessToken,
+      refreshToken,
     };
   }
 
   private async signAccessToken(user: AuthUserRecord): Promise<string> {
-    return this.jwtService.signAsync(this.toPayload(user, 'access'), {
-      expiresIn: process.env.JWT_ACCESS_TTL || '15m',
-    });
-  }
-
-  private async signRefreshToken(user: AuthUserRecord): Promise<string> {
-    return this.jwtService.signAsync(this.toPayload(user, 'refresh'), {
-      expiresIn: process.env.JWT_REFRESH_TTL || '7d',
-    });
+    return this.signToken(
+      this.toPayload(user, 'access'),
+      process.env.JWT_ACCESS_TTL || '15m',
+    );
   }
 
   private toPayload(
@@ -126,11 +155,40 @@ export class AuthService {
     tokenType: JwtPayload['tokenType'],
   ): JwtPayload {
     return {
+      jti: randomUUID(),
       sub: user.id,
       tenant: user.orgId,
       role: user.role?.name ?? 'unknown',
       tokenType,
     };
+  }
+
+  private parseDurationToSeconds(value: string): number {
+    if (/^\d+$/.test(value)) {
+      return Number(value);
+    }
+
+    const match = value.match(/^(\d+)([smhd])$/);
+    if (!match) {
+      throw new Error(`Unsupported JWT duration: ${value}`);
+    }
+
+    const [, amountRaw, unit] = match;
+    const amount = Number(amountRaw);
+    const unitMultiplier: Record<string, number> = {
+      s: 1,
+      m: 60,
+      h: 60 * 60,
+      d: 60 * 60 * 24,
+    };
+
+    return amount * unitMultiplier[unit];
+  }
+
+  private async signToken(payload: JwtPayload, expiresIn: string): Promise<string> {
+    return this.jwtService.signAsync(payload, {
+      expiresIn,
+    });
   }
 
   private invalidCredentials(): UnauthorizedException {

@@ -20,10 +20,12 @@ CREATE TABLE organizations (
   parent_id   UUID REFERENCES organizations(id),
   type        VARCHAR(20) NOT NULL DEFAULT 'department' CHECK (type IN ('company','department','team')),
   status      VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive')),
+  tenant_schema VARCHAR(63),  -- ADR-0004: schema-per-tenant 映射（Tier-B 默认），NULL=共享 public
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   deleted_at  TIMESTAMPTZ
 );
+CREATE UNIQUE INDEX uq_org_tenant_schema ON organizations(tenant_schema) WHERE deleted_at IS NULL AND tenant_schema IS NOT NULL;
 
 CREATE TABLE roles (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -230,7 +232,7 @@ CREATE TABLE exceptions (
   deleted_at  TIMESTAMPTZ
 );
 
--- ============ Agent 与可靠事件域（ADR-0005）============
+-- ============ Agent 与可靠事件域（ADR-0005 / ADR-0008）============
 CREATE TABLE agent_runs (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   agent_type  VARCHAR(30) NOT NULL,  -- dismantle/evaluate/report/feedback_quality
@@ -240,11 +242,21 @@ CREATE TABLE agent_runs (
   input       JSONB,
   output      JSONB,
   tool_calls  JSONB,
+  -- LLM 网关计费（ADR-0008，数据由 sub2api 回传）
+  llm_account_id  VARCHAR(64),   -- sub2api 账号标识
+  gateway_request_id VARCHAR(64), -- sub2api 请求 ID（对账用）
+  input_tokens   INTEGER,
+  output_tokens  INTEGER,
+  cost_cents     NUMERIC(10,4),  -- 成本，单位分
+  upstream_type  VARCHAR(20) NOT NULL DEFAULT 'subscription'
+                CHECK (upstream_type IN ('subscription','official_api')),  -- 内测=subscription，商用=official_api
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+CREATE INDEX idx_agent_runs_llm ON agent_runs(llm_account_id) WHERE llm_account_id IS NOT NULL;
 
 -- Transactional Outbox（ADR-0005）
+-- 投递事件保留 7 天（用于可靠投递与重试），到期清理。审计回放走 agent_runs + audit 日志（另表）。
 CREATE TABLE outbox_events (
   event_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_type    VARCHAR(80) NOT NULL,

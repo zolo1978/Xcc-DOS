@@ -94,6 +94,31 @@ paths:
       responses:
         '200': { description: token 签发 }
         '401': { description: 认证失败, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200': { description: 新 token 对 }
+        '401': { description: refreshToken 无效或过期 }
+  /auth/logout:
+    post:
+      operationId: logout
+      responses:
+        '204': { description: token 已加入黑名单（Redis jti），立即失效 }
+  /auth/sessions:
+    get:
+      operationId: listSessions
+      responses: { '200': { description: 当前用户活跃会话列表，支持远端登出 } }
   /me:
     get:
       operationId: getMe

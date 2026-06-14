@@ -7,26 +7,23 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClsService } from 'nestjs-cls';
+import { AuthTokenStoreService } from './auth-token-store.service';
+import { JwtPayload } from './jwt-payload';
 import { TENANT_CLAIM_KEY } from './tenant.constants';
-
-type JwtPayload = {
-  sub?: string;
-  tenant?: string;
-  role?: string;
-  tokenType?: string;
-};
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly cls: ClsService,
+    private readonly authTokenStore: AuthTokenStoreService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
       headers: Record<string, string | string[] | undefined>;
       header(name: string): string | undefined;
+      user?: JwtPayload;
     }>();
     const rawAuthHeader = request.headers.authorization;
     const authHeader = Array.isArray(rawAuthHeader)
@@ -41,7 +38,7 @@ export class JwtAuthGuard implements CanActivate {
     let payload: JwtPayload;
 
     try {
-      payload = this.jwtService.verify<JwtPayload>(token);
+      payload = await this.jwtService.verifyAsync<JwtPayload>(token);
     } catch {
       throw new UnauthorizedException('INVALID_JWT');
     }
@@ -55,11 +52,16 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('INVALID_JWT');
     }
 
+    if (await this.authTokenStore.isTokenBlacklisted(payload.jti)) {
+      throw new UnauthorizedException('INVALID_JWT');
+    }
+
     const headerTenantId = request.header('X-Tenant-Id');
     if (headerTenantId && headerTenantId !== tenantId) {
       throw new ForbiddenException('TENANT_HEADER_MISMATCH');
     }
 
+    request.user = payload;
     this.cls.set('tenantId', tenantId);
     this.cls.set('jwtPayload', payload);
     return true;

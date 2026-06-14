@@ -126,10 +126,15 @@ export async function login(
   app: INestApplication,
   email: string,
   password = 'password123',
+  userAgent?: string,
 ) {
-  const response = await request(app.getHttpServer())
-    .post('/api/auth/login')
-    .send({ email, password });
+  const req = request(app.getHttpServer()).post('/api/auth/login');
+
+  if (userAgent) {
+    req.set('User-Agent', userAgent);
+  }
+
+  const response = await req.send({ email, password });
 
   return response.body as { accessToken: string; refreshToken: string };
 }
