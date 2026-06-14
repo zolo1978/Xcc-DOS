@@ -238,10 +238,11 @@ CREATE TABLE agent_runs (
   agent_type  VARCHAR(30) NOT NULL,  -- dismantle/evaluate/report/feedback_quality
   trigger_type VARCHAR(20) NOT NULL DEFAULT 'manual',
   status      VARCHAR(20) NOT NULL DEFAULT 'running'
-              CHECK (status IN ('running','succeeded','failed','cancelled')),
+              CHECK (status IN ('running','succeeded','failed','cancelled','awaiting_approval')),
   input       JSONB,
   output      JSONB,
   tool_calls  JSONB,
+  trace_id    VARCHAR(64),   -- W3C traceparent，全链路追踪关联（Block H / ARD M3）
   -- LLM 网关计费（ADR-0008，数据由 sub2api 回传）
   llm_account_id  VARCHAR(64),   -- sub2api 账号标识
   gateway_request_id VARCHAR(64), -- sub2api 请求 ID（对账用）

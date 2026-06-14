@@ -206,7 +206,7 @@ table{width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--
       <tr><td>TC-PERM-004</td><td><span class="badge p0">P0</span></td><td>admin 可见全系统数据</td><td>跨组织数据</td><td>admin 调用各列表接口</td><td>返回所有组织数据</td></tr>
       <tr><td>TC-PERM-005</td><td><span class="badge p0">P0</span></td><td>未登录拒绝所有 API</td><td>无 Token</td><td>直接请求任意 API</td><td>401</td></tr>
       <tr><td>TC-PERM-006</td><td><span class="badge p0">P0</span></td><td>用户只能修改自己的反馈</td><td>2 条不同 user 的反馈</td><td>user A 尝试 PATCH user B 的反馈</td><td>403</td></tr>
-      <tr><td>TC-PERM-007</td><td><span class="badge p1">P1</span></td><td>Agent 不能自动执行高风险写操作</td><td>Agent CreateTaskTool L3 需确认</td><td>Agent 尝试创建任务但未获人工确认</td><td>Agent Run status=NEED_HUMAN_CONFIRMATION</td></tr>
+      <tr><td>TC-PERM-007</td><td><span class="badge p1">P1</span></td><td>Agent 不能自动执行高风险写操作</td><td>Agent CreateTaskTool L3 需确认</td><td>Agent 尝试创建任务但未获人工确认</td><td>Agent Run status=awaiting_approval（DDL 枚举对齐）</td></tr>
     </tbody>
   </table>
 </section>
