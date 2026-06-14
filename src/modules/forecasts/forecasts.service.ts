@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { TenantContext } from '../../common/tenant/tenant-context.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateForecastDto } from './dto/create-forecast.dto';
@@ -8,7 +9,7 @@ type ForecastRecord = {
   id: string;
   caseId: string;
   version: number;
-  scenarios: unknown[];
+  scenarios: Prisma.JsonValue;
   confidence: { toString(): string } | number | null;
   modelSource: string;
   agentRunId: string | null;
@@ -41,7 +42,7 @@ export class ForecastsService {
       data: {
         caseId,
         version: (latest?.version ?? 0) + 1,
-        scenarios: dto.scenarios,
+        scenarios: dto.scenarios as unknown as Prisma.InputJsonArray,
         confidence: dto.confidence,
         modelSource: dto.modelSource,
         inputHypothesisIds: dto.inputHypothesisIds,
@@ -101,7 +102,7 @@ export class ForecastsService {
       id: forecast.id,
       caseId: forecast.caseId,
       version: forecast.version,
-      scenarios: forecast.scenarios,
+      scenarios: Array.isArray(forecast.scenarios) ? forecast.scenarios : [],
       confidence:
         forecast.confidence === null
           ? null

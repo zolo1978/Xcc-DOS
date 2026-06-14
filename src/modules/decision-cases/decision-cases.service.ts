@@ -1,4 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import Decimal from 'decimal.js';
 import { errorBody } from '../../common/http/api-error';
 import { TenantContext } from '../../common/tenant/tenant-context.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -126,6 +128,72 @@ export class DecisionCasesService {
     return this.toResponse(updatedDecisionCase);
   }
 
+  async evaluate(id: string, dto: {
+    resourceScore?: number;
+    timeScore?: number;
+    riskScore?: number;
+    feasibilityScore?: number;
+    comment?: string;
+  }) {
+    const decisionCase = await this.findScopedCase(id);
+    const evaluation = await this.prisma.evaluation.create({
+      data: {
+        caseId: decisionCase.id,
+        resourceScore: this.toDecimal(dto.resourceScore),
+        timeScore: this.toDecimal(dto.timeScore),
+        riskScore: this.toDecimal(dto.riskScore),
+        feasibilityScore: this.toDecimal(dto.feasibilityScore),
+        comment: dto.comment ?? null,
+      },
+    });
+
+    await this.prisma.decisionCase.update({
+      where: { id: decisionCase.id },
+      data: {
+        stage: this.maxStage(decisionCase.stage, 'evaluate'),
+      },
+    });
+
+    return evaluation;
+  }
+
+  async simulateRoi(id: string, dto: {
+    cost: number;
+    revenue: number;
+    paybackDays?: number;
+    assumptions?: Record<string, unknown>;
+  }) {
+    const decisionCase = await this.findScopedCase(id);
+    const roi = dto.cost === 0 ? null : (dto.revenue - dto.cost) / dto.cost;
+    const simulation = await this.prisma.roiSimulation.create({
+      data: {
+        caseId: decisionCase.id,
+        cost: new Decimal(dto.cost),
+        revenue: new Decimal(dto.revenue),
+        roi: roi === null ? null : new Decimal(roi),
+        paybackDays: dto.paybackDays ?? null,
+        assumptions:
+          dto.assumptions === undefined
+            ? Prisma.JsonNull
+            : (dto.assumptions as Prisma.InputJsonObject),
+      },
+    });
+
+    await this.prisma.decisionCase.update({
+      where: { id: decisionCase.id },
+      data: {
+        stage: this.maxStage(decisionCase.stage, 'calculate'),
+      },
+    });
+
+    return {
+      ...simulation,
+      roi: simulation.roi === null ? null : Number(simulation.roi.toString()),
+      cost: Number(simulation.cost.toString()),
+      revenue: Number(simulation.revenue.toString()),
+    };
+  }
+
   private async findScopedCase(id: string): Promise<DecisionCaseRecord> {
     const tenantId = this.tenantContext.getTenantId();
     const decisionCase = await this.prisma.decisionCase.findFirst({
@@ -164,6 +232,10 @@ export class DecisionCasesService {
     }
 
     return currentStage as DecisionStage;
+  }
+
+  private toDecimal(value?: number): Decimal | null {
+    return typeof value === 'number' ? new Decimal(value) : null;
   }
 
   private toResponse(decisionCase: DecisionCaseRecord): DecisionCaseResponseDto {

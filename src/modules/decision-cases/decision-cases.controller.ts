@@ -38,4 +38,32 @@ export class DecisionCasesController {
   async generateReport(@Param('id') id: string) {
     return this.decisionCasesService.generateReport(id);
   }
+
+  @Post(':id/evaluate')
+  async evaluateCase(
+    @Param('id') id: string,
+    @Body() dto: {
+      resourceScore?: number;
+      timeScore?: number;
+      riskScore?: number;
+      feasibilityScore?: number;
+      comment?: string;
+    },
+  ) {
+    return this.decisionCasesService.evaluate(id, dto);
+  }
+
+  @Post(':id/simulate-roi')
+  @HttpCode(200)
+  async simulateRoi(
+    @Param('id') id: string,
+    @Body() dto: {
+      cost: number;
+      revenue: number;
+      paybackDays?: number;
+      assumptions?: Record<string, unknown>;
+    },
+  ) {
+    return this.decisionCasesService.simulateRoi(id, dto);
+  }
 }

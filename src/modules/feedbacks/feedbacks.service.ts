@@ -223,7 +223,11 @@ export class FeedbacksService {
         },
       });
 
-      if (!current || current.task.plan.decisionCase.problem.goal.orgId !== tenantId) {
+      if (
+        !current ||
+        !current.task.plan.decisionCase.problem.goal ||
+        current.task.plan.decisionCase.problem.goal.orgId !== tenantId
+      ) {
         throw new NotFoundException('FEEDBACK_NOT_FOUND');
       }
 

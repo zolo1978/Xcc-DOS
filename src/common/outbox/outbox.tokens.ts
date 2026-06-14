@@ -1,1 +1,3 @@
 export const OUTBOX_PUBLISHER = Symbol('OUTBOX_PUBLISHER');
+export const OUTBOX_PUBLISHER_QUEUE = Symbol('OUTBOX_PUBLISHER_QUEUE');
+export const OUTBOX_DLQ_QUEUE = Symbol('OUTBOX_DLQ_QUEUE');

@@ -37,14 +37,16 @@ export class OutboxRelay {
     const events = await this.claimBatch(lockedBy, limit);
 
     for (const event of events) {
+      const publishableEvent = {
+        eventId: event.event_id,
+        eventType: event.event_type,
+        aggregateType: event.aggregate_type,
+        aggregateId: event.aggregate_id,
+        payload: event.payload,
+      };
+
       try {
-        await this.publisher.publish({
-          eventId: event.event_id,
-          eventType: event.event_type,
-          aggregateType: event.aggregate_type,
-          aggregateId: event.aggregate_id,
-          payload: event.payload,
-        });
+        await this.publisher.publish(publishableEvent);
 
         await this.prisma.outboxEvent.update({
           where: {
@@ -62,6 +64,11 @@ export class OutboxRelay {
         const nextAttemptCount = event.attempt_count + 1;
         const isDead = nextAttemptCount > MAX_RETRIES;
         const delayMinutes = Math.max(1, 2 ** event.attempt_count);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (isDead && this.publisher.publishDeadLetter) {
+          await this.publisher.publishDeadLetter(publishableEvent, errorMessage);
+        }
 
         await this.prisma.outboxEvent.update({
           where: {
@@ -75,7 +82,7 @@ export class OutboxRelay {
             nextAttemptAt: new Date(Date.now() + delayMinutes * 60_000),
             lockedAt: null,
             lockedBy: null,
-            lastError: error instanceof Error ? error.message : String(error),
+            lastError: errorMessage,
           },
         });
       }

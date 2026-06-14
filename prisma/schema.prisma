@@ -59,8 +59,8 @@ model User {
   feedbacks    Feedback[]
   exceptions   Exception[]
 
-  @@index([orgId])
-  @@index([roleId])
+  @@index([orgId], map: "idx_users_org")
+  @@index([roleId], map: "idx_users_role")
   @@map("users")
 }
 
@@ -87,7 +87,7 @@ model Goal {
   problems     Problem[]
   tasks        Task[]
 
-  @@index([ownerId])
+  @@index([ownerId], map: "idx_goals_owner")
   @@map("goals")
 }
 
@@ -212,6 +212,7 @@ model Plan {
   approver       User?        @relation("PlanApprover", fields: [approvedBy], references: [id])
   tasks          Task[]
 
+  @@index([ownerId], map: "idx_plans_owner")
   @@map("plans")
 }
 
@@ -247,6 +248,7 @@ model Task {
   standard    Standard?  @relation(fields: [standardId], references: [id])
   feedbacks   Feedback[]
 
+  @@index([ownerId], map: "idx_tasks_owner")
   @@map("tasks")
 }
 
@@ -270,6 +272,7 @@ model Feedback {
   supersededByFeedback Feedback?  @relation("FeedbackRevision", fields: [supersededBy], references: [id])
   supersedes   Feedback[] @relation("FeedbackRevision")
 
+  @@index([userId, submittedAt(sort: Desc)], map: "idx_fb_user_date")
   @@map("feedbacks")
 }
 
@@ -318,6 +321,7 @@ model OutboxEvent {
   lastError      String?   @map("last_error")
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
+  @@index([status, nextAttemptAt], map: "idx_outbox_poll")
   @@map("outbox_events")
 }
 
