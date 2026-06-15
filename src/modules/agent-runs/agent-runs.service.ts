@@ -74,11 +74,20 @@ export class AgentRunsService {
   }
 
   private toResponse(record: AgentRunRecord) {
+    const riskLevel =
+      record.input &&
+      typeof record.input === 'object' &&
+      !Array.isArray(record.input) &&
+      'riskLevel' in record.input
+        ? String((record.input as { riskLevel?: unknown }).riskLevel)
+        : null;
+
     return {
       id: record.id,
       agentType: record.agentType,
       triggerType: record.triggerType,
       status: record.status,
+      riskLevel,
       input: record.input,
       output: record.output,
       toolCalls: record.toolCalls,

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('FeedbacksService', () => {
   const tx = {
@@ -33,12 +33,18 @@ describe('FeedbacksService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-14T05:00:00.000Z'));
     tenantContext.getTenantId.mockReturnValue('tenant-1');
     tenantContext.getUserId.mockReturnValue('user-1');
     outboxService.enqueue.mockResolvedValue(undefined);
     prisma.$transaction.mockImplementation(async (callback: (client: typeof tx) => unknown) =>
       callback(tx as never),
     );
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('submit throws 409 when current-day effective feedback already exists', async () => {

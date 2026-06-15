@@ -1,17 +1,22 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/tenant/jwt-auth.guard';
-import { CreateForecastDto } from './dto/create-forecast.dto';
+import { AgentService } from '../agent-runs/agent.service';
 import { ListForecastsDto } from './dto/list-forecasts.dto';
+import { RunForecastDto } from './dto/run-forecast.dto';
 import { ForecastsService } from './forecasts.service';
 
 @Controller('decision-cases/:id')
 @UseGuards(JwtAuthGuard)
 export class ForecastsController {
-  constructor(private readonly forecastsService: ForecastsService) {}
+  constructor(
+    private readonly forecastsService: ForecastsService,
+    private readonly agentService: AgentService,
+  ) {}
 
   @Post('forecast')
-  async createForecast(@Param('id') id: string, @Body() dto: CreateForecastDto) {
-    return this.forecastsService.create(id, dto);
+  async createForecast(@Param('id') id: string, @Body() dto: RunForecastDto) {
+    const result = await this.agentService.runForecast(id, dto.hypothesisIds ?? []);
+    return result.status === 'succeeded' ? result.result : result;
   }
 
   @Get('forecasts')

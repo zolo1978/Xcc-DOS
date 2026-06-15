@@ -13,6 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/tenant/jwt-auth.guard';
+import { AgentService } from '../agent-runs/agent.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { ListGoalsDto } from './dto/list-goals.dto';
 import { UpdateGoalStatusDto } from './dto/update-goal-status.dto';
@@ -21,7 +22,10 @@ import { GoalsService } from './goals.service';
 @Controller('goals')
 @UseGuards(JwtAuthGuard)
 export class GoalsController {
-  constructor(private readonly goalsService: GoalsService) {}
+  constructor(
+    private readonly goalsService: GoalsService,
+    private readonly agentService: AgentService,
+  ) {}
 
   @Post()
   async createGoal(@Body() dto: CreateGoalDto) {
@@ -36,6 +40,13 @@ export class GoalsController {
   @Get(':id')
   async getGoal(@Param('id') id: string) {
     return this.goalsService.findOne(id);
+  }
+
+  @Post(':id/breakdown')
+  @HttpCode(200)
+  async breakdownGoal(@Param('id') id: string) {
+    const result = await this.agentService.runBreakdown(id);
+    return result.status === 'succeeded' ? result.result : result;
   }
 
   @Patch(':id/status')
