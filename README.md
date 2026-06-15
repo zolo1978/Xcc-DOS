@@ -42,3 +42,9 @@
 ## 开发状态
 
 设计阶段，代码开发尚未启动。当前仓库存储完整的设计文档基线。
+
+## 本地一键起
+
+后端与前端都已补齐容器化启动文件，可直接在仓库根目录执行 `docker compose up --build`。启动后 API 默认监听 `http://localhost:3000/api`，Web 默认监听 `http://localhost:3001`，Compose 内会自动拉起 PostgreSQL、Redis，并在 API 启动时执行 `prisma migrate deploy`。
+
+如果继续使用宿主机模式，保持根目录 `.env` 中的 `DATABASE_URL`、`REDIS_URL`、`JWT_SECRET` 可用后，后端执行 `npm run prisma:generate && npm run build && npm run start`，前端在 `web/` 目录执行 `npm run build && npm run start -- --port 3001` 即可。
