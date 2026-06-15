@@ -160,6 +160,51 @@ a {
   background: var(--xcdos-navy-900);
 }
 
+.decision-case-card {
+  border: 1px solid var(--xcdos-border);
+}
+
+.decision-case-page .arco-card {
+  border: 1px solid var(--xcdos-border);
+}
+
+.decision-form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.decision-grid__item {
+  min-width: 0;
+}
+
+.decision-inline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.decision-result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.decision-plan-summary,
+.decision-task-created {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--xcdos-border);
+}
+
 @media (max-width: 900px) {
   .app-shell__content {
     padding: 20px;
@@ -176,5 +221,14 @@ a {
 
   .login-page__hero {
     padding: 8px 0 24px;
+  }
+
+  .decision-inline-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .decision-grid {
+    grid-template-columns: 1fr;
   }
 }

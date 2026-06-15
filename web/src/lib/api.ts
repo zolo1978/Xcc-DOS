@@ -1,13 +1,24 @@
 import type {
   ApiErrorBody,
   BossDashboard,
+  CreateForecastInput,
   CreateGoalInput,
+  CreateHypothesisInput,
+  CreatePlanInput,
+  CreateTaskInput,
+  DecisionCase,
+  EvaluateDecisionCaseInput,
   Feedback,
+  FeedbackInput,
+  Forecast,
   Goal,
   LoginInput,
   LoginResponse,
   Plan,
   RefreshResponse,
+  RoiSimulation,
+  SimulateRoiInput,
+  Task,
 } from '@/types/api';
 import { decodeJwtPayload } from './jwt';
 import {
@@ -68,6 +79,14 @@ function normalizeBody(body: unknown) {
   }
 
   return JSON.stringify(body);
+}
+
+function createIdempotencyKey(prefix: string) {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 async function parseBody<T>(response: Response): Promise<T | null> {
@@ -244,8 +263,141 @@ export function getBossDashboard() {
   return request<BossDashboard>('/dashboard/boss');
 }
 
+export function listDecisionCases() {
+  return request<DecisionCase[]>('/decision-cases');
+}
+
+export function getDecisionCase(decisionCaseId: string) {
+  return request<DecisionCase>(`/decision-cases/${decisionCaseId}`);
+}
+
+export function addHypothesis(decisionCaseId: string, input: CreateHypothesisInput) {
+  return request<DecisionCase['hypotheses'][number] | null>(
+    `/decision-cases/${decisionCaseId}/hypotheses`,
+    {
+      method: 'POST',
+      body: input,
+    },
+  );
+}
+
+export function createForecast(decisionCaseId: string, input: CreateForecastInput) {
+  return request<Forecast>(`/decision-cases/${decisionCaseId}/forecast`, {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export function listForecasts(decisionCaseId: string, version?: number) {
+  return request<Forecast[] | Forecast>(`/decision-cases/${decisionCaseId}/forecasts`, {
+    query: {
+      version,
+    },
+  });
+}
+
+export function evaluateDecisionCase(
+  decisionCaseId: string,
+  input: EvaluateDecisionCaseInput,
+) {
+  return request<DecisionCase['evaluation'] | null>(`/decision-cases/${decisionCaseId}/evaluate`, {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export function simulateDecisionCaseRoi(
+  decisionCaseId: string,
+  input: SimulateRoiInput,
+) {
+  return request<RoiSimulation>(`/decision-cases/${decisionCaseId}/simulate-roi`, {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export function generateDecisionReport(decisionCaseId: string) {
+  return request<Record<string, unknown> | null>(`/decision-cases/${decisionCaseId}/report`, {
+    method: 'POST',
+  });
+}
+
+export function createPlan(decisionCaseId: string, input: CreatePlanInput) {
+  return request<Plan>(`/decision-cases/${decisionCaseId}/plans`, {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export function getPlan(planId: string) {
+  return request<Plan>(`/plans/${planId}`);
+}
+
+export function submitPlan(planId: string) {
+  return request<Record<string, unknown> | null>(`/plans/${planId}/submit`, {
+    method: 'POST',
+  });
+}
+
+export function approvePlan(planId: string) {
+  return request<Record<string, unknown> | null>(`/plans/${planId}/approve`, {
+    method: 'POST',
+  });
+}
+
+export function rejectPlan(planId: string, reason: string) {
+  return request<Record<string, unknown> | null>(`/plans/${planId}/reject`, {
+    method: 'POST',
+    body: { reason },
+  });
+}
+
+export function createTask(input: CreateTaskInput) {
+  return request<Task>('/tasks', {
+    method: 'POST',
+    body: input,
+    headers: {
+      'Idempotency-Key': createIdempotencyKey('task'),
+    },
+  });
+}
+
+export function updateTaskStatus(taskId: string, status: Task['status'], version: number) {
+  return request<Task>(`/tasks/${taskId}/status`, {
+    method: 'PATCH',
+    body: { status },
+    headers: {
+      'If-Match': String(version),
+    },
+  });
+}
+
+export function submitTaskFeedback(taskId: string, input: FeedbackInput) {
+  return request<Feedback>(`/tasks/${taskId}/feedback`, {
+    method: 'POST',
+    body: input,
+    headers: {
+      'Idempotency-Key': createIdempotencyKey('feedback'),
+    },
+  });
+}
+
+export function getTaskFeedback(taskId: string) {
+  return request<Feedback[] | Feedback>(`/tasks/${taskId}/feedback`);
+}
+
+export function reviseFeedback(feedbackId: string, input: FeedbackInput) {
+  return request<Feedback>(`/feedbacks/${feedbackId}/revisions`, {
+    method: 'POST',
+    body: input,
+  });
+}
+
 export type XcdosApiTypes = {
+  DecisionCase: DecisionCase;
+  Forecast: Forecast;
   Goal: Goal;
   Plan: Plan;
+  Task: Task;
   Feedback: Feedback;
 };

@@ -12,6 +12,10 @@ function getActiveMenuKey(pathname: string) {
     return '/goals';
   }
 
+  if (pathname.startsWith('/decision-cases') || pathname.startsWith('/tasks')) {
+    return '/decision-cases';
+  }
+
   return '/dashboard';
 }
 
@@ -39,6 +43,7 @@ export function AppShell({ children }: PropsWithChildren) {
         >
           <Menu.Item key="/dashboard">老板驾驶舱</Menu.Item>
           <Menu.Item key="/goals">目标管理</Menu.Item>
+          <Menu.Item key="/decision-cases">拆推评算</Menu.Item>
         </Menu>
       </Sider>
       <Layout>
