@@ -13,7 +13,8 @@ class ResizeObserverMock {
 }
 
 vi.stubGlobal('ResizeObserver', ResizeObserverMock);
-vi.stubGlobal('matchMedia', () => ({
+
+const matchMediaMock = vi.fn().mockImplementation(() => ({
   matches: false,
   media: '',
   onchange: null,
@@ -23,3 +24,12 @@ vi.stubGlobal('matchMedia', () => ({
   removeListener: vi.fn(),
   dispatchEvent: vi.fn(),
 }));
+
+vi.stubGlobal('matchMedia', matchMediaMock);
+
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: matchMediaMock,
+  });
+}
