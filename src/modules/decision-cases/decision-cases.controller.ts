@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/tenant/jwt-auth.guard';
+import { AgentService } from '../agent-runs/agent.service';
 import { CreateDecisionCaseDto } from './dto/create-decision-case.dto';
 import { ListDecisionCasesDto } from './dto/list-decision-cases.dto';
 import { DecisionCasesService } from './decision-cases.service';
@@ -16,7 +17,10 @@ import { DecisionCasesService } from './decision-cases.service';
 @Controller('decision-cases')
 @UseGuards(JwtAuthGuard)
 export class DecisionCasesController {
-  constructor(private readonly decisionCasesService: DecisionCasesService) {}
+  constructor(
+    private readonly decisionCasesService: DecisionCasesService,
+    private readonly agentService: AgentService,
+  ) {}
 
   @Post()
   async createDecisionCase(@Body() dto: CreateDecisionCaseDto) {
@@ -50,7 +54,8 @@ export class DecisionCasesController {
       comment?: string;
     },
   ) {
-    return this.decisionCasesService.evaluate(id, dto);
+    const result = await this.agentService.runEvaluate(id, dto);
+    return result.status === 'succeeded' ? result.result : result;
   }
 
   @Post(':id/simulate-roi')
