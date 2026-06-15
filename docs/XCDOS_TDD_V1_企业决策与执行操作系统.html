@@ -135,6 +135,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
       <tr><td>后端</td><td>NestJS + TypeScript</td><td>模块化强，适合 DDD 分层和团队协作</td><td>FastAPI</td></tr>
       <tr><td>数据库</td><td>PostgreSQL</td><td>事务可靠，JSONB 灵活，适合业务系统</td><td>MySQL</td></tr>
       <tr><td>缓存/队列</td><td>Redis + BullMQ</td><td>处理提醒、Agent 异步任务、轻工作流</td><td>RabbitMQ / Kafka</td></tr>
+      <tr><td>BI 看板</td><td>Apache Superset 嵌入（Embedded Dashboard + guest token）</td><td>唯一合规开源 BI（Apache-2.0；Metabase 核心 AGPL 被否决），guest token 对接 JWT 租户隔离，详见 docs/RESEARCH/block-z2</td><td>自研驾驶舱（仅核心指标）</td></tr>
       <tr><td>分析库</td><td>ClickHouse（二期）</td><td>后续做大量事件分析</td><td>PostgreSQL 物化视图</td></tr>
       <tr><td>向量库</td><td>pgvector（二期）</td><td>减少系统复杂度，先内聚在 PostgreSQL</td><td>Qdrant / Milvus</td></tr>
       <tr><td>Agent</td><td>OpenAI/Claude API + Tool Router</td><td>先接云模型验证价值</td><td>本地大模型</td></tr>
@@ -145,7 +146,7 @@ pre{margin:0}.code{background:var(--navy-950);color:#D7E6F7;border-radius:16px;p
 <section id="architecture">
   <h2>三、总体技术架构</h2>
   <div class="diagram">
-    <div class="layer"><div class="layer-title">Client Layer</div><div class="layer-items"><span class="node strong">Web Admin</span><span class="node">Mobile H5</span><span class="node">Boss Dashboard</span></div></div>
+    <div class="layer"><div class="layer-title">Client Layer</div><div class="layer-items"><span class="node strong">Web Admin</span><span class="node">Mobile H5</span><span class="node">Boss Dashboard（Superset 嵌入）</span></div></div>
     <div class="arrow">↓</div>
     <div class="layer"><div class="layer-title">BFF / API Layer</div><div class="layer-items"><span class="node strong">Next.js API Client</span><span class="node">Auth Guard</span><span class="node">DTO Validation</span><span class="node">Rate Limit</span></div></div>
     <div class="arrow">↓</div>

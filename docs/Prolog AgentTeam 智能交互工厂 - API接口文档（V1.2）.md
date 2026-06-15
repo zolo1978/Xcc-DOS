@@ -63,6 +63,17 @@
 
 ---
 
+## 二.B 统一枚举字典（P0-08：API/DB/测试唯一口径）
+
+| 枚举 | 取值 | DB 存储 | 说明 |
+|------|------|---------|------|
+| isolate_type | `physical` / `schema` / `shared_rls` | 2 / 3 / 1 | Tier-A 物理独立库 / Tier-B schema-per-tenant（默认）/ Tier-C 共享+RLS（ADR-0004） |
+| rule_type | `process` / `validation` / `routing` | 1 / 2 / 3 | 流程规则 / 校验规则 / 路由规则（业务维度；组合结构由 parent_rule_id 表达） |
+| rule_status | `draft` / `active` / `gray` / `inactive` | 0 / 1 / 2 / 3 | 草稿 / 已生效 / 灰度中（F-005）/ 停用（F-007）；DB rule_prolog.status 同步增加 3-停用 |
+| ID 类型 | string（雪花 ID 数字串） | bigint | 全系统主键统一雪花 ID；API 层以 string 传输防 JS 精度丢失；**不使用 UUID** |
+
+---
+
 ## 三、租户管理（超级管理员）
 
 ### POST /api/v1/tenants
@@ -72,7 +83,7 @@
 |------|------|------|------|
 | name | string | ✓ | 租户名称 |
 | code | string | ✓ | 租户编码（唯一） |
-| isolate_type | enum | ✓ | `schema`（独立Schema）/ `shared`（共享Schema） |
+| isolate_type | enum | ✓ | `physical`（Tier-A 物理独立库）/ `schema`（Tier-B 默认）/ `shared_rls`（Tier-C 共享+RLS），见二.B 字典 |
 | expire_time | datetime | | 过期时间，不填则永久 |
 
 ### GET /api/v1/tenants
@@ -121,9 +132,9 @@
 | rule_code | string | ✓ | 规则编码（唯一） |
 | rule_name | string | ✓ | 规则名称 |
 | rule_content | text | ✓ | Prolog 规则内容 |
-| rule_type | enum | ✓ | `single` / `composite` / `fallback` |
+| rule_type | enum | ✓ | `process` / `validation` / `routing`（见二.B 字典；组合规则用 parent_rule_id 表达层级） |
 | priority | int | | 优先级，默认 0（越大越高） |
-| parent_rule_id | UUID | | 父规则（组合规则时使用） |
+| parent_rule_id | string(雪花ID) | | 父规则（组合规则时使用）；全系统主键统一雪花 ID，API 以 string 传输（见二.B） |
 | gray_rate | int | | 灰度比例 0-100，默认 100 |
 
 **Response 201:** `{ id, rule_code, version: 1, status: "draft" }`
@@ -138,7 +149,7 @@
 编辑规则。Body 同创建。规则版本号自动 +1，旧版本存入 `rule_snapshot` 表。
 
 ### PATCH /api/v1/rules/:id/status
-规则状态管控。Body: `{ status: "draft" | "active" | "inactive" }`。
+规则状态管控。Body: `{ status: "draft" | "active" | "gray" | "inactive" }`（四态见二.B 字典；gray 配合 gray_rate 灰度放量 F-005）。
 
 inactive 规则不参与调度。
 

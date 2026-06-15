@@ -1,6 +1,6 @@
 # ADR-0005：工作流执行 BullMQ + Transactional Outbox（暂定）
 
-- **Status**：Provisional（萃取调研可推翻）
+- **Status**：Accepted（萃取调研完成，Block D 结论支撑）
 - **Date**：2026-06-11
 - **Decision Makers**：架构师 / 后端 Lead
 
@@ -22,15 +22,17 @@ V1.2 **暂定**采用：
 4. **DLQ 启用**：BullMQ 自带失败队列；重试 5 次后入 DLQ，触发告警与人工介入。
 5. **幂等键**：所有事件携带 `event_id`（UUID v7），消费方按 `event_id` 去重。
 
-## Provisional 原因
+## 调研结论（2026-06-12 锁定）
 
-Step 2 萃取调研 Block C / D / E 将评估 Temporal / Restate / DurableObjects 等持久工作流方案在以下场景下是否显著优于自研 Outbox：
+Block D 萃取调研（`docs/RESEARCH/block-d-outbox-dlq.md`）已完成 Temporal / Restate / BullMQ+Outbox 三方案对比：
 
-- XCDOS Plan 多级审批（5+ 步）
-- Prolog 自进化任务长流程编排
-- Agent Runtime 跨工具调用的确定性重放
+- **Temporal**：持久工作流能力最强，但引入 Go/Java SDK 异构运维、额外数据库依赖、学习曲线陡峭。MVP 阶段过度设计。
+- **Restate**：适合事件溯源 + 确定性重放，但社区年轻、Java SDK 不成熟、运维经验稀缺。
+- **BullMQ + Transactional Outbox**：复用现有 Redis/PostgreSQL 基础设施，Outbox Relay 组件轻量，DLQ/幂等/重试均已有 DDL 契约落地（`xcdos_schema.sql` 248-284 行）。
 
-若证据充分，本 ADR 将被新 ADR 替换并标记 Superseded。
+**锁定理由**：V1 MVP 的 Plan 审批链（5+ 步）和 Prolog 自进化任务均属适度复杂度，BullMQ + Outbox 可覆盖。长流程编排（>10 步审批、跨服务 Saga）列入 V2 评估 Temporal。Outbox Relay HA 部署方案在联调阶段确定。
+
+原 Provisional 条件（Block C/D/E 调研未完成）已满足——Block D 出结论，Block C（消息可靠性对比）和 Block E（幂等中间件对比）结论已在 Block D 文档附录中记录。
 
 ## Consequences
 
