@@ -1,0 +1,180 @@
+:root {
+  --xcdos-navy-950: #07111f;
+  --xcdos-navy-900: #0d1b2d;
+  --xcdos-navy-700: #163455;
+  --xcdos-cyan-500: #2bc3e8;
+  --xcdos-cyan-300: #8de3f5;
+  --xcdos-surface: rgba(255, 255, 255, 0.9);
+  --xcdos-border: rgba(22, 52, 85, 0.12);
+  --xcdos-text: #0b1d33;
+  --xcdos-muted: #4d6480;
+  --font-body: "Avenir Next", "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--xcdos-text);
+  background:
+    radial-gradient(circle at top left, rgba(43, 195, 232, 0.18), transparent 32%),
+    linear-gradient(140deg, #eff6ff 0%, #f8fbff 38%, #e8f1fb 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-shell__sider {
+  background: linear-gradient(180deg, #081425 0%, #12375f 100%);
+}
+
+.app-shell__brand {
+  padding: 28px 24px 20px;
+}
+
+.app-shell__header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 84px;
+  padding: 0 28px;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--xcdos-border);
+}
+
+.app-shell__content {
+  padding: 28px;
+}
+
+.app-shell__eyebrow {
+  display: block;
+  color: var(--xcdos-muted);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.page-shell--center {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.page-shell__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.page-shell__eyebrow,
+.login-page__eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--xcdos-cyan-500);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.login-page__grid {
+  width: min(1120px, 100%);
+}
+
+.login-page__hero {
+  padding: 32px;
+}
+
+.login-page__title {
+  max-width: 12ch;
+  margin-top: 0;
+}
+
+.login-page__desc {
+  max-width: 56ch;
+  color: var(--xcdos-muted);
+}
+
+.login-page__card {
+  border: 1px solid var(--xcdos-border);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 60px rgba(8, 20, 37, 0.08);
+}
+
+.kpi-card {
+  min-height: 160px;
+  border: 1px solid var(--xcdos-border);
+  background:
+    linear-gradient(180deg, rgba(22, 52, 85, 0.96), rgba(7, 17, 31, 0.96)),
+    var(--xcdos-surface);
+  color: #fff;
+}
+
+.kpi-card__label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kpi-card__value {
+  margin-top: 18px;
+  margin-bottom: 0;
+  color: #fff;
+}
+
+.embed-card {
+  margin-top: 20px;
+  border: 1px solid var(--xcdos-border);
+}
+
+.embed-card__frame {
+  width: 100%;
+  min-height: 420px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--xcdos-navy-900);
+}
+
+@media (max-width: 900px) {
+  .app-shell__content {
+    padding: 20px;
+  }
+
+  .page-shell__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .login-page {
+    padding: 20px;
+  }
+
+  .login-page__hero {
+    padding: 8px 0 24px;
+  }
+}
