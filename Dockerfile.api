@@ -20,4 +20,5 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist ./dist
 COPY package.json package-lock.json ./
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+# migrate 重试：db healthcheck 通过后仍可能有短暂未就绪窗口（冷启动竞态），重试 5 次再放弃
+CMD ["sh", "-c", "for i in 1 2 3 4 5; do npx prisma migrate deploy && break; echo \"migrate retry $i (db 未就绪)\"; sleep 3; done && node dist/main"]
