@@ -4,33 +4,45 @@ import com.xccdos.prolog.common.api.ApiException;
 import com.xccdos.prolog.common.id.SnowflakeIdGenerator;
 import com.xccdos.prolog.rule.domain.RulePrologEntity;
 import com.xccdos.prolog.rule.domain.RuleRepository;
+import com.xccdos.prolog.rule.domain.RuleSnapshotEntity;
+import com.xccdos.prolog.rule.domain.RuleSnapshotRepository;
 import com.xccdos.prolog.rule.domain.RuleStatus;
 import com.xccdos.prolog.rule.domain.RuleType;
 import com.xccdos.prolog.rule.web.CreateRuleRequest;
+import com.xccdos.prolog.rule.web.PublishGrayRuleRequest;
 import com.xccdos.prolog.rule.web.RuleResponse;
+import com.xccdos.prolog.rule.web.RollbackRuleRequest;
 import com.xccdos.prolog.rule.web.UpdateGrayRateRequest;
 import com.xccdos.prolog.rule.web.UpdateRuleRequest;
 import com.xccdos.prolog.rule.web.UpdateRuleStatusRequest;
-import com.xccdos.prolog.tenant.domain.TenantEntity;
-import com.xccdos.prolog.tenant.domain.TenantRepository;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.xccdos.prolog.tenant.application.TenantPublicLookupService;
 
 @Service
 public class RuleService {
 
     private final RuleRepository ruleRepository;
-    private final TenantRepository tenantRepository;
+    private final RuleSnapshotRepository ruleSnapshotRepository;
+    private final TenantPublicLookupService tenantPublicLookupService;
     private final SnowflakeIdGenerator idGenerator;
 
-    public RuleService(RuleRepository ruleRepository, TenantRepository tenantRepository, SnowflakeIdGenerator idGenerator) {
+    public RuleService(
+            RuleRepository ruleRepository,
+            RuleSnapshotRepository ruleSnapshotRepository,
+            TenantPublicLookupService tenantPublicLookupService,
+            SnowflakeIdGenerator idGenerator
+    ) {
         this.ruleRepository = ruleRepository;
-        this.tenantRepository = tenantRepository;
+        this.ruleSnapshotRepository = ruleSnapshotRepository;
+        this.tenantPublicLookupService = tenantPublicLookupService;
         this.idGenerator = idGenerator;
     }
 
@@ -39,8 +51,9 @@ public class RuleService {
         if (ruleRepository.existsByRuleCode(request.ruleCode())) {
             throw new ApiException(HttpStatus.CONFLICT, "RULE_CODE_EXISTS", "Rule code already exists");
         }
-        TenantEntity tenant = tenantRepository.findByTenantCode(tenantCode)
-                .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, "TENANT_NOT_FOUND", "Tenant not found"));
+        if (request.grayRate() != null) {
+            validateGrayRate(request.grayRate());
+        }
         RulePrologEntity entity = new RulePrologEntity();
         entity.setId(idGenerator.nextId());
         entity.setRuleCode(request.ruleCode());
@@ -52,8 +65,10 @@ public class RuleService {
         entity.setVersion(1);
         entity.setGrayRate(request.grayRate() == null ? 100 : request.grayRate());
         entity.setIsAutoGen((short) 0);
-        entity.setTenantId(tenant.getId());
-        return RuleResponse.fromEntity(ruleRepository.save(entity));
+        entity.setTenantId(tenantPublicLookupService.requireTenantId(tenantCode));
+        RulePrologEntity saved = ruleRepository.save(entity);
+        saveSnapshot(saved, "create");
+        return RuleResponse.fromEntity(saved);
     }
 
     @Transactional(readOnly = true)
@@ -86,8 +101,7 @@ public class RuleService {
         entity.setRuleContent(request.ruleContent());
         entity.setRuleType(RuleType.fromApiValue(request.ruleType()));
         entity.setParentId(parseNullableLong(request.parentRuleId()));
-        entity.setVersion(entity.getVersion() + 1);
-        return RuleResponse.fromEntity(ruleRepository.save(entity));
+        return RuleResponse.fromEntity(saveNewVersion(entity, "update"));
     }
 
     @Transactional
@@ -98,22 +112,76 @@ public class RuleService {
             throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "RULE_STATUS_INVALID", "Invalid rule status transition");
         }
         entity.setStatus(target);
-        return RuleResponse.fromEntity(ruleRepository.save(entity));
+        return RuleResponse.fromEntity(saveNewVersion(entity, "status:" + target.getApiValue()));
     }
 
     @Transactional
     public RuleResponse updateGrayRate(Long ruleId, UpdateGrayRateRequest request) {
-        if (request.grayRate() < 0 || request.grayRate() > 100) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "RULE_GRAY_RATE_INVALID", "Gray rate must be between 0 and 100");
-        }
         RulePrologEntity entity = getRule(ruleId);
+        validateGrayRate(request.grayRate());
         entity.setGrayRate(request.grayRate());
         return RuleResponse.fromEntity(ruleRepository.save(entity));
+    }
+
+    @Transactional
+    public RuleResponse publishGray(Long ruleId, PublishGrayRuleRequest request) {
+        validateGrayRate(request.grayRate());
+        RulePrologEntity entity = getRule(ruleId);
+        entity.setStatus(RuleStatus.GRAY);
+        entity.setGrayRate(request.grayRate());
+        return RuleResponse.fromEntity(saveNewVersion(entity, "publish-gray"));
+    }
+
+    @Transactional
+    public RuleResponse fullRelease(Long ruleId) {
+        RulePrologEntity entity = getRule(ruleId);
+        entity.setStatus(RuleStatus.ACTIVE);
+        entity.setGrayRate(100);
+        return RuleResponse.fromEntity(saveNewVersion(entity, "full-release"));
+    }
+
+    @Transactional
+    public RuleResponse rollback(Long ruleId, RollbackRuleRequest request) {
+        RulePrologEntity entity = getRule(ruleId);
+        RuleSnapshotEntity snapshot = ruleSnapshotRepository.findByRuleIdAndVersion(ruleId, request.version())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "RULE_SNAPSHOT_NOT_FOUND", "Rule snapshot not found"));
+        entity.setRuleContent(snapshot.getRuleContent());
+        return RuleResponse.fromEntity(saveNewVersion(entity, "rollback:" + request.version()));
     }
 
     private RulePrologEntity getRule(Long ruleId) {
         return ruleRepository.findById(ruleId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "RULE_NOT_FOUND", "Rule not found"));
+    }
+
+    private RulePrologEntity saveNewVersion(RulePrologEntity entity, String changeDesc) {
+        entity.setVersion(entity.getVersion() + 1);
+        RulePrologEntity saved = ruleRepository.save(entity);
+        saveSnapshot(saved, changeDesc);
+        return saved;
+    }
+
+    private void saveSnapshot(RulePrologEntity entity, String changeDesc) {
+        RuleSnapshotEntity snapshot = new RuleSnapshotEntity();
+        snapshot.setId(idGenerator.nextId());
+        snapshot.setRuleId(entity.getId());
+        snapshot.setRuleContent(entity.getRuleContent());
+        snapshot.setVersion(entity.getVersion());
+        snapshot.setChangeDesc(changeDesc);
+        snapshot.setCreateUser(currentUser());
+        snapshot.setTenantId(entity.getTenantId());
+        ruleSnapshotRepository.save(snapshot);
+    }
+
+    private String currentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication == null || authentication.getName() == null ? "system" : authentication.getName();
+    }
+
+    private void validateGrayRate(int grayRate) {
+        if (grayRate < 0 || grayRate > 100) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "RULE_GRAY_RATE_INVALID", "Gray rate must be between 0 and 100");
+        }
     }
 
     private boolean isTransitionAllowed(RuleStatus current, RuleStatus target) {
