@@ -39,22 +39,44 @@ public class RuleController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String keyword
     ) {
+        requiredTenantCode();
         return new ListResponse<>(ruleService.listRules(ruleType, status, keyword));
     }
 
     @PutMapping("/{ruleId}")
     public RuleResponse updateRule(@PathVariable Long ruleId, @Valid @RequestBody UpdateRuleRequest request) {
+        requiredTenantCode();
         return ruleService.updateRule(ruleId, request);
     }
 
     @PatchMapping("/{ruleId}/status")
     public RuleResponse updateStatus(@PathVariable Long ruleId, @Valid @RequestBody UpdateRuleStatusRequest request) {
+        requiredTenantCode();
         return ruleService.updateStatus(ruleId, request);
     }
 
     @PatchMapping("/{ruleId}/gray-rate")
     public RuleResponse updateGrayRate(@PathVariable Long ruleId, @Valid @RequestBody UpdateGrayRateRequest request) {
+        requiredTenantCode();
         return ruleService.updateGrayRate(ruleId, request);
+    }
+
+    @PatchMapping("/{ruleId}/publish/gray")
+    public RuleResponse publishGray(@PathVariable Long ruleId, @Valid @RequestBody PublishGrayRuleRequest request) {
+        requiredTenantCode();
+        return ruleService.publishGray(ruleId, request);
+    }
+
+    @PatchMapping("/{ruleId}/publish/full")
+    public RuleResponse fullRelease(@PathVariable Long ruleId) {
+        requiredTenantCode();
+        return ruleService.fullRelease(ruleId);
+    }
+
+    @PostMapping("/{ruleId}/rollback")
+    public RuleResponse rollback(@PathVariable Long ruleId, @Valid @RequestBody RollbackRuleRequest request) {
+        requiredTenantCode();
+        return ruleService.rollback(ruleId, request);
     }
 
     private String requiredTenantCode() {

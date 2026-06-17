@@ -4,11 +4,15 @@ import com.xccdos.prolog.common.api.ApiException;
 import com.xccdos.prolog.common.id.SnowflakeIdGenerator;
 import com.xccdos.prolog.rule.domain.RulePrologEntity;
 import com.xccdos.prolog.rule.domain.RuleRepository;
+import com.xccdos.prolog.rule.domain.RuleSnapshotEntity;
+import com.xccdos.prolog.rule.domain.RuleSnapshotRepository;
 import com.xccdos.prolog.rule.domain.RuleStatus;
+import com.xccdos.prolog.rule.domain.RuleType;
 import com.xccdos.prolog.rule.web.CreateRuleRequest;
+import com.xccdos.prolog.rule.web.PublishGrayRuleRequest;
+import com.xccdos.prolog.rule.web.RollbackRuleRequest;
 import com.xccdos.prolog.rule.web.UpdateRuleStatusRequest;
-import com.xccdos.prolog.tenant.domain.TenantEntity;
-import com.xccdos.prolog.tenant.domain.TenantRepository;
+import com.xccdos.prolog.tenant.application.TenantPublicLookupService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +32,10 @@ class RuleServiceTest {
     private RuleRepository ruleRepository;
 
     @Mock
-    private TenantRepository tenantRepository;
+    private TenantPublicLookupService tenantPublicLookupService;
+
+    @Mock
+    private RuleSnapshotRepository ruleSnapshotRepository;
 
     @Mock
     private SnowflakeIdGenerator snowflakeIdGenerator;
@@ -38,11 +45,10 @@ class RuleServiceTest {
 
     @Test
     void createRuleDefaultsToDraftAndVersionOne() {
-        TenantEntity tenant = new TenantEntity();
-        tenant.setId(2001L);
-        when(snowflakeIdGenerator.nextId()).thenReturn(3001L);
-        when(tenantRepository.findByTenantCode("acme")).thenReturn(Optional.of(tenant));
+        when(snowflakeIdGenerator.nextId()).thenReturn(3001L, 3002L);
+        when(tenantPublicLookupService.requireTenantId("acme")).thenReturn(2001L);
         when(ruleRepository.save(any(RulePrologEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(ruleSnapshotRepository.save(any(RuleSnapshotEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         var response = ruleService.createRule("acme", new CreateRuleRequest(
                 "rule_1", "Rule 1", "valid(rule_1).", "process", null, null
@@ -54,6 +60,12 @@ class RuleServiceTest {
     }
 
     @Test
+    void publishGrayRejectsInvalidRate() {
+        assertThatThrownBy(() -> ruleService.publishGray(11L, new PublishGrayRuleRequest(101)))
+                .isInstanceOf(ApiException.class);
+    }
+
+    @Test
     void updateStatusRejectsSkippedLifecycleTransition() {
         RulePrologEntity entity = new RulePrologEntity();
         entity.setId(11L);
@@ -62,5 +74,36 @@ class RuleServiceTest {
 
         assertThatThrownBy(() -> ruleService.updateStatus(11L, new UpdateRuleStatusRequest("gray")))
                 .isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    void rollbackRestoresSnapshotContentAndCreatesNextVersion() {
+        RulePrologEntity entity = new RulePrologEntity();
+        entity.setId(11L);
+        entity.setRuleCode("rule_1");
+        entity.setRuleName("Rule 1");
+        entity.setRuleContent("current(v3).");
+        entity.setRuleType(RuleType.PROCESS);
+        entity.setStatus(RuleStatus.ACTIVE);
+        entity.setVersion(3);
+        entity.setGrayRate(100);
+
+        RuleSnapshotEntity snapshot = new RuleSnapshotEntity();
+        snapshot.setId(21L);
+        snapshot.setRuleId(11L);
+        snapshot.setRuleContent("previous(v2).");
+        snapshot.setVersion(2);
+
+        when(ruleRepository.findById(11L)).thenReturn(Optional.of(entity));
+        when(ruleSnapshotRepository.findByRuleIdAndVersion(11L, 2)).thenReturn(Optional.of(snapshot));
+        when(ruleRepository.save(any(RulePrologEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(ruleSnapshotRepository.save(any(RuleSnapshotEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(snowflakeIdGenerator.nextId()).thenReturn(1001L);
+
+        var response = ruleService.rollback(11L, new RollbackRuleRequest(2));
+
+        assertThat(response.ruleContent()).isEqualTo("previous(v2).");
+        assertThat(response.ruleType()).isEqualTo("process");
+        assertThat(response.version()).isEqualTo(4);
     }
 }
