@@ -1,0 +1,4 @@
+com/xccdos/prolog/tenant/application/TenantServiceTest.class
+com/xccdos/prolog/config/JpaConfigTest.class
+com/xccdos/prolog/rule/application/RuleServiceTest.class
+com/xccdos/prolog/TenantRuleIntegrationTest.class
