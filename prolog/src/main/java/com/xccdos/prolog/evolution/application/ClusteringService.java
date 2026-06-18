@@ -94,6 +94,16 @@ public class ClusteringService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<EvolutionClusterTaskEntity> listTasks(String tenantCode) {
+        TenantContext.setCurrentTenant(tenantCode, TenantSchemaNames.forTenantCode(tenantCode));
+        try {
+            return evolutionClusterTaskRepository.findAllByOrderByCreateTimeDesc();
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
     private void validateJson(String content, String errorCode) {
         try {
             objectMapper.readTree(content);

@@ -13,10 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -68,8 +70,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             TenantContext.setCurrentTenant(tenantCode, schema);
+            List<? extends GrantedAuthority> authorities = Collections.emptyList();
+            Number roleLevel = claims.get("role_level", Number.class);
+            if (roleLevel != null) {
+                authorities = RoleLevelAuthority.authoritiesFor(roleLevel.shortValue());
+            }
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    claims.getSubject(), null, Collections.emptyList());
+                    claims.getSubject(), null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
         } catch (ApiException exception) {
