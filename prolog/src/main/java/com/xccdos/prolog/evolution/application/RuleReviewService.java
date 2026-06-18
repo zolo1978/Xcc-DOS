@@ -46,6 +46,14 @@ public class RuleReviewService {
         return generatedRuleRepository.findAllByReviewStatusOrderByCreateTimeDesc(GeneratedRuleReviewStatus.PENDING_REVIEW);
     }
 
+    @Transactional(readOnly = true)
+    public List<GeneratedRuleEntity> listGeneratedRules(String reviewStatus) {
+        if (reviewStatus == null || reviewStatus.isBlank()) {
+            return generatedRuleRepository.findAllByOrderByCreateTimeDesc();
+        }
+        return generatedRuleRepository.findAllByReviewStatusOrderByCreateTimeDesc(parseReviewStatus(reviewStatus));
+    }
+
     @Transactional
     public RulePrologEntity approve(Long generatedRuleId, String reviewer) {
         GeneratedRuleEntity generatedRule = requirePendingRule(generatedRuleId);
@@ -139,5 +147,14 @@ public class RuleReviewService {
         snapshot.setCreateUser(reviewer);
         snapshot.setTenantId(rule.getTenantId());
         ruleSnapshotRepository.save(snapshot);
+    }
+
+    private GeneratedRuleReviewStatus parseReviewStatus(String reviewStatus) {
+        return switch (reviewStatus) {
+            case "pending_review" -> GeneratedRuleReviewStatus.PENDING_REVIEW;
+            case "approved" -> GeneratedRuleReviewStatus.APPROVED;
+            case "rejected" -> GeneratedRuleReviewStatus.REJECTED;
+            default -> throw new ApiException(HttpStatus.BAD_REQUEST, "GENERATED_RULE_STATUS_INVALID", "Unknown review status");
+        };
     }
 }
