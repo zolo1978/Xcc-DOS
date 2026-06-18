@@ -22,6 +22,8 @@ public class TenantSchemaManager {
         jdbcTemplate.execute("create table if not exists " + schemaName + ".rule_synonym (like public.rule_synonym including all)");
         jdbcTemplate.execute("create table if not exists " + schemaName + ".user_session (like public.user_session including all)");
         jdbcTemplate.execute("create table if not exists " + schemaName + ".request_log (like public.request_log including all)");
+        jdbcTemplate.execute("create table if not exists " + schemaName + ".evolution_cluster_task (like public.evolution_cluster_task including all)");
+        jdbcTemplate.execute("create table if not exists " + schemaName + ".generated_rule (like public.generated_rule including all)");
         return schemaName;
     }
 }

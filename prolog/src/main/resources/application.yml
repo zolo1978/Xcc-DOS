@@ -25,3 +25,13 @@ prolog:
   jwt:
     secret: ${PROLOG_JWT_SECRET:change-me-change-me-change-me-change-me}
     issuer: ${PROLOG_JWT_ISSUER:prolog-agentteam}
+  langflow:
+    base-url: ${LANGFLOW_BASE_URL:}
+    api-key: ${LANGFLOW_API_KEY:}
+  evolution:
+    clustering-flow-id: ${PROLOG_CLUSTERING_FLOW_ID:request-log-clustering}
+    rule-generation-flow-id: ${PROLOG_RULE_GENERATION_FLOW_ID:rule-generation}
+    sample-limit: ${PROLOG_CLUSTERING_SAMPLE_LIMIT:100}
+    clustering:
+      enabled: ${PROLOG_CLUSTERING_ENABLED:false}
+      cron: ${PROLOG_CLUSTERING_CRON:0 0 3 * * ?}
